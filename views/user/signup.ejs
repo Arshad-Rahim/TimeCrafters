@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Signup Page</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f9f9f9;
+        }
+        .signup-container {
+            background-color: white;
+            padding: 40px;
+            width: 320px;
+            border-radius: 10px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2); /* 3D shadow effect */
+            text-align: center;
+        }
+        h2 {
+            margin-bottom: 20px;
+            font-size: 24px;
+            font-weight: bold;
+        }
+        form {
+            display: flex;
+            flex-direction: column;
+        }
+        input[type="text"], input[type="email"], input[type="password"] {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 14px;
+            text-align: left; /* Keep the placeholder text aligned to the left */
+        }
+        button.signup-btn {
+            width: 100%;
+            padding: 12px;
+            margin-top: 20px;
+            background-color: #007bff;
+            border: none;
+            color: white;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Button shadow for 3D effect */
+        }
+        button.signup-btn:hover {
+            background-color: #0056b3;
+        }
+        .google-btn {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 20px 0;
+            padding: 12px;
+            background-color: white;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Google button shadow */
+        }
+        .google-btn img {
+            width: 20px;
+            margin-right: 8px;
+        }
+        .or-divider {
+            display: flex;
+            align-items: center;
+            text-align: center;
+            margin: 20px 0;
+        }
+        .or-divider::before, .or-divider::after {
+            content: '';
+            flex: 1;
+            border-bottom: 1px solid #ddd;
+        }
+        .or-divider:not(:empty)::before {
+            margin-right: .5em;
+        }
+        .or-divider:not(:empty)::after {
+            margin-left: .5em;
+        }
+        .signin-link {
+            margin-top: 10px;
+            font-size: 14px;
+        }
+        .signin-link a {
+            color: #007bff;
+            text-decoration: none;
+        }
+        .signin-link a:hover {
+            text-decoration: underline;
+        }
+        .error-message {
+            display: none;
+            color: red;
+            font-size: 12px;
+            margin-top: 5px;
+            text-align: left;
+        }
+        input.error {
+            border-color: red;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="signup-container">
+        <h2>Register now</h2>
+        <form method="post" action="/signup" id="LoginForm" accept-charset="UTF-8" class="contact-form">
+            <input type="text" id="name" name="name" placeholder="Name" required>
+            <div id="nameError" class="error-message"></div>
+            <input type="email" id="email" name="email" placeholder="Email address" required>
+            <div id="emailError" class="error-message"></div>
+            <input type="password" id="password" name="password" placeholder="Password" required>
+            <div id="passwordError" class="error-message"></div>
+            <input type="password" id="confirm-password" name="ConformPassword" placeholder="Confirm password" required>
+            <div id="conformPasswordError" class="error-message"></div>
+            <button type="submit" class="signup-btn">Signup</button>
+        </form>
+
+        <div class="or-divider">or</div>
+
+        <a href="/auth/google" class="google-btn" onclick="loginWithGoogle()" style="">
+            <img src="images/googlesignup.png" alt="Google logo">
+            Sign in with Google
+        </a>
+
+        <div class="signin-link">
+            Have an account? <a href="#">Sign in</a>
+        </div>
+    </div>
+
+  <script>
+        // Placeholder for Google login functionality
+        // function loginWithGoogle() {
+        //     alert('Login with Google is not yet implemented.');
+        // }
+
+
+
+ const name_id = document.getElementById('name');
+const email_id = document.getElementById('email');
+const password_id = document.getElementById('password');
+const conformPassword_id = document.getElementById('confirm-password');
+
+const nameError = document.getElementById('nameError');
+const emailError = document.getElementById('emailError');
+const passwordError = document.getElementById('passwordError');
+const conformPasswordError = document.getElementById('conformPasswordError');
+
+const LoginForm = document.getElementById('LoginForm')
+
+
+
+
+function nameValidateChecking(){
+  const name_val = name_id.value;
+  const namePattern = /^[A-Za-z\s]{3,}$/;
+
+  if(name_val.trim()==""){
+    nameError.style.display='block';
+    nameError.innerHTML='Please enter a valid name';
+  }else if(!namePattern .test(name_val)){
+    nameError.style.display='block';
+    nameError.innerHTML='Name should only contain atleast 3 alphabets or spaces';
+  }else{
+    nameError.style.display='none';
+    nameError.innerHTML='';
+  }
+
+ 
+
+}
+
+
+
+function emailValidateChecking(){
+  const email_val = email_id.value;
+  const pattern =  /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+
+  if(!pattern.test(email_val)){
+    emailError.style.display='block';
+    emailError.innerHTML = 'Invalid Format'
+  }else{
+    emailError.style.display='none';
+    emailError.innerHTML='';
+  }
+}
+
+
+function passwordValidateChecking(){
+  const password_val = password_id.value;
+  const conformPassword_val = conformPassword_id.value;
+  const passwordPattern = /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+
+
+  if(!passwordPattern .test(password_val)){
+    passwordError.style.display='block';
+    passwordError.innerHTML='Password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, one digit, and one special character (@$!%*?&). ';
+  }else{
+    passwordError.style.display='none';
+    passwordError.innerHTML='';
+  }
+
+  if(password_val !== conformPassword_val){
+    conformPasswordError.style.display='block';
+    conformPasswordError.innerHTML="Password not Match";
+  }else{
+    conformPasswordError.style.display='none';
+    conformPasswordError.innerHTML='';
+  }
+
+}
+
+
+
+
+
+document.addEventListener('DOMContentLoaded',function (){
+  LoginForm.addEventListener('submit',function (event){
+    nameValidateChecking();
+    emailValidateChecking();
+    passwordValidateChecking();
+
+
+
+    if(!name_id||!email_id||!password_id||!conformPassword_id||!nameError||!emailError||!passwordError||!conformPasswordError){
+      console.log("one ore more component is missing")
+    }
+
+
+    // if(nameError.innerHTML||emailError.innerHTML||passwordError.innerHTML||conformPasswordError.innerHTML){
+    //   event.preventDefault();
+    // }
+
+    if (nameError.style.display === 'block' ||
+        emailError.style.display === 'block' ||
+        passwordError.style.display === 'block' ||
+        conformPasswordError.style.display === 'block') {
+      event.preventDefault(); // Prevent form submission
+    }
+
+  });
+});
+
+
+    </script>
+
+</body>
+</html>
