@@ -31,14 +31,30 @@
             display: flex;
             flex-direction: column;
         }
+        .input-container {
+            position: relative;
+            width: 100%;
+            margin: 10px 0;
+        }
         input[type="text"], input[type="email"], input[type="password"] {
             width: 100%;
             padding: 12px;
-            margin: 10px 0;
+            margin-bottom: 15px;
             border: 1px solid #ccc;
             border-radius: 5px;
             font-size: 14px;
-            text-align: left; /* Keep the placeholder text aligned to the left */
+            box-sizing: border-box; 
+        }
+        .eye-icon {
+            position: absolute;
+            right: 12px;
+            top: 0;
+            bottom: 0;
+            margin: auto;
+            height: 32px; /* Ensure the icon size is appropriate */
+            cursor: pointer;
+            color: #333; /* Optional: Adjust the icon color */
+            font-size: 18px; /* Optional: Adjust the icon size */
         }
         button.signup-btn {
             width: 100%;
@@ -110,148 +126,90 @@
             border-color: red;
         }
     </style>
+    <link
+        rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+        integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw=="
+        crossorigin="anonymous"
+        referrerpolicy="no-referrer"
+    />
 </head>
 <body>
 
     <div class="signup-container">
         <h2>Register now</h2>
         <form method="post" action="/signup" id="LoginForm" accept-charset="UTF-8" class="contact-form">
-            <input type="text" id="name" name="name" placeholder="Name" required>
+            <input type="text" id="name" name="name" placeholder="Name">
             <div id="nameError" class="error-message"></div>
-            <input type="email" id="email" name="email" placeholder="Email address" required>
+            
+            <input type="email" id="email" name="email" placeholder="Email address">
             <div id="emailError" class="error-message"></div>
-            <input type="password" id="password" name="password" placeholder="Password" required>
+
+            <div class="input-container">
+              <input type="password" id="password" name="password" placeholder="Password">
+              <i class="fa fa-eye eye-icon" id="togglePassword"></i>
+            </div>
             <div id="passwordError" class="error-message"></div>
-            <input type="password" id="confirm-password" name="ConformPassword" placeholder="Confirm password" required>
+
+            <div class="input-container">
+              <input type="password" id="confirm-password" name="confirmPassword" placeholder="Confirm password">
+              <i class="fa fa-eye eye-icon" id="toggleConfirmPassword"></i>
+            </div>
             <div id="conformPasswordError" class="error-message"></div>
+
             <button type="submit" class="signup-btn">Signup</button>
         </form>
 
         <div class="or-divider">or</div>
 
-        <a href="/auth/google" class="google-btn" onclick="loginWithGoogle()" style="">
-            <img src="images/googlesignup.png" alt="Google logo">
+        <a href="/auth/google" class="google-btn" onclick="loginWithGoogle()">
+            <img src="frontend/images/googlesignup.png" alt="Google logo">
             Sign in with Google
         </a>
 
         <div class="signin-link">
-            Have an account? <a href="#">Sign in</a>
+            Have an account? <a href="/login">Sign in</a>
         </div>
     </div>
 
-  <script>
-        // Placeholder for Google login functionality
-        // function loginWithGoogle() {
-        //     alert('Login with Google is not yet implemented.');
-        // }
-
-
-
- const name_id = document.getElementById('name');
-const email_id = document.getElementById('email');
-const password_id = document.getElementById('password');
-const conformPassword_id = document.getElementById('confirm-password');
-
-const nameError = document.getElementById('nameError');
-const emailError = document.getElementById('emailError');
-const passwordError = document.getElementById('passwordError');
-const conformPasswordError = document.getElementById('conformPasswordError');
-
-const LoginForm = document.getElementById('LoginForm')
-
-
-
-
-function nameValidateChecking(){
-  const name_val = name_id.value;
-  const namePattern = /^[A-Za-z\s]{3,}$/;
-
-  if(name_val.trim()==""){
-    nameError.style.display='block';
-    nameError.innerHTML='Please enter a valid name';
-  }else if(!namePattern .test(name_val)){
-    nameError.style.display='block';
-    nameError.innerHTML='Name should only contain atleast 3 alphabets or spaces';
-  }else{
-    nameError.style.display='none';
-    nameError.innerHTML='';
-  }
-
  
 
-}
+    <script>
+
+      const togglePassword = document.querySelector('#togglePassword');
+      const toggleConfirmPassword = document.querySelector('#toggleConfirmPassword');
+      const passwordField = document.querySelector('#password');
+      const confirmPasswordField = document.querySelector('#confirm-password');
+
+      togglePassword.addEventListener('click',function (){
+        if(passwordField.type =='password'){
+          togglePassword.classList.remove('fa-eye');
+          togglePassword.classList.add('fa-eye-slash');
+          passwordField.type='text';
+        }else{
+          togglePassword.classList.remove('fa-eye-slash');
+          togglePassword.classList.add('fa-eye');
+          passwordField.type='password';
+        }
+      })
 
 
 
-function emailValidateChecking(){
-  const email_val = email_id.value;
-  const pattern =  /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+      toggleConfirmPassword.addEventListener('click',function(){
+        if(confirmPasswordField.type =='password'){
+          toggleConfirmPassword.classList.remove('fa-eye');
+          toggleConfirmPassword.classList.add('fa-eye-slash');
 
-  if(!pattern.test(email_val)){
-    emailError.style.display='block';
-    emailError.innerHTML = 'Invalid Format'
-  }else{
-    emailError.style.display='none';
-    emailError.innerHTML='';
-  }
-}
+          confirmPasswordField.type='text';
 
+        }else{
 
-function passwordValidateChecking(){
-  const password_val = password_id.value;
-  const conformPassword_val = conformPassword_id.value;
-  const passwordPattern = /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+          toggleConfirmPassword.classList.remove('fa-eye-slash');
+          toggleConfirmPassword.classList.add('fa-eye');
 
-
-  if(!passwordPattern .test(password_val)){
-    passwordError.style.display='block';
-    passwordError.innerHTML='Password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, one digit, and one special character (@$!%*?&). ';
-  }else{
-    passwordError.style.display='none';
-    passwordError.innerHTML='';
-  }
-
-  if(password_val !== conformPassword_val){
-    conformPasswordError.style.display='block';
-    conformPasswordError.innerHTML="Password not Match";
-  }else{
-    conformPasswordError.style.display='none';
-    conformPasswordError.innerHTML='';
-  }
-
-}
-
-
-
-
-
-document.addEventListener('DOMContentLoaded',function (){
-  LoginForm.addEventListener('submit',function (event){
-    nameValidateChecking();
-    emailValidateChecking();
-    passwordValidateChecking();
-
-
-
-    if(!name_id||!email_id||!password_id||!conformPassword_id||!nameError||!emailError||!passwordError||!conformPasswordError){
-      console.log("one ore more component is missing")
-    }
-
-
-    // if(nameError.innerHTML||emailError.innerHTML||passwordError.innerHTML||conformPasswordError.innerHTML){
-    //   event.preventDefault();
-    // }
-
-    if (nameError.style.display === 'block' ||
-        emailError.style.display === 'block' ||
-        passwordError.style.display === 'block' ||
-        conformPasswordError.style.display === 'block') {
-      event.preventDefault(); // Prevent form submission
-    }
-
-  });
-});
-
+          confirmPasswordField.type='password';
+        }
+      })
 
     </script>
 

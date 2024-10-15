@@ -3,25 +3,102 @@ const User = require('../../models/userSchema');
 const bcrypt = require('bcrypt');
 const env = require('dotenv').config();
 const nodemailer = require('nodemailer');
+const Category = require('../../models/categorySchema');
+const Product = require('../../models/productSchema');
+const Brand = require('../../models/brandSchema');
 
+
+const pageNotFound = async (req,res) =>{
+  try {
+    res.render('page-404');
+    res.status(500).send("Server error");
+  } catch (error) {
+    res.render('/pageNotFound');
+    res.status(500).send("Server error");
+  }
+};
 
 
 const loadHome = async (req, res) => {
   try {
-    return res.render("home");
+    const user = req.session.user;
+    
+    const categories = await Category.find({isListed:true});
+    
+
+    const productData = await Product.find({
+      isBlocked: false,
+      category: { $in: categories.map(category => category._id) },
+      quantity: { $gt: 0 }
+    }).sort({ createdOn: -1 }).limit(8); 
+
+   
+
+
+    if(user){
+      const userData = await User.findOne({_id:user._id});
+     
+      return res.render("home",{user:userData , product:productData,cat:categories});
+    }else{
+      return res.render('home',{product:productData});
+    }
+    
   } catch (error) {
     console.log("Home page  not found");
     res.status(500).send("Server error");
   }
 };
-const login = async (req, res) => {
+
+
+
+
+
+const Loadlogin = async (req, res) => {
   try {
-    return res.render("login");
+    if(!req.session.user){
+      return res.render("login");
+    }else{
+     return  res.redirect('/');
+    }
+    
   } catch (error) {
+    res.redirect('/pageNotFound')
     console.log("Login page not found");
     res.status(500).send("Server error");
   }
 };
+
+
+
+const login = async(req,res) =>{
+  try {
+   
+    const {email,password} = req.body;
+    
+
+    const findUser = await User.findOne({email:email})
+    if(!findUser){
+      return res.render('login',{message:"User not found"})
+    }
+    if(findUser.isBlocked){
+      return res.render('login',{message:"User is blocked by the admin"})
+    }
+    
+    const passwordMatch = await bcrypt.compare(password,findUser.password);
+
+    if(!passwordMatch){
+      return res.render('login',{message:'Incorrect Password'})
+    }
+
+    req.session.user = findUser._id;
+   return res.redirect('/');
+  } catch (error) {
+    console.log('login error',error);
+    return res.render('login',{message:"login failed please try again"});
+  }
+}
+
+
 
 const loadSignup = async(req,res) =>{
     try{
@@ -33,21 +110,7 @@ const loadSignup = async(req,res) =>{
     }
 }
 
-// const signup = async(req,res) =>{
-//   const {name,email,password}=req.body; 
 
-//   try{
-//     const newUser = new User({name,email,password});
-
-//     await newUser.save();
-    
-//     return res.redirect('/signup')
-//   }catch(error){
-//     console.error("Error to save to database",error);
-//     res.status(500).send("Internal server error");
-
-//   }
-// }
 
 function generateOtp(){
   return Math.floor(100000 + Math.random()*900000).toString();
@@ -90,6 +153,21 @@ async function sentVerificationEmail(email,otp){
 }
 }
 
+// const signup = async(req,res) =>{
+//   const {name,email,password}=req.body; 
+
+//   try{
+//     const newUser = new User({name,email,password});
+
+//     await newUser.save();
+    
+//     return res.redirect('/signup')
+//   }catch(error){
+//     console.error("Error to save to database",error);
+//     res.status(500).send("Internal server error");
+
+//   }
+// }
 
 async function signup(req, res) {
   try {
@@ -168,7 +246,7 @@ const verifyOtp = async (req,res) =>{
   } catch (error) {
 
     console.log('Error while Verifiying OTP',error);
-    res.status(500).json({success:fasle,message:"An error occured"});
+    res.status(500).json({success:false,message:"An error occured"});
     
   }
 }
@@ -203,12 +281,83 @@ const resentOtp = async (req,res) =>{
 }
 
 
+const getProductList = async(req,res) =>{
+  try {
+
+    const user = req.session.user;
+    const categories = await Category.find({isListed:true});
+    const productData = await Product.find({
+      isBlocked:false,
+      category:{$in:categories.map(category =>category._id)},
+      quantity:{$gt:0}
+    }).sort({createdAt:-1});
+
+    if(user){
+      const userData = await User.findOne({_id:user._id});
+      
+      return res.render('userProductList',{user:userData,product:productData,cat:categories});
+    }else{
+      return res.render('userProductList',{product:productData,cat:categories});
+    }
+
+  
+    
+  } catch (error) {
+    console.error('Error in getting the Product list',error);
+  }
+}
+
+
+
+
+
+
+
+
+const getProductDetails = async(req,res) =>{
+  try {
+   
+
+    const id = req.params.id;
+    const productDetails = await Product.findById({_id:id}).populate('category');
+
+
+
+    const user = req.session.user;
+    const categories = await Category.find({isListed:true});
+    // populate cheyyam ithin pakeream
+    const productData = await Product.find({
+      isBlocked:false,
+      category:{$in:categories.map(category =>category._id)},
+      quantity:{$gt:0}
+
+    }).sort({createdAt:-1})
+    
+    if(user){
+      const userData = await User.findOne({_id:user._id});
+      
+      return res.render('productDetails',{user:userData,product:productData,cat:categories,id,productDetails});
+      
+    }else{
+
+      return res.render('productDetails',{product:productData,cat:categories,id,productDetails});
+    }
+    
+  } catch (error) {
+    console.error('Error in rendering ProductDetails page',error);
+  }
+}
+
 
 module.exports = {
   loadHome,
-  login,
+  Loadlogin,
   loadSignup,
   signup,
   verifyOtp,
   resentOtp,
+  pageNotFound,
+  login,
+  getProductList,
+  getProductDetails,
 };

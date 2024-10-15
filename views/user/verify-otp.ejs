@@ -144,7 +144,7 @@
                     <div id="otpTimer" class="otp-timer">
                         <span id="timerValue">60</span>
                     </div>
-                    <button type="button" class="btn btn-secondary" onclick="resendOTP()">Resend OTP</button>
+                        <button id="resentOTPButton" type="button" class="btn btn-secondary" onclick="resendOTP()">Resend OTP</button>
                 </div>
                 <% if (locals.message && message.length > 0) { %>
                 <div class="alert alert-danger"><%= message %></div>
@@ -168,11 +168,13 @@
         timerInterval = setInterval(() => {
             timer--;
             document.getElementById("timerValue").textContent = timer;
+            document.getElementById("resentOTPButton").disabled=true;
             if (timer <= 0) {
                 clearInterval(timerInterval);
                 document.getElementById("timerValue").classList.add("expired");
                 document.getElementById("timerValue").textContent = "Expired";
                 document.getElementById("otp").disabled = true;
+                document.getElementById('resentOTPButton').disabled = false;
             }
         }, 1000);
     }
@@ -180,7 +182,7 @@
 
     function validateOTPForm(){
         const otpInput = document.getElementById('otp').value;
-
+        
 
     // ajax 
     $.ajax({
@@ -224,6 +226,7 @@
         timer = 60;
         document.getElementById('otp').disabled = false;
         document.getElementById('timerValue').classList.remove('expired');
+        document.getElementById('resentOTPButton').disabled=true;
         startTimer();
 
         $.ajax({
@@ -254,5 +257,7 @@
     }
 
 </script>
+
+
 </body>
 </html>
