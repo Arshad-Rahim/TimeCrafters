@@ -103,11 +103,17 @@ body {
   color: #333;
   font-weight: bold;
 }	
+   
+.pd_img img {
+      max-width: 100%;
+      height: auto;
+    }
 </style>
 
-<script>
+<!-- <script>
 	const extm = require('.')
-</script>
+</script> -->
+
 	<!-- Cart -->
 	<div class="wrap-header-cart js-panel-cart">
 		<div class="s-full js-hide-cart"></div>
@@ -194,6 +200,7 @@ body {
 
 
 	<!-- breadcrumb -->
+	 <!-- dynamically set cheyth -->
 	<div class="container" style="margin-top: 50px;">
 		<div class="bread-crumb flex-w p-l-25 p-r-15 p-t-30 p-lr-0-lg">
 			<a href="index.html" class="stext-109 cl8 hov-cl1 trans-04">
@@ -202,12 +209,12 @@ body {
 			</a>
 
 			<a href="product.html" class="stext-109 cl8 hov-cl1 trans-04">
-				Men
+				<%= productDetails.category.name  %>
 				<i class="fa fa-angle-right m-l-9 m-r-10" aria-hidden="true"></i>
 			</a>
 
 			<span class="stext-109 cl4">
-				Lightweight Jacket
+				<%= productDetails.productName  %>
 			</span>
 		</div>
 	</div>
@@ -225,12 +232,12 @@ body {
 
 							<div class="slick3 gallery-lb">
 								<div class="item-slick3" data-thumb="/uploads/re-image/<%= productDetails.productImage[0] %>">
-									<div class="wrap-pic-w pos-relative">
-										<img class="zoomImg" src="/uploads/re-image/<%= productDetails.productImage[0] %>" alt="IMG-PRODUCT">
+									<div class="pd_img wrap-pic-w pos-relative">
+										<img id="mainProductImage"  class="zoomImg" src="/uploads/re-image/<%= productDetails.productImage[0] %>" alt="IMG-PRODUCT">
 
-										<!-- <a class="flex-c-m size-108 how-pos1 bor0 fs-16 cl10 bg0 hov-btn3 trans-04" href="/uploads/re-image/<%= productDetails.productImage[0] %>">
+										<a class="flex-c-m size-108 how-pos1 bor0 fs-16 cl10 bg0 hov-btn3 trans-04" href="/uploads/re-image/<%= productDetails.productImage[0] %>">
 											<i class="fa fa-expand"></i>
-										</a> -->
+										</a>
 									</div>
 								</div>
 
@@ -238,9 +245,9 @@ body {
 									<div class="wrap-pic-w pos-relative">
 										<img  class="zoomImg" src="/uploads/re-image/<%= productDetails.productImage[3] %>" alt="IMG-PRODUCT">
 
-										<!-- <a class="flex-c-m size-108 how-pos1 bor0 fs-16 cl10 bg0 hov-btn3 trans-04" href="/uploads/re-image/<%= productDetails.productImage[3] %>">
+										<a class="flex-c-m size-108 how-pos1 bor0 fs-16 cl10 bg0 hov-btn3 trans-04" href="/uploads/re-image/<%= productDetails.productImage[3] %>">
 											<i class="fa fa-expand"></i>
-										</a> -->
+										</a>
 									</div>
 								</div>
 
@@ -248,13 +255,13 @@ body {
 									<div class="wrap-pic-w pos-relative">
 										<img  class="zoomImg" src="/uploads/re-image/<%= productDetails.productImage[2] %>" alt="IMG-PRODUCT">
 
-										<!-- <a class="flex-c-m size-108 how-pos1 bor0 fs-16 cl10 bg0 hov-btn3 trans-04" href="/uploads/re-image/<%= productDetails.productImage[2] %>">
+										<a class="flex-c-m size-108 how-pos1 bor0 fs-16 cl10 bg0 hov-btn3 trans-04" href="/uploads/re-image/<%= productDetails.productImage[2] %>">
 											<i class="fa fa-expand"></i>
-										</a> -->
+										</a>
 									</div>
 								</div>
 								
-							</div>
+							</div>	
 						</div>
 					</div>
 				</div>
@@ -528,14 +535,14 @@ body {
 			<div class="wrap-slick2">
 				
 				<div class="slick2">
+					<% for(let i=0;i<product.length;i++){  if(productDetails.category.name == product[i].category.name)  {	%>
 					
-					<% for(let i=0;i<product.length;i++){ if(productDetails.category.name == product[i].category.name) 	console.log(productDetails.category.name)	%>
 					<div class="item-slick2 p-l-15 p-r-15 p-t-15 p-b-15">
 						<!-- Block2 -->
 						
 						<div class="block2">
 						
-							<div class="block2-pic hov-img0">
+							<div class="block2-pic hov-img0" >
 								<img src="/uploads/re-image/<%= product[i].productImage[0] %>" alt="<%= product[i].productName %>">
 
 								<a href="/productDetails/<%= product[i]._id %>" class="block2-btn flex-c-m stext-103 cl2 size-102 bg0 bor2 hov-btn1 p-lr-15 trans-04">
@@ -563,38 +570,81 @@ body {
 							</div>
 					
 						</div>
+					
 						
 					</div>
-
-					<% } %>
+					<%} } %>
 				</div>
 				
 			</div>
 		
 		</div>
-		<script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
-
-		<script src='/public/hover-extended-magnify/extm.min.js'></script>
+		
 	</section>
 	
+	<!-- <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script> -->
+	<script src="/frontend/vendor/jquery/jquery-3.2.1.min.js"></script>
+	<script src='/hover-extended-magnify/extm.min.js'></script>
 	<script>
-		$(document).ready(function(){
-    // Function to enable zoom on hover
-    $('.zoomImg').hover(function() {
-        // On hover, initialize the zoom functionality
-        $(this).extm({
-            zoomElement: false,        // Default zoom settings
-            squareOverlay: true,       // Show square overlay
-            imageSrc: $(this).attr('src'), // Use the original image
-            lazy: true,                // Enable lazy load if necessary
-            zoomLevel: 1,              // Set zoom level
-            zoomSize: 1000,            // Set zoom size
-        });
-    }, function() {
-        // On hover out, destroy the zoom functionality
-        $(this).extmDestroy();
-    });
+		$('.zoomImg').extm({
+    zoomElement: false,
+    squareOverlay: true,
+    imageSrc: $(this).attr('src'),
+    lazy: true,
+    zoomLevel: 1,
+	position:'right',
+    zoomSize: 1000,
 });
+
+
+
+
+
+
+
+
+
+
+
+
+
+// $(document).ready(function() {
+//     $('.zoomImg').extm({
+//         zoomElement: false,
+//         squareOverlay: true,
+//         imageSrc: $('.zoomImg').attr('src'),
+//         lazy: true,
+//         zoomLevel: 1,
+//         zoomSize: 1000,
+//     });
+// });
+
+
+
+
+
+// 		$(document).ready(function(){
+		
+
+//     // Function to enable zoom on hover
+//     $('.zoomImg').hover(function() {
+		
+//         // On hover, initialize the zoom functionality
+//         $(this).extm({
+//             zoomElement: false,        // Default zoom settings
+//             squareOverlay: true,       // Show square overlay	
+//             imageSrc: $(this).attr('src'), // Use the original image
+//             lazy: true,                // Enable lazy load if necessary
+//             zoomLevel: 2,              // Set zoom level
+//             zoomSize: 1000,            // Set zoom size
+//         });
+//     }, function() {
+//         // On hover out, destroy the zoom functionality
+//         $(this).extmDestroy();
+//     });
+// });
+
+
 	</script>
 
 	

@@ -358,34 +358,34 @@
               if (name.trim() === "") {
       displayErrorMessage('productName-error', 'Please enter a product name.');
       isValid = false;
-   } else if (!/^[a-zA-Z\s]+$/.test(name.trim())) {
-      displayErrorMessage('productName-error', 'Product name should contain only alphabetic characters.');
-      isValid = false;
-   }
+   }  else if (!/^[a-zA-Z0-9\s\-_]+$/.test(name.trim())) {
+    displayErrorMessage('productName-error', 'Product name should contain only alphabetic characters, numbers, hyphens, and underscores.');
+    isValid = false;
+}
             
    if (description.trim() === "") {
       displayErrorMessage('description-error', 'Please enter a product description.');
       isValid = false;
-   } else if (!/^[a-zA-Z\s.,'!@#$%^&*()\-_=+{}[\]:;"<>?/\\|]*$/.test(description.trim())) {
-   displayErrorMessage('description-error', 'Product description contains invalid characters.');
-   isValid = false;
+   } else if (!/^[a-zA-Z0-9\s.,'!@#$%^&*()\-_=+{}[\]:;"<>?/\\|®–]*$/.test(description.trim())) {
+    displayErrorMessage('description-error', 'Product description contains invalid characters.');
+    isValid = false;
 }
   
 
   
            
   
-if (!/^[1-9]\d*$/.test(blackQuantity)) {
+if (!/^[0-9]\d*$/.test(blackQuantity)) {
     displayErrorMessage('blackQuantity-error', 'Please enter a valid positive quantity.');
     isValid = false;
 }
 
-if (!/^[1-9]\d*$/.test(silverQuantity)) {
+if (!/^[0-9]\d*$/.test(silverQuantity)) {
     displayErrorMessage('silverQuantity-error', 'Please enter a valid positive quantity.');
     isValid = false;
 }
 
-if (!/^[1-9]\d*$/.test(goldenQuantity)) {
+if (!/^[0-9]\d*$/.test(goldenQuantity)) {
     displayErrorMessage('goldenQuantity-error', 'Please enter a valid positive quantity.');
     isValid = false;
 }
@@ -421,10 +421,10 @@ if (!/^[1-9]\d*$/.test(goldenQuantity)) {
               if (additionalInfo.trim() === "") {
         displayErrorMessage('additionalInfo-error', 'Please enter additional information.');
         isValid = false;
-    } else if (!/^[a-zA-Z\s.,'!@#$%^&*()\-_=+{}[\]:;"<>?/\\|]*$/.test(additionalInfo.trim())) {
-        displayErrorMessage('additionalInfo-error', 'Additional information contains invalid characters.');
-        isValid = false;
-    }
+    } else if (!/^[a-zA-Z0-9\s.,'!@#$%^&*()\-_=+{}[\]:;"<>?/\\|®–]*$/.test(description.trim())) {
+    displayErrorMessage('description-error', 'Additional information contains invalid characters.');
+    isValid = false;
+}
 
     return isValid;
 
@@ -452,4 +452,4 @@ if (!/^[1-9]\d*$/.test(goldenQuantity)) {
           }
 
 
-</script>
+</script>           

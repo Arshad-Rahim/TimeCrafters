@@ -28,8 +28,7 @@ const loadHome = async (req, res) => {
 
     const productData = await Product.find({
       isBlocked: false,
-      category: { $in: categories.map(category => category._id) },
-      quantity: { $gt: 0 }
+      category: { $in: categories.map(category => category._id) }
     }).sort({ createdOn: -1 }).limit(8); 
 
    
@@ -241,7 +240,7 @@ const verifyOtp = async (req,res) =>{
         res.json({success:true,redirectUrl:'/'});
     }else{
       res.status(400).json({success:fasle,message:"Invalid OTP, Please try again"})
-    }
+    } quantity:{$gt:0}
     
   } catch (error) {
 
@@ -289,8 +288,8 @@ const getProductList = async(req,res) =>{
     const productData = await Product.find({
       isBlocked:false,
       category:{$in:categories.map(category =>category._id)},
-      quantity:{$gt:0}
-    }).sort({createdAt:-1});
+     
+    }).populate('category').sort({createdAt:-1});
 
     if(user){
       const userData = await User.findOne({_id:user._id});
@@ -329,9 +328,9 @@ const getProductDetails = async(req,res) =>{
     const productData = await Product.find({
       isBlocked:false,
       category:{$in:categories.map(category =>category._id)},
-      quantity:{$gt:0}
+     
 
-    }).sort({createdAt:-1})
+    }).populate('category').sort({createdAt:-1})
     
     if(user){
       const userData = await User.findOne({_id:user._id});

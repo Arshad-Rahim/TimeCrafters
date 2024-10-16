@@ -146,10 +146,7 @@
                                                         <%=cat[i].name%>
                                                     </option>
                                                     
-                                                    <%}%>
-
-
-                                                    
+                                                    <%}%>  
                                                     
                                             </select>
                                             <div id="category-error" class="error-message"></div>
@@ -157,13 +154,14 @@
                                     </div>
                                 </div>
                             </div>
+                            <!-- the first one -->
                             <div class="card mb-2">
                                 <div class="card-header">
                                     <h4>Choose images</h4>
                                 </div>
                                 <div class="border row">
                                     <div id="addedImagesContainer" class="thumbnails-container"></div>
-                                </div>
+                            
                                 <div class="row">
                                 
                                     <div class="card-body align-items-center" style="margin-bottom: 20px;">
@@ -173,25 +171,30 @@
                                                                         accept="image/png, image/jpeg, image/jpg"
                                                                         onchange="viewImage1(event), viewImage(event, 1)" >
                                                                         <div id="images-error" class="error-message"></div>
-                                                                </div>
+                                     
                                                                 <div class="image-cropper d-flex align-items-center"
                                                                     style="display:none; width: 300px; height: 200px; margin-bottom: 20px;">
                                                                     <img src="/uploads/re-image/<%=product.productImage[i]%>" id="croppedImg<%=i+1 %>" alt="">
                                                                     <button type="button" id="saveButton<%=i+1%>" class="btn-sm btn-primary">Save</button>
                                                                 </div>
-                                                                </div>
+                                                                <% } %>  
+                                                               
+                                 </div>
                                                             
-                                                                <% } %>
+                                                      
                                                                 
-                                
+                                </div>
+                            </div>
+                            
 
                             <div>
-                                <!-- here i changed the button to submit the type -->
-                                <button class="btn btn-md rounded font-sm hover-up"  type="submit" onclick="validateAndSubmit()
-    ">Publish</button>
+                                
+                                <button class="btn btn-md rounded font-sm hover-up"  type="submit" onclick="validateAndSubmit()">Publish</button>
                             </div>
                         </form>
                     </div>
+
+
                 </div>
             </div>
         </div>
@@ -342,19 +345,18 @@ function validateAndSubmit(){
               if (name.trim() === "") {
       displayErrorMessage('productName-error', 'Please enter a product name.');
       isValid = false;
-   } else if (!/^[a-zA-Z\s]+$/.test(name.trim())) {
-      displayErrorMessage('productName-error', 'Product name should contain only alphabetic characters.');
-      isValid = false;
-   }
+   } else if (!/^[a-zA-Z0-9\s\-_]+$/.test(name.trim())) {
+    displayErrorMessage('productName-error', 'Product name should contain only alphabetic characters, numbers, hyphens, and underscores.');
+    isValid = false;
+}
             
    if (description.trim() === "") {
       displayErrorMessage('description-error', 'Please enter a product description.');
       isValid = false;
-   } else if (!/^[a-zA-Z\s.,'!@#$%^&*()\-_=+{}[\]:;"<>?/\\|]*$/.test(description.trim())) {
-   displayErrorMessage('description-error', 'Product description contains invalid characters.');
-   isValid = false;
+   } else if (!/^[a-zA-Z0-9\s.,'!@#$%^&*()\-_=+{}[\]:;"<>?/\\|®–]*$/.test(description.trim())) {
+    displayErrorMessage('description-error', 'Additional information contains invalid characters.');
+    isValid = false;
 }
-  
 
   
            
@@ -401,10 +403,10 @@ if (!/^(0|[1-9]\d*)$/.test(goldenQuantity)) {
               if (additionalInfo.trim() === "") {
         displayErrorMessage('additionalInfo-error', 'Please enter additional information.');
         isValid = false;
-    } else if (!/^[a-zA-Z\s.,'!@#$%^&*()\-_=+{}[\]:;"<>?/\\|]*$/.test(additionalInfo.trim())) {
-        displayErrorMessage('additionalInfo-error', 'Additional information contains invalid characters.');
-        isValid = false;
-    }
+    } else if (!/^[a-zA-Z0-9\s.,'!@#$%^&*()\-_=+{}[\]:;"<>?/\\|]*$/.test(description.trim())) {
+    displayErrorMessage('description-error', 'Additional information contains invalid characters.');
+    isValid = false;
+}
 
     return isValid;
 
