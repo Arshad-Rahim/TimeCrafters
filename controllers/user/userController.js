@@ -77,23 +77,29 @@ const login = async(req,res) =>{
 
     const findUser = await User.findOne({email:email})
     if(!findUser){
-      return res.render('login',{message:"User not found"})
+
+      req.flash('error_msg',"User not found")
+      return res.redirect('/login')
     }
     if(findUser.isBlocked){
-      return res.render('login',{message:"User is blocked by the admin"})
+
+      req.flash('error_msg',"User is blocked by the admin")
+      return res.redirect('/login')
     }
     
     const passwordMatch = await bcrypt.compare(password,findUser.password);
 
     if(!passwordMatch){
-      return res.render('login',{message:'Incorrect Password'})
+      req.flash('error_msg',"Incorrect Password")
+      return res.redirect('/login')
     }
 
     req.session.user = findUser._id;
    return res.redirect('/');
   } catch (error) {
     console.log('login error',error);
-    return res.render('login',{message:"login failed please try again"});
+    req.flash('error_msg',"login failed please try again")
+    return res.redirect('login');
   }
 }
 

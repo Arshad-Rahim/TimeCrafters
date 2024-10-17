@@ -67,17 +67,74 @@
             margin-bottom: 20px;
             text-align: center;
         }
+
+
+
+ /* Modern Minimal Flash Messages */
+.alert {
+    padding: 12px 16px;
+    margin: 10px 0;
+    border-left: 4px solid;
+    font-size: 14px;
+    line-height: 1.6;
+    position: relative;
+    border-radius: 2px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    animation: slideIn 0.3s ease-out;
+}
+
+/* Success Message */
+.alert-success {
+    border-color: #38a169;
+    color: #38a169;
+}
+
+/* Error/Danger Message */
+.alert-danger {
+    border-color: #e53e3e;
+    color: #e53e3e;
+}
+
+/* Optional: Add a slide-in animation */
+@keyframes slideIn {
+    from {
+        transform: translateY(-10px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+/* Optional: Add close button */
+.alert .close-btn {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    opacity: 0.6;
+    transition: opacity 0.2s;
+}
+
+.alert .close-btn:hover {
+    opacity: 1;
+}
     </style>
 </head>
 <body>
     <div class="login-container">
         <h2>Admin Login</h2>
 
-        <% if (message) { %>
-            <div class="error-message">
-                <%= message %>
-            </div>
-        <% } %>
+
+
+<% if (error_msg) { %>
+   
+    <div class="alert alert-danger">
+        <%= error_msg %>
+    </div>
+<% } %>
 
         <form action="/admin/adminLogin" method="POST">
             <div class="form-group">

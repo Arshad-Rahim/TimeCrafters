@@ -13,6 +13,7 @@ const loadLogin = async(req,res) =>{
     if(req.session.admin){
         return res.redirect('/admin');
     }
+    
         return res.render('adminLogin',{message:null});
    } catch (error) {
     console.log('error in loadind admin loging page',error);
@@ -33,10 +34,12 @@ const login = async (req,res) =>{
                 req.session.admin=true;
               return  res.redirect('/admin');
             }else{
-               return res.render('adminLogin',{message:'passord doesnot match'});
+                req.flash('error_msg', 'passord doesnot match');
+               return res.redirect('adminLogin');
             }
         }
-      return  res.render('adminLogin',{message:"Not be an Admin account"});
+        req.flash('error_msg', 'Not be an Admin account');
+      return  res.redirect('adminLogin');
     } catch (error) {
         console.error('login error',error);
     }
