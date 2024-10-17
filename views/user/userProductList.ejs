@@ -107,11 +107,11 @@
 		<div class="container">
 			<div class="flex-w flex-sb-m p-b-52">
 				<div class="flex-w flex-l-m filter-tope-group m-tb-10">
-					<button class="stext-106 cl6 hov1 bor3 trans-04 m-r-32 m-tb-5 how-active1" data-filter="*">
+					<button class="stext-106 cl6 hov1 bor3 trans-04 m-r-32 m-tb-5 how-active1"  onclick="filterProducts('All')">
 						All Products
 					</button>
 					<% for(let i=0;i<cat.length;i++){ %>
-					<button class="stext-106 cl6 hov1 bor3 trans-04 m-r-32 m-tb-5" data-filter="<%= cat[i].name%>">
+					<button class="stext-106 cl6 hov1 bor3 trans-04 m-r-32 m-tb-5"  onclick="filterProducts('<%= cat[i]._id %>')">
 						<%= cat[i].name%>
 					</button>
 					<% } %>
@@ -301,7 +301,7 @@
 									</a>
 								</li>
 							</ul>
-						</div>
+						</div>7080a77f0d40130b0b1428
 
 						<div class="filter-col4 p-b-27">
 							<div class="mtext-102 cl2 p-b-15">
@@ -386,6 +386,21 @@
 			</div>
 			
 		</div>
+
+</div>
+		<script>
+			let currentCategory = 'All';
+		
+			function filterProducts(category) {
+				if (currentCategory !== category) {
+					currentCategory = category;
+					window.location.replace('/userProductList/' + category);
+					
+				}else{
+					window.location.replace('/userProductList/All');
+				}
+			}
+		</script>
 	
 		
 

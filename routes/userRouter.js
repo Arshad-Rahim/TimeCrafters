@@ -16,7 +16,10 @@ router.post("/verify-otp", userController.verifyOtp);
 router.post("/resent-otp", userController.resentOtp);
 router.get('/userProductList',userAuth,userController.getProductList);
 router.get('/productDetails/:id',userAuth,userController.getProductDetails);
-// /:id
+// category filtering
+router.get('/userProductList/:id',userAuth,userController.getFilteredCategory);
+
+
 
 
 

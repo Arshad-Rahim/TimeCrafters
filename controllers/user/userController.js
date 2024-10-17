@@ -240,7 +240,7 @@ const verifyOtp = async (req,res) =>{
         res.json({success:true,redirectUrl:'/'});
     }else{
       res.status(400).json({success:fasle,message:"Invalid OTP, Please try again"})
-    } quantity:{$gt:0}
+    }
     
   } catch (error) {
 
@@ -311,8 +311,6 @@ const getProductList = async(req,res) =>{
 
 
 
-
-
 const getProductDetails = async(req,res) =>{
   try {
    
@@ -324,7 +322,7 @@ const getProductDetails = async(req,res) =>{
 
     const user = req.session.user;
     const categories = await Category.find({isListed:true});
-    // populate cheyyam ithin pakeream
+    
     const productData = await Product.find({
       isBlocked:false,
       category:{$in:categories.map(category =>category._id)},
@@ -348,6 +346,32 @@ const getProductDetails = async(req,res) =>{
 }
 
 
+
+const getFilteredCategory = async(req,res) =>{
+  const categoryId = req.params.id;
+  try {
+
+    let product;
+
+    if(categoryId == "All"){
+      product = await Product.find();
+    }else{
+      
+      product = await Product.find({category:categoryId});
+    }
+
+    const cat = await Category.find();
+    return res.render('userProductList',{product,cat,categoryId});
+    
+    
+  } catch (error) {
+    
+  }
+}
+
+
+
+
 module.exports = {
   loadHome,
   Loadlogin,
@@ -359,4 +383,6 @@ module.exports = {
   login,
   getProductList,
   getProductDetails,
+  getFilteredCategory,
+
 };
