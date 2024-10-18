@@ -11,10 +11,16 @@ const getAddProduct = async (req, res) => {
     const category = await Category.find({ isListed: true });
     const brand = await Brand.find({ isBlocked: false });
 
-    res.render("addProduct", {
-      cat: category,
-      brand: brand,
-    });
+
+    if(req.session.admin){
+      res.render("addProduct", {
+        cat: category,
+        brand: brand,
+      });
+    }else{
+       return res.redirect('/admin/adminLogin');
+    }
+   
   } catch (error) {
     console.error("Error in add product", error);
   }
@@ -31,16 +37,7 @@ const addProduct = async (req, res) => {
     if (!productExists) {
       const images = [];
 
-      // if(req.files && req.files.length>0){
-      //     for(let i=0;i<req.files.length;i++){
-      //         const orginalImagePath = req.files[i].path;
-      //         // console.log(orginalImagePath)
-      //         const resizedImagePath = path.join('public','uploads','re-image',req.files[i].filename);
-      //         await sharp(orginalImagePath).resize({width:440,height:440}).toFile(resizedImagePath);
-      //         images.push(req.files[i].filename);
-      //     }
-      // }
-
+    
       if (req.files && req.files.length > 0) {
         const uploadDir = path.join("public", "uploads", "re-image");
         if (!fs.existsSync(uploadDir)) {
@@ -124,14 +121,19 @@ const getAllProducts = async (req, res) => {
     const brand = await Brand.find({ isBlocked: false });
 
     if (category && brand) {
-      return res.render("product", {
-        data: productData,
-        currentPage: page,
-        totalPages: Math.ceil(count / limit),
-        cat: category,
-        brand: brand,
-        search:search,
-      });
+      if(req.session.admin){
+        return res.render("product", {
+          data: productData,
+          currentPage: page,
+          totalPages: Math.ceil(count / limit),
+          cat: category,
+          brand: brand,
+          search:search,
+        });
+      }else{
+         return res.redirect('/admin/adminLogin');
+      }
+     
     } else {
       return res
         .status(400)
@@ -173,9 +175,13 @@ const getEditProduct = async(req,res) =>{
     const category = await Category.find({isListed:true})
 
     const product = await Product.findOne({_id:id});
-  
+    if(req.session.admin){
+      return res.render('editProduct',{product:product,brand:brand,cat:category});
+    }else{
+       return res.redirect('/admin/adminLogin');
+    }
    
-    return res.render('editProduct',{product:product,brand:brand,cat:category});
+   
     
   } catch (error) {
     console.error("Error in getting edit page",error);

@@ -7,17 +7,17 @@ const passport = require("passport");
 
 router.get('/page-not-found',userController.pageNotFound )
 
-router.get("/",userAuth,userController.loadHome);
+router.get("/",userController.loadHome);
 router.get("/login", userController.Loadlogin);
 router.post('/login',userController.login);
 router.get("/signup", userController.loadSignup);
 router.post("/signup", userController.signup);
 router.post("/verify-otp", userController.verifyOtp);
 router.post("/resent-otp", userController.resentOtp);
-router.get('/userProductList',userAuth,userController.getProductList);
-router.get('/productDetails/:id',userAuth,userController.getProductDetails);
+router.get('/userProductList',userController.getProductList);
+router.get('/productDetails/:id',userController.getProductDetails);
 // category filtering
-router.get('/userProductList/:id',userAuth,userController.getFilteredCategory);
+router.get('/userProductList/:id',userController.getFilteredCategory);
 
 
 

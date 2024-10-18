@@ -4,6 +4,7 @@ const User = require('../../models/userSchema');
 const customerInfo = async (req,res) =>{
     
     try {
+       
         
         let search='';
         if(req.query.search){
@@ -39,7 +40,12 @@ const customerInfo = async (req,res) =>{
 
         const totalPages = Math.ceil(count/limit);
         
-        res.render('userList',{data:userData,totalPages:totalPages,currentPage:page,search:search});
+        if(req.session.admin){
+            return  res.render('userList',{data:userData,totalPages:totalPages,currentPage:page,search:search});
+          }else{
+             return res.redirect('/admin/adminLogin');
+          }
+       
 
     } catch (error) {
       console.error("Error in customer Info ",error)

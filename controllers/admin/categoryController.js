@@ -1,6 +1,5 @@
 const Category = require("../../models/categorySchema");
 
-//category info  category page is rendering here with the data like categoryData,currentPage,totalPages and total Categories
 const categoryInfo = async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
@@ -15,12 +14,17 @@ const categoryInfo = async (req, res) => {
     const totalCategories = await Category.countDocuments();
     const totalPages = Math.ceil(totalCategories / limit);
 
-    res.render("category", {
-      cat: categoryData,
-      currentPage: page,
-      totalPages: totalPages,
-      totalCategories: totalCategories,
-    });
+    if(req.session.admin){
+      return res.render("category", {
+        cat: categoryData,
+        currentPage: page,
+        totalPages: totalPages,
+        totalCategories: totalCategories,
+      });
+    }else{
+       return res.redirect('/admin/adminLogin');
+    }
+    
   } catch (error) {
     console.log("Error in Category Info ", error);
   }
@@ -83,7 +87,13 @@ const getEditCategory = async(req,res)=>{
     
     const id = req.query.id;
     const category = await Category.findOne({_id:id});
-    return res.render('editCategory',{category:category})
+
+    if(req.session.admin){
+      return res.render('editCategory',{category:category})
+    }else{
+       return res.redirect('/admin/adminLogin');
+    }
+  
 
   } catch (error) {
     console.log('Error in editing the Category',error);

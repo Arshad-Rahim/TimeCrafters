@@ -24,17 +24,7 @@
                                     <input type="text" name="name" placeholder="Type here" class="form-control" id="product_name" />
                                     <div id="name-error" class="error-message"></div>
                                 </div>
-                                <!-- <div class="mb-4">
-                                    <label for="product_slug" class="form-label">Slug</label>
-                                    <input type="text" placeholder="Type here" class="form-control" id="product_slug" />
-                                </div>
-                                <div class="mb-4">
-                                    <label class="form-label">Parent</label>
-                                    <select class="form-select">
-                                        <option>Clothes</option>
-                                        <option>T-Shirts</option>
-                                    </select>
-                                </div> -->
+                             
                                 <div class="mb-4">
                                     <label class="form-label">Description</label>
                                     <textarea id="descriptionId" placeholder="Type here" name="description" class="form-control"></textarea>
@@ -159,6 +149,8 @@ function handleFormSubmit(event){
             icon:'success',
             title: 'Success',
             text: 'Category added successfully!',
+            showConfirmButton:false,
+            timer:1500,
         }).then(()=>{
             location.reload();
         });
@@ -169,13 +161,17 @@ function handleFormSubmit(event){
             Swal.fire({
                 icon:'error',
                 title:'Oops',
-                text:'Category alredy exists'
+                text:'Category alredy exists',
+                showConfirmButton:false,
+                timer:1500,
             });
         }else{
             Swal.fire({
                 icon:'error',
                 title:'Oops',
                 text:'An error occured while adding the category',
+                showConfirmButton:false,
+                timer:1500
             })
         }
     })

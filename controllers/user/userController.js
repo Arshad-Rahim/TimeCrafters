@@ -158,38 +158,25 @@ async function sentVerificationEmail(email,otp){
 }
 }
 
-// const signup = async(req,res) =>{
-//   const {name,email,password}=req.body; 
 
-//   try{
-//     const newUser = new User({name,email,password});
-
-//     await newUser.save();
-    
-//     return res.redirect('/signup')
-//   }catch(error){
-//     console.error("Error to save to database",error);
-//     res.status(500).send("Internal server error");
-
-//   }
-// }
 
 async function signup(req, res) {
   try {
-    const {name,email,password,ConformPassword } = req.body;
 
-    if (password !== ConformPassword) {
-      return res.render('signup', { message: "password desn't match" });
-      
-    }
+    const {name,email,password,confirmPassword} = req.body;
+
+    
 
     const findUser = await User.findOne({ email });
+   
     if (findUser) {
-      return res.render('signup', { message: "User with this email is alredy exists" });
+      req.flash('error_msg',"User with this email is alredy exists")
+      
+      return res.redirect('signup');
     }
 
     const otp = generateOtp();
-
+    
 
     const sentEmail = await sentVerificationEmail(email, otp);
 

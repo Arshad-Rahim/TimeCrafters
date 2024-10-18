@@ -19,7 +19,7 @@ router.post('/adminLogin',adminController.login);
 router.get('/',adminAuth,adminController.loadDashboard);
 router.get('/users',adminAuth,customerController.customerInfo);
 
-router.get('/logout',adminController.logout);
+router.get('/logout',adminAuth,adminController.logout);
 
 // customer controller routes
 router.get('/blockUser',adminAuth,customerController.userBlocked);

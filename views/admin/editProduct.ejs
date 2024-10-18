@@ -87,9 +87,9 @@
                                     <div class="mb-4">
                                         <label class="form-label">Sale price</label>
                                         <input placeholder="$" name="salePrice" type="text" class="form-control border" value="<%= product.salePrice%>">
-                                        
+                                        <div id="salePrice-error" class="error-message"></div>
                                     </div>
-                                    <div id="salePrice-error" class="error-message"></div>
+                                    
                                 </div>
                                 
                             </div>
@@ -100,8 +100,9 @@
                                     <div class="mb-4">
                                      <label class="form-label">Black Stock</label>
                                      <input  placeholder="" name="blackQuantity" type="text" class="form-control border" value="<%= product.blackQuantity%>" >
+                                     <div id="blackQuantity-error" class="error-message"></div>
                                     </div>
-                                    <div id="blackQuantity-error" class="error-message"></div>
+                                   
                                 </div>
                                     
                                 <div class="col-lg-4">
@@ -109,8 +110,9 @@
                                     <div class="mb-4">
                                      <label class="form-label">Silver Stock</label>
                                      <input placeholder="" name="silverQuantity" type="text" class="form-control border" value="<%= product.silverQuantity%>">
+                                     <div id="silverQuantity-error" class="error-message"></div>
                                     </div>
-                                    <div id="silverQuantity-error" class="error-message"></div>
+                                   
                                 </div>
 
 
@@ -119,8 +121,9 @@
                                     <div class="mb-4">
                                      <label class="form-label">Golden Stock</label>
                                      <input placeholder="" name="goldenQuantity" type="text" class="form-control border" value="<%= product.goldenQuantity%>">
+                                     <div id="goldenQuantity-error" class="error-message"></div>
                                     </div>
-                                    <div id="goldenQuantity-error" class="error-message"></div>
+                                   
                                 </div>
 
                             
@@ -161,29 +164,35 @@
                                 </div>
                                 <div class="border row">
                                     <div id="addedImagesContainer" class="thumbnails-container"></div>
-                            
+                            <!-- orginal -->
                                 <div class="row">
+                                    <% for(let i=0;i<product.productImage.length;i++){ %>
                                 
                                     <div class="card-body align-items-center" style="margin-bottom: 20px;">
-                                        <% for(let i=0;i<product.productImage.length;i++){ %>
+
                                         <img src="/uploads/re-image/<%=product.productImage[i]%>" alt="" id="imgView1">
                                                                     <input class="form-control" type="file" name="images" id="input1"
                                                                         accept="image/png, image/jpeg, image/jpg"
                                                                         onchange="viewImage1(event), viewImage(event, 1)" >
                                                                         <div id="images-error" class="error-message"></div>
+
+                                 </div>
                                      
                                                                 <div class="image-cropper d-flex align-items-center"
                                                                     style="display:none; width: 300px; height: 200px; margin-bottom: 20px;">
                                                                     <img src="/uploads/re-image/<%=product.productImage[i]%>" id="croppedImg<%=i+1 %>" alt="">
                                                                     <button type="button" id="saveButton<%=i+1%>" class="btn-sm btn-primary">Save</button>
                                                                 </div>
-                                                                <% } %>  
+                                                                
                                                                
-                                 </div>
                                                             
+                                                                <% } %>  
                                                       
                                                                 
                                 </div>
+
+
+
                             </div>
                             
 

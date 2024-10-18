@@ -180,6 +180,12 @@
     <div class="login-container">
       <h2>Welcome to TimeCrafters</h2>
       <form method="post" action="/login">
+        <% if (error_msg) { %>
+   
+          <div class="alert alert-danger">
+              <%= error_msg %>
+          </div>
+      <% } %>
         <div class="input-container">
           <input
             type="email"
@@ -200,12 +206,7 @@
           <i class="fa fa-eye eye-icon" id="togglePassword"></i>
         </div>
 
-        <% if (error_msg) { %>
-   
-          <div class="alert alert-danger">
-              <%= error_msg %>
-          </div>
-      <% } %>
+      
 
         <div class="forgot-password">
           <a href="#">Forgot password?</a>
