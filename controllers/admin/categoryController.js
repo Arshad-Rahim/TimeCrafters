@@ -32,17 +32,17 @@ const categoryInfo = async (req, res) => {
 
 const addCategory = async (req, res) => {
   try {
+    // ?the error releated to the category name instead of the name check it after coming
+    const { categoryName, description } = req.body;
     
-    const { name, description } = req.body;
-    console.log(req.body)
 
-    const existingCategory = await Category.findOne({ name });
+    const existingCategory = await Category.findOne({ categoryName });
 
     if (existingCategory) {
       return res.status(400).json({ error: "Category already existing" });
     } else {
       const newCategory = new Category({
-        name,
+        name:categoryName,
         description,
       });
 
@@ -104,23 +104,50 @@ const editCategory = async(req,res)=>{
   try {
     
     const id = req.params.id;
-    
-    const {categoryName,description}=req.body;
-   
 
-    const existingCategory = await Category.findOne({ name: categoryName, _id: { $ne: id } });
-    if(existingCategory){
-      return res.status(400).json({error:'category exists, please choose another name'})
+    console.log(id)
+    
+    const categoryName=req.body.categoryName.trim()
+    const description = req.body.description.trim()
+    
+    // console.log(req.body)
+
+    const isCategoryExists = await Category.findOne({name : categoryName , _id : {$ne : id}})
+
+    if(isCategoryExists) {
+      return res.status(409).json({error : 'Catgeory already existing'})
     }
-    const updateCategory = await Category.findByIdAndUpdate(id,{
-      name:categoryName,
-      description:description,
-    },{new:true});
+
+
+    const existingCategory = await Category.findById(id)
+    
+    // ee two way ith implement cheyyam
+    
+    // const updateCategory = await Category.findByIdAndUpdate(id,{
+    //   name:categoryName,
+    //   description:description,
+    // },{new:true});
+
+    if(existingCategory.name != categoryName) {
+      existingCategory.name = categoryName
+    }
+
+    if(existingCategory.description != description) {
+      existingCategory.description = description
+    }
+
+    await existingCategory.save()
    
    
-    if(updateCategory){
-      
-      return res.redirect('/admin/category');
+    if(existingCategory){
+
+     return res.status(200).json({
+      success:true,
+      message:'Category has updated succesfully',
+      redirectURL:"/admin/category"
+    
+    })
+
     }else{
       return res.status(400).json({error:'category not found'});
     }

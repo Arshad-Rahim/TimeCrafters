@@ -1,22 +1,143 @@
+<style>
+
+.error-message {
+  display: none;
+  color: red; /* You can style the error messages as you wish */
+}
+</style>
+
 <%-include('../partials/admin/header')  %>
 <div class="container">
     <div class="row justify-content-center">
         <div class="col-md-6 mt-60">
-            <form method="post" action="/admin/editCategory/<%=category._id%>">
+            <form method="post" action="/admin/editCategory/<%=category._id%>" onsubmit="return handleFormSubmit(event)">
                 <div class="d-grid text-end mt-30 col-md-5">
                     <button class="btn btn-primary" type="submit">Update category</button>
+                
                 </div>
                 <div class="mb-4 mt-30">
                     <label for="product_name" class="form-label">Name</label>
                     <input type="text" name="categoryName" value="<%=category.name%>" class="form-control border" />
+                    <div id="name-error" class="error-message"></div>
                 </div>
                 
                 <div class="mb-4">
                     <label class="form-label">Description</label>
-                    <textarea name="description" class="form-control border"><%=category.description%></textarea>
+                    <textarea id="descriptionId"  name="description" class="form-control border"><%=category.description%></textarea>
+                    <div id="description-error" class="error-message"></div>
                 </div>
             </form>
         </div>
     </div>
 </div>
+
+
+
 <%-include('../partials/admin/footer')%>
+<script>
+
+
+function handleFormSubmit(event){
+
+    event.preventDefault();
+    const categoryId ='<%=category._id%>';
+    
+    const name = document.getElementsByName('categoryName')[0].value;
+    const description = document.getElementById('descriptionId').value.trim();
+    if(!validForm()){
+        return;
+    }else{
+        editCategoryAjax(categoryId,name,description);
+    }
+
+   
+}
+
+
+function validForm(){
+    clearErrorMessage();
+    const name = document.getElementsByName('categoryName')[0].value.trim();
+    const description = document.getElementById('descriptionId').value.trim();
+
+    isValid = true;
+
+    if(name==""){
+        displayErrorMessage('name-error','Please Enter a name');
+        isValid=false;
+    }else if(!/^[a-zA-Z\s]+$/.test(name)){
+        displayErrorMessage('name-error','Category should contain only Alphabetic Charecters');
+        isValid = false;
+    }
+
+    if(description===''){
+        displayErrorMessage('description-error',"Please enter a desacription");
+        isValid=false;
+    }
+    return isValid;
+}
+
+function displayErrorMessage(elementId,message){
+    var errorElement = document.getElementById(elementId);
+    errorElement.innerHTML=message;
+    errorElement.style.display='block';
+}
+
+function clearErrorMessage(){
+    const errorElement = document.getElementsByClassName('error-message');
+    Array.from(errorElement).forEach((element) =>{
+        element.innerHTML='';
+        element.style.display="none";
+    });
+}
+
+
+function editCategoryAjax(categoryId,name,description){
+        $.ajax({
+            url:`/admin/editCategory/${categoryId}`,
+            type:'POST',
+            dataType:'json',
+            contentType:'application/json',
+            data:JSON.stringify({categoryName:name,description:description}),
+
+
+
+            success:function(response){
+if(response.success){
+    Swal.fire({
+                    toast:true,
+                    position:'top',
+                    icon:'success',
+                    title:'Success',
+                    text:response.message,
+                    showConfirmButton:false,
+                    timer:1500,
+                    customClass:'center-toast',
+
+
+                }) .then(() =>{
+                    window.location.href=response.redirectURL;
+                });
+}
+               
+            },
+
+            error: function(xhr, status, error) {
+
+                Swal.fire({
+                toast: true,
+                position: 'top',
+                icon: 'error',
+                title: 'Error',
+                text: xhr.responseJSON ? xhr.responseJSON.error : 'An error occurred',
+                showConfirmButton: false,
+                timer: 1500,
+                customClass: 'center-toast',
+            });
+        }
+
+
+
+        })
+}
+
+</script>

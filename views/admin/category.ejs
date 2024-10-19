@@ -135,7 +135,7 @@ function handleFormSubmit(event){
         headers:{
             'Content-Type':'application/json'
         },
-        body:JSON.stringify({name,description})
+        body:JSON.stringify({categoryName:name,description:description})
     }).then(response =>{
         
         if(!response.ok){
@@ -145,33 +145,42 @@ function handleFormSubmit(event){
         }
         return response.json();
     }).then(data =>{
-        Swal.fire({
-            icon:'success',
-            title: 'Success',
-            text: 'Category added successfully!',
-            showConfirmButton:false,
-            timer:1500,
-        }).then(()=>{
-            location.reload();
-        });
+            Swal.fire({
+                toast:true,
+                position: 'top',
+                icon:'success',
+                title: 'Success',
+                text: 'Category added successfully!',
+                showConfirmButton:false,
+                timer:1500,
+                customClass: 'center-toast'
+            }).then(()=>{
+                location.reload();
+            });
     })
     
     .catch(error=>{
         if(error.message === "Category already existing"){
             Swal.fire({
+                toast:true,
+                position: 'top',
                 icon:'error',
                 title:'Oops',
                 text:'Category alredy exists',
                 showConfirmButton:false,
                 timer:1500,
+                customClass: 'center-toast'
             });
         }else{
             Swal.fire({
+                toast:true,
+                position: 'top',
                 icon:'error',
                 title:'Oops',
                 text:'An error occured while adding the category',
                 showConfirmButton:false,
-                timer:1500
+                timer:1500,
+                customClass: 'center-toast'
             })
         }
     })
