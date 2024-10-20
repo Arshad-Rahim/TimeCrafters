@@ -12,12 +12,21 @@ router.get("/login", userController.Loadlogin);
 router.post('/login',userController.login);
 router.get("/signup", userController.loadSignup);
 router.post("/signup", userController.signup);
-router.post("/verify-otp", userController.verifyOtp);
+router.post("/verify-otp", userController.verifyOtpSignup);
 router.post("/resent-otp", userController.resentOtp);
 router.get('/userProductList',userController.getProductList);
 router.get('/productDetails/:id',userController.getProductDetails);
 // category filtering
 router.get('/userProductList/:id',userController.getFilteredCategory);
+
+
+// forgetPassword
+
+router.get('/forgetPasswordEmail',userController.getForgetPasswordEmail);
+router.post('/forgetPasswordEmail',userController.postForgetPasswordEmail);
+router.post('/verify-otp-forgetPassword',userController.verifyOtpForgetPassword);
+router.get('/setNewPassword',userController.getPasswordEnter);
+router.post('/setNewPassword',userController.postPasswordEnter);  
 
 
 

@@ -213,9 +213,9 @@ const securePassword = async (password) =>{
 
 
 
-const verifyOtp = async (req,res) =>{
+const verifyOtpSignup = async (req,res) =>{
   try {
-
+   
     const {otp} = req.body;
 
     if( otp == req.session.userOtp){
@@ -232,7 +232,7 @@ const verifyOtp = async (req,res) =>{
         req.session.user = saveUserData._id;
         res.json({success:true,redirectUrl:'/'});
     }else{
-      res.status(400).json({success:fasle,message:"Invalid OTP, Please try again"})
+      res.status(400).json({success:false,message:"Invalid OTP, Please try again"})
     }
     
   } catch (error) {
@@ -358,10 +358,182 @@ const getFilteredCategory = async(req,res) =>{
     
     
   } catch (error) {
+    console.log('Error in GetFilterCategory',error);
+  }
+}
+
+
+
+const  getForgetPasswordEmail = async(req,res)=>{
+  try {
+
+    if(!req.session.user){
+      return res.render('forgetPasswordEmail');
+    }else{
+      return res.redirect('/');
+    }
+    
+    
+  } catch (error) {
     
   }
 }
 
+
+function generateOtp(){
+  return Math.floor(100000 + Math.random()*900000).toString();
+}
+
+
+  
+async function sentVerificationEmail(email,otp){
+  try {
+
+   const transporter = nodemailer.createTransport({
+    service:'gmail',
+    port:587,
+    secure:false,
+    requireTLS:true,
+    auth:{
+      user:process.env.NODEMAILER_EMAIL,
+      pass:process.env.NODEMAILER_PASSWORD,
+  
+    }
+   
+   })
+   
+
+                                                                            
+   const info = await transporter.sendMail({
+    from:process.env.NODEMAILER_EMAIL,
+    to:email,
+    subject:'Verify your account',
+    text:`Your OTP is ${otp}`,
+    html:`<b>Your OTP ${otp}</b>`
+    
+  })
+
+  return info.accepted.length>0;
+   
+}catch (error) {
+    console.error('Error to sending the email',error);
+    return false;
+}
+}
+
+
+
+
+
+
+async function  postForgetPasswordEmail (req,res){
+  try {
+
+    const {email}= req.body;
+    
+   
+    req.session.userData = {email};
+    
+    
+    const findUser = await User.findOne({email:email});
+   
+    if(!findUser){
+      req.flash('error_msg',"The email is not registered")
+      return res.redirect('/forgetPasswordEmail');
+    }else{
+      const otp = generateOtp();
+    
+
+      const sentEmail = await sentVerificationEmail(email, otp);
+  
+      if (!sentEmail) {
+        return res.json('email-error');
+      }
+  
+  
+      req.session.userOtp = otp;
+  
+      
+      console.log(`OTP sent ${otp}`);
+      return res.render('forgetPasswordOTP');
+     
+    }
+
+  } catch (error) {
+    console.log('Error in postForgetPassword',error);
+  }
+}
+
+
+// otp verification for foget password
+
+const verifyOtpForgetPassword = async (req,res) =>{
+  try {
+
+    const {otp} = req.body;
+
+    if( otp == req.session.userOtp){
+      
+    return  res.json({success:true,redirectUrl:'/setNewPassword'});
+    }else{
+    return  res.status(400).json({success:false,message:"Invalid OTP, Please try again"})
+    }
+    
+  } catch (error) {
+
+    console.log('Error while Verifiying OTP',error);
+   return res.status(500).json({success:false,message:"An error occured"});
+    
+  }
+}
+
+
+const getPasswordEnter = async(req,res)=>{
+  try {
+
+    return res.render('passwordEnter');
+    
+  } catch (error) {
+    
+  }
+}
+
+
+const postPasswordEnter = async(req,res)=>{
+  try {
+
+    const {newPassword} = req.body;
+    const {email} = req.session.userData;
+    const passwordHash = await securePassword(newPassword);
+
+    const updatePassword = await User.findOneAndUpdate(
+      {email:email},
+      {password:passwordHash},
+      {new:true}
+    );
+  
+
+
+
+    if(updatePassword){
+
+      return res.status(200).json({
+       success:true,
+       message:'Password updated succesfully',
+       redirectURL:"/login"
+     
+     })
+ 
+     }else{
+       return res.status(400).json({error:'Password not updated'});
+     }
+   
+  
+    
+  } catch (error) {
+    console.log("Error in postPasswordEnter",error)
+  }
+}
 
 
 
@@ -370,12 +542,17 @@ module.exports = {
   Loadlogin,
   loadSignup,
   signup,
-  verifyOtp,
+  verifyOtpSignup,
   resentOtp,
   pageNotFound,
   login,
   getProductList,
   getProductDetails,
   getFilteredCategory,
+  getForgetPasswordEmail,
+  postForgetPasswordEmail,
+  verifyOtpForgetPassword,
+  getPasswordEnter,
+  postPasswordEnter,
 
 };

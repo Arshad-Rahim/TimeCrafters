@@ -32,7 +32,7 @@ const categoryInfo = async (req, res) => {
 
 const addCategory = async (req, res) => {
   try {
-    // ?the error releated to the category name instead of the name check it after coming
+
     const { categoryName, description } = req.body;
     
 
@@ -110,7 +110,6 @@ const editCategory = async(req,res)=>{
     const categoryName=req.body.categoryName.trim()
     const description = req.body.description.trim()
     
-    // console.log(req.body)
 
     const isCategoryExists = await Category.findOne({name : categoryName , _id : {$ne : id}})
 
