@@ -23,6 +23,7 @@ const loadHome = async (req, res) => {
   try {
     const user = req.session.user;
     
+    
     const categories = await Category.find({isListed:true});
     
 
@@ -537,6 +538,61 @@ const postPasswordEnter = async(req,res)=>{
 
 
 
+
+
+// userProfile
+
+const getUserProfile = async(req,res) =>{
+  try {
+
+    if(req.session.user){
+
+      const id = req.session.user;
+
+      const userData = await User.findOne({_id:id});
+     
+      
+
+
+      return res.render('userProfile',{user:userData});
+    }else{
+      return res.redirect('/login');
+    }
+    
+  } catch (error) {
+    console.log("Error in getUserProfile",error);
+  }
+}
+
+
+
+const postUserProfile = async(req,res) =>{
+  try {
+
+    const {name} = req.body;
+    const id = req.session.user;
+
+    const updateName = await User.findByIdAndUpdate(
+      {_id:id},
+      {name:name},
+      {new:true}
+    );
+
+
+    if(updateName){
+      return res.status(200).json({
+        success:true,
+        message:"User Profile updated Succesfully",
+      })
+    }else{
+      return res.status(400).json({error:'Name not Updated'})
+    }
+    
+  } catch (error) {
+    
+  }
+}
+
 module.exports = {
   loadHome,
   Loadlogin,
@@ -554,5 +610,8 @@ module.exports = {
   verifyOtpForgetPassword,
   getPasswordEnter,
   postPasswordEnter,
+  getUserProfile,
+  postUserProfile,
+  
 
 };
