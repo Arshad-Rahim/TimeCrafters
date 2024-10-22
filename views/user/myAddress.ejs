@@ -1,0 +1,228 @@
+<%- include('../../views/partials/user/header') %>
+
+<style>
+  :root {
+    --primary-color: #222;
+    --secondary-color: #444;
+    --background-color: #b3a7a7;
+    --text-color: #e0e0e0;
+    --card-bg: #1a1a1a;
+    --hover-color: #555;
+    --border-radius: 8px;
+    --box-shadow: 0 2px 4px rgba(255, 255, 255, 0.1);
+    --transition: all 0.3s ease;
+  }
+
+  body {
+    font-family: 'Poppins', sans-serif;
+    background-color: var(--background-color);
+    color: var(--text-color);
+    line-height: 1.6;
+  }
+
+  .main {
+    padding: 60px 0;
+  }
+
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 15px;
+  }
+
+  .bread-crumb {
+    background-color: var(--card-bg);
+    border-radius: var(--border-radius);
+    padding: 15px;
+    margin-bottom: 30px;
+    box-shadow: var(--box-shadow);
+  }
+
+  .bread-crumb a {
+    color: var(--text-color);
+    text-decoration: none;
+    transition: var(--transition);
+  }
+
+  .bread-crumb a:hover {
+    color: var(--hover-color);
+  }
+
+  .dashboard-container {
+    display: flex;
+    gap: 30px;
+  }
+
+  .dashboard-menu {
+    flex: 0 0 250px;
+    background-color: var(--card-bg);
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
+    padding: 20px;
+  }
+
+  .dashboard-menu ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .dashboard-menu ul li {
+    margin-bottom: 10px;
+  }
+
+  .dashboard-menu ul li a {
+    display: flex;
+    align-items: center;
+    padding: 10px 15px;
+    color: var(--text-color);
+    text-decoration: none;
+    border-radius: var(--border-radius);
+    transition: var(--transition);
+  }
+
+  .dashboard-menu ul li a:hover,
+  .dashboard-menu ul li a.active {
+    background-color: var(--secondary-color);
+    color: var(--text-color);
+  }
+
+  .dashboard-menu ul li a i {
+    margin-right: 10px;
+    font-size: 18px;
+  }
+
+  .dashboard-content {
+    flex: 1;
+  }
+
+  .card {
+    background-color: var(--card-bg);
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
+    overflow: hidden;
+    transition: var(--transition);
+  }
+
+  .card:hover {
+    box-shadow: 0 4px 8px rgba(255, 255, 255, 0.1);
+  }
+
+  .card-header {
+    background-color: var(--primary-color);
+    color: var(--text-color);
+    padding: 15px 20px;
+    font-size: 18px;
+    font-weight: 600;
+  }
+
+  .card-body {
+    padding: 20px;
+  }
+
+  .btn-primary {
+    background-color: var(--primary-color);
+    color: var(--text-color);
+    border: none;
+    padding: 10px 20px;
+    border-radius: var(--border-radius);
+    font-weight: 600;
+    text-decoration: none;
+    display: inline-block;
+    transition: var(--transition);
+    cursor: pointer;
+  }
+
+  .btn-primary:hover {
+    background-color: var(--secondary-color);
+  }
+
+  @media (max-width: 768px) {
+    .dashboard-container {
+      flex-direction: column;
+    }
+
+    .dashboard-menu {
+      margin-bottom: 20px;
+    }
+  }
+</style>
+
+<main class="main">
+  <div class="container">
+    <div class="bread-crumb flex-w p-l-25 p-r-15 p-t-30 p-lr-0-lg">
+      <a href="/" class="stext-109 cl8 hov-cl1 trans-04">
+        Home
+        <i class="fa fa-angle-right m-l-9 m-r-10" aria-hidden="true"></i>
+      </a>
+
+      <a href="/userProductList" class="stext-109 cl8 hov-cl1 trans-04">
+        Products
+        <i class="fa fa-angle-right m-l-9 m-r-10" aria-hidden="true"></i>
+      </a>
+      <span class="stext-109 cl4">Dashboard</span>
+    </div>
+
+    <div class="dashboard-container">
+      <div class="dashboard-menu">
+        <ul class="nav flex-column" role="tablist">
+          <li class="nav-item">
+            <a class="nav-link" id="dashboard-tab" data-bs-toggle="tab" href="#dashboard" role="tab"
+              aria-controls="dashboard" aria-selected="false">
+              <i class="fi-rs-settings-sliders mr-10"></i>Dashboard</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" id="orders-tab" data-bs-toggle="tab" href="#orders" role="tab"
+              aria-controls="orders" aria-selected="false">
+              <i class="fi-rs-shopping-bag mr-10"></i>Orders</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" id="track-orders-tab" data-bs-toggle="tab" href="#track-orders" role="tab"
+              aria-controls="track-orders" aria-selected="false">
+              <i class="fi-rs-shopping-cart-check mr-10"></i>Track Your Order</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link active" id="address-tab" data-bs-toggle="tab" href="#address" role="tab"
+              aria-controls="address" aria-selected="true">
+              <i class="fi-rs-marker mr-10"></i>My Address</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" id="account-detail-tab" data-bs-toggle="tab" href="#account-detail" role="tab"
+              aria-controls="account-detail" aria-selected="true">
+              <i class="fi-rs-user mr-10"></i>Account details</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/logout">
+              <i class="fi-rs-sign-out mr-10"></i>Logout</a>
+          </li>
+        </ul>
+      </div>
+
+      <div class="dashboard-content">
+        <div class="card">
+          <div class="card-header">
+            My Address
+          </div>
+          <div class="card-body">
+            <p>Manage your shipping addresses for a smoother checkout experience.</p>
+            <a href="/addAddress" class="btn-primary mt-4">Add New Address</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<%- include('../../views/partials/user/footer') %>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const currentPath = window.location.pathname;
+    const menuItems = document.querySelectorAll('.dashboard-menu a');
+    menuItems.forEach(item => {
+      if (item.getAttribute('href') === currentPath) {
+        item.classList.add('active');
+      }
+    });
+  });
+</script>

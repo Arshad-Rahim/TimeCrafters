@@ -34,6 +34,10 @@ router.post('/setNewPassword',userController.postPasswordEnter);
 router.get('/userProfile',userController.getUserProfile);
 router.post('/userProfile',userController.postUserProfile);
 
+router.get('/myAddress',userController.getMyAddress);
+
+router.get('/addAddress',userController.getAddAddress);
+
 
 
 

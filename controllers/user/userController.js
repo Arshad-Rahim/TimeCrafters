@@ -589,7 +589,41 @@ const postUserProfile = async(req,res) =>{
     }
     
   } catch (error) {
+    console.log("Error in postUserProfile",error);
+  }
+}
+
+
+
+
+const getMyAddress = async(req,res) =>{
+  try {
+
+    if(req.session.user){
+      return res.render('myAddress');
+    }else{
+      return res.redirect('/login');
+    }
     
+  } catch (error) {
+    console.log('Error in getMyAddress',error);
+  }
+}
+
+
+
+
+const getAddAddress = async(req,res)=>{
+  try {
+
+    if(req.session.user){
+      return res.render('addAddress');
+    }else{
+      return res.redirect('/login');
+    }
+    
+  } catch (error) {
+    console.log("Error in getAddAddress",error);
   }
 }
 
@@ -612,6 +646,8 @@ module.exports = {
   postPasswordEnter,
   getUserProfile,
   postUserProfile,
+  getMyAddress,
+  getAddAddress,
   
 
 };

@@ -1,0 +1,186 @@
+<%- include('../../views/partials/user/header') %>
+
+<style>
+  :root {
+    --primary-color: #222;
+    --secondary-color: #333;
+    --background-color: #fff;
+    --text-color: #e0e0e0;
+    --input-bg: #2a2a2a;
+    --input-border: #444;
+    --input-focus: #555;
+    --button-color: #007bff;
+    --button-hover: #0056b3;
+    --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    --border-radius: 8px;
+    --transition: all 0.3s ease;
+  }
+
+  body {
+    font-family: "Poppins", sans-serif;
+    background-color: var(--background-color);
+    color: var(--text-color);
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  .main {
+    padding: 60px 0;
+  }
+
+  .container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 0 15px;
+  }
+
+  .form-container {
+    background-color: var(--primary-color);
+    padding: 40px;
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
+  }
+
+  .form-container h2 {
+    font-size: 28px;
+    font-weight: 600;
+    margin-bottom: 30px;
+    color: var(--text-color);
+    text-align: center;
+  }
+
+  .form-group {
+    margin-bottom: 25px;
+  }
+
+  .form-label {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-color);
+    display: block;
+    margin-bottom: 8px;
+  }
+
+  .form-control {
+    display: block;
+    width: 100%;
+    padding: 12px;
+    background-color: var(--input-bg);
+    border: 1px solid var(--input-border);
+    border-radius: var(--border-radius);
+    font-size: 14px;
+    color: var(--text-color);
+    transition: var(--transition);
+  }
+
+  .form-control:focus {
+    border-color: var(--input-focus);
+    box-shadow: 0 0 5px rgba(85, 85, 85, 0.25);
+  }
+
+  .submit-btn {
+    display: inline-block;
+    width: 100%;
+    padding: 14px 25px;
+    background-color: var(--button-color);
+    color: #ffffff;
+    border: none;
+    border-radius: var(--border-radius);
+    font-size: 16px;
+    font-weight: 600;
+    text-align: center;
+    cursor: pointer;
+    transition: var(--transition);
+  }
+
+  .submit-btn:hover {
+    background-color: var(--button-hover);
+    transform: translateY(-2px);
+  }
+
+  /* Responsive adjustments */
+  @media (max-width: 768px) {
+    .form-container {
+      padding: 30px 20px;
+    }
+  }
+</style>
+
+<main class="main">
+  <div class="container">
+    <div class="form-container">
+      <h2>Add New Address</h2>
+      <form action="/user/add-address" method="POST">
+        <!-- House Name or Number -->
+        <div class="form-group">
+          <label for="house" class="form-label">House Name or House Number</label>
+          <input type="text" name="house" id="house" class="form-control" placeholder="Enter your House Name or Number" required />
+        </div>
+
+        <!-- Street -->
+        <div class="form-group">
+          <label for="street" class="form-label">Street</label>
+          <input type="text" name="street" id="street" class="form-control" placeholder="Enter street address" required />
+        </div>
+
+        <!-- Landmark -->
+        <div class="form-group">
+          <label for="landmark" class="form-label">Landmark</label>
+          <input type="text" name="landmark" id="landmark" class="form-control" placeholder="Nearby landmark" />
+        </div>
+
+        <!-- City -->
+        <div class="form-group">
+          <label for="city" class="form-label">City</label>
+          <input type="text" name="city" id="city" class="form-control" placeholder="Enter your city" required />
+        </div>
+
+        <!-- District -->
+        <div class="form-group">
+          <label for="district" class="form-label">District</label>
+          <input type="text" name="district" id="district" class="form-control" placeholder="Enter your district" required />
+        </div>
+
+        <!-- State -->
+        <div class="form-group">
+          <label for="state" class="form-label">State</label>
+          <input type="text" name="state" id="state" class="form-control" placeholder="Enter your state" required />
+        </div>
+
+        <!-- Zip Code -->
+        <div class="form-group">
+          <label for="zipCode" class="form-label">Zip Code</label>
+          <input type="text" name="zipCode" id="zipCode" class="form-control" placeholder="Enter zip code" required />
+        </div>
+
+        <!-- Address Type -->
+        <div class="form-group">
+          <label for="addressType" class="form-label">Address Type</label>
+          <select name="addressType" id="addressType" class="form-control" required>
+            <option value="" disabled selected>Select address type</option>
+            <option value="home">Home</option>
+            <option value="work">Work</option>
+            <option value="other">Other</option>
+          </select>
+        </div>
+
+        <!-- Mobile Number -->
+        <div class="form-group">
+          <label for="mobileNumber" class="form-label">Mobile Number</label>
+          <input type="text" name="mobileNumber" id="mobileNumber" class="form-control" placeholder="Enter mobile number" required />
+        </div>
+
+        <!-- Alternative Mobile Number -->
+        <div class="form-group">
+          <label for="altMobileNumber" class="form-label">Alternative Mobile Number</label>
+          <input type="text" name="altMobileNumber" id="altMobileNumber" class="form-control" placeholder="Enter alternative mobile number" />
+        </div>
+
+        <!-- Submit Button -->
+        <button type="submit" class="submit-btn">Submit Address</button>
+      </form>
+    </div>
+  </div>
+</main>
+
+<%- include('../../views/partials/user/footer') %>
