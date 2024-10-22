@@ -37,6 +37,7 @@ router.post('/userProfile',userController.postUserProfile);
 router.get('/myAddress',userController.getMyAddress);
 
 router.get('/addAddress',userController.getAddAddress);
+router.post('/addAddress',userController.postAddAddress);
 
 
 

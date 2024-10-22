@@ -1,5 +1,12 @@
 <%- include('../../views/partials/user/header') %>
 
+<head>
+
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <link href="https://cdn.jsdelivr.net/npm/@sweetalert2/theme-dark@4/dark.css" rel="stylesheet">
+</head>
+
 <style>
   :root {
     --primary-color: #222;
@@ -78,6 +85,31 @@
     box-shadow: 0 0 5px rgba(85, 85, 85, 0.25);
   }
 
+  /* Styles for select element */
+  select.form-control {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23e0e0e0' d='M10.293 3.293L6 7.586 1.707 3.293A1 1 0 00.293 4.707l5 5a1 1 0 001.414 0l5-5a1 1 0 10-1.414-1.414z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    padding-right: 40px;
+    color: var(--text-color);
+    background-color: var(--input-bg);
+  }
+
+  /* Styles for option elements */
+  select.form-control option {
+    background-color: var(--input-bg);
+    color: var(--text-color);
+  }
+
+  /* Ensure text is visible when option is selected */
+  select.form-control:focus option:checked {
+    background-color: var(--button-color);
+    color: #ffffff;
+  }
+
   .submit-btn {
     display: inline-block;
     width: 100%;
@@ -104,79 +136,147 @@
       padding: 30px 20px;
     }
   }
+
+  .error-message {
+    color: red;
+  }
 </style>
 
 <main class="main">
   <div class="container">
     <div class="form-container">
       <h2>Add New Address</h2>
-      <form action="/user/add-address" method="POST">
-        <!-- House Name or Number -->
+      <form
+        action="/add-address"
+        method="POST"
+        onsubmit="validateAndSubmit(event)"
+      >
+        <input type="hidden" id="userId" value="<%= userId %>" />
+
         <div class="form-group">
-          <label for="house" class="form-label">House Name or House Number</label>
-          <input type="text" name="house" id="house" class="form-control" placeholder="Enter your House Name or Number" required />
+          <label for="house" class="form-label"
+            >House Name or House Number</label
+          >
+          <input
+            type="text"
+            name="house"
+            id="house"
+            class="form-control"
+            placeholder="Enter your House Name or Number"
+          />
+          <div id="houseName-error" class="error-message"></div>
         </div>
 
-        <!-- Street -->
         <div class="form-group">
           <label for="street" class="form-label">Street</label>
-          <input type="text" name="street" id="street" class="form-control" placeholder="Enter street address" required />
+          <input
+            type="text"
+            name="street"
+            id="street"
+            class="form-control"
+            placeholder="Enter street address"
+          />
+
+          <div id="street-error" class="error-message"></div>
         </div>
 
-        <!-- Landmark -->
         <div class="form-group">
           <label for="landmark" class="form-label">Landmark</label>
-          <input type="text" name="landmark" id="landmark" class="form-control" placeholder="Nearby landmark" />
+          <input
+            type="text"
+            name="landmark"
+            id="landmark"
+            class="form-control"
+            placeholder="Nearby landmark"
+          />
+          <div id="landmark-error" class="error-message"></div>
         </div>
 
-        <!-- City -->
         <div class="form-group">
           <label for="city" class="form-label">City</label>
-          <input type="text" name="city" id="city" class="form-control" placeholder="Enter your city" required />
+          <input
+            type="text"
+            name="city"
+            id="city"
+            class="form-control"
+            placeholder="Enter your city"
+          />
+          <div id="city-error" class="error-message"></div>
         </div>
 
-        <!-- District -->
         <div class="form-group">
           <label for="district" class="form-label">District</label>
-          <input type="text" name="district" id="district" class="form-control" placeholder="Enter your district" required />
+          <input
+            type="text"
+            name="district"
+            id="district"
+            class="form-control"
+            placeholder="Enter your district"
+          />
+          <div id="district-error" class="error-message"></div>
         </div>
 
-        <!-- State -->
         <div class="form-group">
           <label for="state" class="form-label">State</label>
-          <input type="text" name="state" id="state" class="form-control" placeholder="Enter your state" required />
+          <input
+            type="text"
+            name="state"
+            id="state"
+            class="form-control"
+            placeholder="Enter your state"
+          />
+          <div id="state-error" class="error-message"></div>
         </div>
 
-        <!-- Zip Code -->
         <div class="form-group">
           <label for="zipCode" class="form-label">Zip Code</label>
-          <input type="text" name="zipCode" id="zipCode" class="form-control" placeholder="Enter zip code" required />
+          <input
+            type="text"
+            name="zipCode"
+            id="zipCode"
+            class="form-control"
+            placeholder="Enter zip code"
+          />
+          <div id="zipCode-error" class="error-message"></div>
         </div>
 
-        <!-- Address Type -->
         <div class="form-group">
           <label for="addressType" class="form-label">Address Type</label>
-          <select name="addressType" id="addressType" class="form-control" required>
+          <select name="addressType" id="addressType" class="form-control">
             <option value="" disabled selected>Select address type</option>
             <option value="home">Home</option>
             <option value="work">Work</option>
             <option value="other">Other</option>
           </select>
+          <div id="addressType-error" class="error-message"></div>
         </div>
 
-        <!-- Mobile Number -->
         <div class="form-group">
           <label for="mobileNumber" class="form-label">Mobile Number</label>
-          <input type="text" name="mobileNumber" id="mobileNumber" class="form-control" placeholder="Enter mobile number" required />
+          <input
+            type="text"
+            name="mobileNumber"
+            id="mobileNumber"
+            class="form-control"
+            placeholder="Enter mobile number"
+          />
+          <div id="mobileNumber-error" class="error-message"></div>
         </div>
 
-        <!-- Alternative Mobile Number -->
         <div class="form-group">
-          <label for="altMobileNumber" class="form-label">Alternative Mobile Number</label>
-          <input type="text" name="altMobileNumber" id="altMobileNumber" class="form-control" placeholder="Enter alternative mobile number" />
+          <label for="altMobileNumber" class="form-label"
+            >Alternative Mobile Number</label
+          >
+          <input
+            type="text"
+            name="altMobileNumber"
+            id="altMobileNumber"
+            class="form-control"
+            placeholder="Enter alternative mobile number"
+          />
+          <div id="altMobileNumber-error" class="error-message"></div>
         </div>
 
-        <!-- Submit Button -->
         <button type="submit" class="submit-btn">Submit Address</button>
       </form>
     </div>
@@ -184,3 +284,241 @@
 </main>
 
 <%- include('../../views/partials/user/footer') %>
+
+
+<script>
+  function validateAndSubmit(event) {
+    event.preventDefault();
+
+    const userId = document.getElementById('userId').value;
+    const houseName = document.getElementsByName("house")[0].value;
+    const street = document.getElementsByName("street")[0].value;
+    const landmark = document.getElementsByName("landmark")[0].value;
+    const city = document.getElementsByName("city")[0].value;
+    const district = document.getElementsByName("district")[0].value;
+    const state = document.getElementsByName("state")[0].value;
+    const zipCode = document.getElementsByName("zipCode")[0].value;
+    const addressType = document.getElementsByName("addressType")[0].value;
+    const mobileNumber = document.getElementsByName("mobileNumber")[0].value;
+    const altMobileNumber =
+      document.getElementsByName("altMobileNumber")[0].value;
+    if (validForm()) {
+      addAddressAjax(
+        userId,
+        houseName,
+        street,
+        landmark,
+        city,
+        district,
+        state,
+        zipCode,
+        addressType,
+        mobileNumber,
+        altMobileNumber
+      );
+    } else {
+      return false;
+    }
+  }
+
+  function validForm() {
+    clearErrorMessage();
+
+    const houseName = document.getElementsByName("house")[0].value;
+    const street = document.getElementsByName("street")[0].value;
+    const landmark = document.getElementsByName("landmark")[0].value;
+    const city = document.getElementsByName("city")[0].value;
+    const district = document.getElementsByName("district")[0].value;
+    const state = document.getElementsByName("state")[0].value;
+    const zipCode = document.getElementsByName("zipCode")[0].value;
+    const addressType = document.getElementsByName("addressType")[0].value;
+    const mobileNumber = document.getElementsByName("mobileNumber")[0].value;
+    const altMobileNumber =
+      document.getElementsByName("altMobileNumber")[0].value;
+    let isValid = true;
+
+    if (houseName.trim() === "") {
+      displayErrorMessage("houseName-error", "Please enter a house name.");
+      isValid = false;
+    } else if (!/^[a-zA-Z0-9\s\-_]+$/.test(houseName.trim())) {
+      displayErrorMessage(
+        "houseName-error",
+        "House name should contain only alphabetic characters, numbers, hyphens, and underscores."
+      );
+      isValid = false;
+    }
+
+    if (street.trim() === "") {
+      displayErrorMessage("street-error", "Please enter a street.");
+      isValid = false;
+    } else if (!/^[a-zA-Z0-9\s,'-]{3,50}$/.test(street.trim())) {
+      displayErrorMessage(
+        "street-error",
+        "Street name should only contain alphabetic characters, numbers, spaces, commas, periods, hyphens, and apostrophes."
+      );
+      isValid = false;
+    }
+
+    if (landmark.trim() === "") {
+      displayErrorMessage("landmark-error", "Please enter a landmark.");
+      isValid = false;
+    } else if (!/^[a-zA-Z0-9\s,.'-]+$/.test(landmark.trim())) {
+      displayErrorMessage(
+        "landmark-error",
+        "Landmark should only contain alphabetic characters, numbers, spaces, commas, periods, hyphens, and apostrophes."
+      );
+      isValid = false;
+    }
+
+    if (city.trim() === "") {
+      displayErrorMessage("city-error", "Please enter a city.");
+      isValid = false;
+    } else if (!/^[a-zA-Z\s-]+$/.test(city.trim())) {
+      displayErrorMessage(
+        "city-error",
+        "City name should contain only alphabetic characters, spaces, and hyphens."
+      );
+      isValid = false;
+    }
+
+    if (district.trim() === "") {
+      displayErrorMessage("district-error", "Please enter a district.");
+      isValid = false;
+    } else if (!/^[a-zA-Z\s-]+$/.test(district.trim())) {
+      displayErrorMessage(
+        "district-error",
+        "District name should contain only alphabetic characters, spaces, and hyphens."
+      );
+      isValid = false;
+    }
+
+    if (state.trim() === "") {
+      displayErrorMessage("state-error", "Please enter a state.");
+      isValid = false;
+    } else if (!/^[a-zA-Z\s-]+$/.test(state.trim())) {
+      displayErrorMessage(
+        "state-error",
+        "State name should contain only alphabetic characters, spaces, and hyphens."
+      );
+      isValid = false;
+    }
+
+    if (zipCode.trim() === "") {
+      displayErrorMessage("zipCode-error", "Please enter a zipCode.");
+      isValid = false;
+    } else if (!/^\d{5}(-\d{4})?$/.test(zipCode.trim())) {
+      displayErrorMessage(
+        "zipCode-error",
+        "Zip code should be a 5-digit number, optionally followed by a hyphen and 4 additional digits (e.g., 12345 or 12345-6789)."
+      );
+      isValid = false;
+    }
+
+    if (!addressType || addressType === "") {
+      displayErrorMessage(
+        "addressType-error",
+        "Please select an address type."
+      );
+      isValid = false;
+    }
+
+    if (mobileNumber.trim() === "") {
+      displayErrorMessage("mobileNumber-error", "Please enter a mobileNumber.");
+      isValid = false;
+    } else if (!/^\d{10}$/.test(mobileNumber.trim())) {
+      displayErrorMessage(
+        "mobileNumber-error",
+        "Mobile number should contain exactly 10 digits."
+      );
+      isValid = false;
+    }
+
+    if (altMobileNumber.trim() !== "") {
+      if (!/^\d{10}$/.test(altMobileNumber.trim())) {
+        displayErrorMessage(
+          "altMobileNumber-error",
+          "altMobileNumber number should contain exactly 10 digits."
+        );
+        isValid = false;
+      }
+    }
+    return isValid;
+  }
+
+  function clearErrorMessage() {
+    const errorElement = document.getElementsByClassName("error-message");
+    Array.from(errorElement).forEach((element) => {
+      element.innerHTML = "";
+    });
+    const errorMessage = document.getElementById("errorMessage");
+  }
+
+  function displayErrorMessage(elementId, message) {
+    var errorElement = document.getElementById(elementId);
+    errorElement.innerHTML = message;
+    errorElement.style.display = "block";
+  }
+
+  function addAddressAjax(
+    userId,
+    houseName,
+    street,
+    landmark,
+    city,
+    district,
+    state,
+    zipCode,
+    addressType,
+    mobileNumber,
+    altMobileNumber
+  ) {
+    $.ajax({
+      url: `/addAddress`,
+      type: "POST",
+      dataType: "json",
+      contentType: "application/json",
+      data: JSON.stringify({
+        userId,
+        houseName,
+        street,
+        landmark,
+        city,
+        district,
+        state,
+        zipCode,
+        addressType,
+        mobileNumber,
+        altMobileNumber,
+      }),
+
+      success: function (response) {
+        if (response.success) {
+          Swal.fire({
+            toast: true,
+            position: "top",
+            icon: "success",
+            title: "Success",
+            text: response.message,
+            timer: 1500,
+            customClass: "center-toast",
+          }).then(() =>{
+                    window.location.href=response.redirectURL;
+                });
+        }
+      },
+
+      error: function (xhr, status, error) {
+        Swal.fire({
+          toast: true,
+          position: "top",
+          icon: "error",
+          title: "Error",
+          text: xhr.responseJSON ? xhr.responseJSON.error : "An error occurred",
+          showConformButton: false,
+          timer: 1500,
+          customClass: "center-toast",
+        });
+      },
+    });
+  }
+</script>

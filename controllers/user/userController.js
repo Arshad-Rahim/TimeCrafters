@@ -6,6 +6,7 @@ const nodemailer = require('nodemailer');
 const Category = require('../../models/categorySchema');
 const Product = require('../../models/productSchema');
 const Brand = require('../../models/brandSchema');
+const Address = require('../../models/addressSchema');
 
 
 const pageNotFound = async (req,res) =>{
@@ -617,13 +618,58 @@ const getAddAddress = async(req,res)=>{
   try {
 
     if(req.session.user){
-      return res.render('addAddress');
+     const userId = req.session.user; 
+      return res.render('addAddress',{userId});
     }else{
       return res.redirect('/login');
     }
     
   } catch (error) {
     console.log("Error in getAddAddress",error);
+  }
+}
+
+
+
+const postAddAddress = async(req,res) =>{
+  try {
+    
+    
+    
+     const {userId,houseName,street,landmark,city,district,state,zipCode,addressType,mobileNumber,altMobileNumber} = req.body;
+    
+
+     const saveAddress = new Address({
+      userId,
+      houseName,street,
+      landmark,
+      city,
+      district,
+      state,
+      zipCode,
+      addressType,
+      mobileNumber,
+      altMobileNumber
+      
+     })
+
+     await saveAddress.save();
+if(saveAddress){
+ 
+  return res.json({
+    success:true,
+    message:'Address added succesfuly',
+    redirectURL:"/myAddress"
+  });
+}else{
+  return res.json({success:false,message:"Error in saving address"})
+}
+     
+    
+    
+    
+  } catch (error) {
+    console.log("Error in postAddAddress",error)
   }
 }
 
@@ -648,6 +694,7 @@ module.exports = {
   postUserProfile,
   getMyAddress,
   getAddAddress,
+  postAddAddress,
   
 
 };
