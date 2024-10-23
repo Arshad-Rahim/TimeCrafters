@@ -147,13 +147,13 @@
 <main class="main">
   <div class="container">
     <div class="form-container">
-      <h2>Add New Address</h2>
+      <h2>Edit Address</h2>
       <form
-        action="/add-address"
-        method="POST"
+        
         onsubmit="validateAndSubmit(event)"
       >
-        <input type="hidden" id="userId" value="<%= userId %>" />
+        <input type="hidden" id="userId" value="<%= userData._id %>" />
+        <input type="hidden" id="addressId" value="<%= address._id %>" />
 
         <div class="form-group">
           <label for="house" class="form-label"
@@ -165,6 +165,7 @@
             id="house"
             class="form-control"
             placeholder="Enter your House Name or Number"
+            value="<%= address.houseName %>"
           />
           <div id="houseName-error" class="error-message"></div>
         </div>
@@ -177,6 +178,7 @@
             id="street"
             class="form-control"
             placeholder="Enter street address"
+            value="<%= address.street %>"
           />
 
           <div id="street-error" class="error-message"></div>
@@ -190,6 +192,7 @@
             id="landmark"
             class="form-control"
             placeholder="Nearby landmark"
+            value="<%= address.landmark%>"
           />
           <div id="landmark-error" class="error-message"></div>
         </div>
@@ -202,6 +205,7 @@
             id="city"
             class="form-control"
             placeholder="Enter your city"
+           value="<%= address.city %>" 
           />
           <div id="city-error" class="error-message"></div>
         </div>
@@ -214,6 +218,7 @@
             id="district"
             class="form-control"
             placeholder="Enter your district"
+          value="<%= address.district %>"  
           />
           <div id="district-error" class="error-message"></div>
         </div>
@@ -226,6 +231,7 @@
             id="state"
             class="form-control"
             placeholder="Enter your state"
+            value="<%= address.state %>"
           />
           <div id="state-error" class="error-message"></div>
         </div>
@@ -238,6 +244,7 @@
             id="zipCode"
             class="form-control"
             placeholder="Enter zip code"
+            value="<%= address.zipCode%>"
           />
           <div id="zipCode-error" class="error-message"></div>
         </div>
@@ -261,6 +268,7 @@
             id="mobileNumber"
             class="form-control"
             placeholder="Enter mobile number"
+            value="<%= address.mobileNumber %>"
           />
           <div id="mobileNumber-error" class="error-message"></div>
         </div>
@@ -275,6 +283,7 @@
             id="altMobileNumber"
             class="form-control"
             placeholder="Enter alternative mobile number"
+            value="<%= address.altMobileNumber %>"
           />
           <div id="altMobileNumber-error" class="error-message"></div>
         </div>
@@ -291,7 +300,7 @@
 <script>
   function validateAndSubmit(event) {
     event.preventDefault();
-
+    
     const userId = document.getElementById('userId').value;
     const houseName = document.getElementsByName("house")[0].value;
     const street = document.getElementsByName("street")[0].value;
@@ -474,9 +483,10 @@
     mobileNumber,
     altMobileNumber
   ) {
+    const addressId = document.getElementById('addressId').value;
     $.ajax({
-      url: `/addAddress`,
-      type: "POST",
+      url: `/editAddress/${addressId}`,
+      type: "PUT",
       dataType: "json",
       contentType: "application/json",
       data: JSON.stringify({

@@ -39,6 +39,10 @@ router.get('/myAddress',userController.getMyAddress);
 router.get('/addAddress',userController.getAddAddress);
 router.post('/addAddress',userController.postAddAddress);
 
+router.get('/editAddress/:id',userController.getEditAddress);
+router.put('/editAddress/:id',userController.putEditAddress);
+router.delete('/deleteAddress/:id',userController.deleteAddress);
+
 
 
 
