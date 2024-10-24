@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 
 const userController = require("../controllers/user/userController");
+const cartController = require('../controllers/user/cartController');
 const {userAuth} = require('../middleware/auth');
 const passport = require("passport");
 
@@ -45,6 +46,9 @@ router.delete('/deleteAddress/:id',userController.deleteAddress);
 
 
 
+// cart
+router.get('/cart',cartController.getCart);
+router.post('/cart/:id',cartController.postCart);
 
 
 

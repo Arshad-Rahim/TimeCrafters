@@ -62,7 +62,7 @@ const productSchema = new mongoose.Schema({
         required:true,
         default:'Available'
     },
-
+    
 },{timestamps:true});
 
 

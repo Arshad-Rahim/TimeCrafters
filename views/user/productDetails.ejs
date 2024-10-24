@@ -1,4 +1,11 @@
 <%-include('../../views/partials/user/header')  %>
+
+<head>
+
+	<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+	<link href="https://cdn.jsdelivr.net/npm/@sweetalert2/theme-dark@4/dark.css" rel="stylesheet">
+  </head>
 <style>
 
 body {
@@ -289,6 +296,7 @@ body {
 						<!--Product color specify cheytha radio buttons  -->
 						<div class="p-t-33">
 							<h2>Select Product Color</h2>
+	
     <div class="color-radio">
         <input type="radio" id="color-black" name="productColor" value="black">
         <label class="black" for="color-black"></label>
@@ -335,19 +343,9 @@ body {
 
 							<div class="flex-w flex-r-m p-b-10">
 								<div class="size-204 flex-w flex-m respon6-next">
-									<div class="wrap-num-product flex-w m-r-20 m-tb-10">
-										<div class="btn-num-product-down cl8 hov-btn3 trans-04 flex-c-m">
-											<i class="fs-16 zmdi zmdi-minus"></i>
-										</div>
+									
 
-										<input class="mtext-104 cl3 txt-center num-product" type="number" name="num-product" value="1">
-
-										<div class="btn-num-product-up cl8 hov-btn3 trans-04 flex-c-m">
-											<i class="fs-16 zmdi zmdi-plus"></i>
-										</div>
-									</div>
-
-									<button class="flex-c-m stext-101 cl0 size-101 bg1 bor1 hov-btn1 p-lr-15 trans-04 js-addcart-detail">
+									<button style="margin-top: 15px;" class="flex-c-m stext-101 cl0 size-101 bg1 bor1 hov-btn1 p-lr-15 trans-04" onclick="addToCart(event,'<%= productDetails.id%>')">
 										Add to cart
 									</button>
 								</div>
@@ -598,42 +596,6 @@ body {
 
 
 
-// $(document).ready(function() {
-//     $('.zoomImg').extm({
-//         zoomElement: false,
-//         squareOverlay: true,
-//         imageSrc: $('.zoomImg').attr('src'),
-//         lazy: true,
-//         zoomLevel: 1,
-//         zoomSize: 1000,
-//     });
-// });
-
-
-
-
-
-// 		$(document).ready(function(){
-		
-
-//     // Function to enable zoom on hover
-//     $('.zoomImg').hover(function() {
-		
-//         // On hover, initialize the zoom functionality
-//         $(this).extm({
-//             zoomElement: false,        // Default zoom settings
-//             squareOverlay: true,       // Show square overlay	
-//             imageSrc: $(this).attr('src'), // Use the original image
-//             lazy: true,                // Enable lazy load if necessary
-//             zoomLevel: 2,              // Set zoom level
-//             zoomSize: 1000,            // Set zoom size
-//         });
-//     }, function() {
-//         // On hover out, destroy the zoom functionality
-//         $(this).extmDestroy();
-//     });
-// });
-
 
 	</script>
 
@@ -642,3 +604,91 @@ body {
 	
 	<%-include('../../views/partials/user/footer')  %>
 	
+
+
+	<script>
+
+		// radio button finout
+let selectedColor;
+let colorStock;
+		document.querySelectorAll('input[name="productColor"]').forEach(radio =>{
+		radio.addEventListener('change', async(event)=>{
+			 selectedColor = event.target.value;
+			
+		})
+	})
+
+
+
+
+
+
+		function addToCart(event,productId){
+			
+			event.preventDefault();
+
+			if(!selectedColor){
+				Swal.fire({
+					toast:true,
+					position:'center',
+					icon:'warning',
+					title:"Warning",
+					text:'Please select a color first',
+					showConfirmButton:false,
+					timer:1500,
+					customClass:'center-toast',
+				})
+				return;
+			}
+			
+			addToCartAjax(productId,selectedColor)
+		}
+
+
+	function addToCartAjax(productId,color){
+		if(color=='black'){
+		 colorStock ='<%= productDetails.blackQuantity%>'
+		}else if(color=='silver'){
+			 colorStock = ' <%= productDetails.silverQuantity%>'
+		}else {
+			 colorStock = ' <%= productDetails.goldQuantity%>'
+		}
+			$.ajax({
+				type:'POST',
+				url:`/cart/${productId}`,
+				dataType:'json',
+				contentType:'application/json',
+				data:JSON.stringify({color,colorStock}),
+				success:function(response){
+					if(response.success){
+						Swal.fire({
+							toast:true,
+							position:'center',
+							icon:'success',
+							title:'Success',
+							text:response.message,
+							showConfirmButton:false,
+							timer:1500,
+							customClass:'center-toast',
+						}).then(() =>{
+							window.location.href = response.redirectURL;
+						});
+					}
+				},
+				error:function(xhr){
+					const response = xhr.responseJSON;
+					Swal.fire({
+						toast:true,
+						position:'center',
+						icon:'error',
+						title:'Error',
+						text:response.message,
+						showConfirmButton:false,
+						timer:1500,
+						customClass:'center-toast',
+					});
+				}
+				
+			})
+		}
+	</script>

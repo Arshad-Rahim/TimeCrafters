@@ -765,6 +765,8 @@ const deleteAddress = async(req,res) =>{
   }
 }
 
+
+
 module.exports = {
   loadHome,
   Loadlogin,
@@ -790,6 +792,7 @@ module.exports = {
   getEditAddress,
   putEditAddress,
   deleteAddress,
+ 
   
 
 };
