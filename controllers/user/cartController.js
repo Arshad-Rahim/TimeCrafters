@@ -7,15 +7,23 @@ const getCart = async(req,res) =>{
     try {
   const userId = req.session.user;
 
-  const cart = await Cart.findOne({userId}).populate({
+  const cart = await Cart.findOne({userId})
+  .populate({
     path:'items.productId',
     select:'productName salePrice productImage'
   })
+
   
- 
+
+  const cartCalculation ={
+    basePrice:cart.items.reduce((total,item) =>total + (item.regularPrice * item.quantity),0),
+    totalPrice:cart.items.reduce((total,item) => total + (item.salePrice * item.quantity),0)
+  }
+  
+ cartCalculation.savings = cartCalculation.basePrice - cartCalculation.totalPrice;
       if(req.session.user){
         
-        return res.render('cart',{cart});
+        return res.render('cart',{cart,cartCalculation});
       }else{
         return res.redirect('/login');
       }
@@ -32,8 +40,10 @@ const getCart = async(req,res) =>{
         
         const  {id} = req.params;
         const {color,colorStock} = req.body;
+        
        
         const product = await Product.findOne({_id:id});
+       
 
         if(!userId){
             return res.status(400).json({
@@ -72,6 +82,7 @@ const getCart = async(req,res) =>{
             regularPrice:product.regularPrice,
             productImage:product.productImage[0],
             quantity:1,
+            productAmount:product.salePrice*1,
             color:color,
             colorStock:colorStock,
           });
@@ -107,12 +118,13 @@ const getCart = async(req,res) =>{
                 salePrice:product.salePrice,
                 productImage:product.productImage[0],
                 quantity:1,
+                productAmount:product.salePrice*1,
                 color:color,
                 colorStock:colorStock,
             }]
            
         })
-
+        
         saveCart.totalPrice = saveCart.items.reduce((total,item) => total+(item.salePrice * item.quantity),0)
 
         await saveCart.save();
@@ -140,8 +152,84 @@ const getCart = async(req,res) =>{
   }
   
 
+  const putQuantity = async(req,res) =>{
+    try {
+
+      if(req.session.user){
+        const userId = req.session.user;
+        
+
+        const {quantity,productId} = req.body;
+  
+        
+
+        if (!quantity || quantity < 1) {
+          return res.status(400).json({ 
+              success: false, 
+              message: 'Atleast One product Must be in cart' 
+          });
+      }
+
+
+
+      if ( quantity > 5) {
+        return res.status(400).json({ 
+            success: false, 
+            message: 'Maximum quantity is 5' 
+        });
+    }
+    
+        const cart = await Cart.findOne({userId});
+
+        if (!cart) {
+          return res.status(404).json({ 
+              success: false, 
+              message: 'Cart not found' 
+          });
+      }
+
+
+        
+          const product = await Product.findById(productId);
+        
+          if (!product) {
+            return res.status(404).json({ 
+                success: false, 
+                message: 'Product not found' 
+            });
+        }
+
+      const  foundIndex = cart.items.findIndex(item => item.productId.toString() == productId.toString());
+          
+      if(foundIndex == -1){
+        return res.status(400).json({
+          success:false,
+          message:'Item is not found in cart',
+        })
+      }
+
+      cart.items[foundIndex].quantity = quantity;
+
+      cart.items[foundIndex].productAmount = cart.items[foundIndex].salePrice*quantity;
+      cart.totalPrice = cart.items
+      .reduce((total,item)=>total+(item.salePrice * item.quantity),0);
+
+      await cart.save();
+      return res.status(200).json({
+        success:true,
+        message:'Cart updated succesfully',
+      })
+         
+      }
+      
+    } catch (error) {
+      console.log('Error in patchQuantity',error);
+    }
+  }
+
 
   module.exports={
     getCart,
     postCart,
+    putQuantity,
   }

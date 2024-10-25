@@ -34,6 +34,10 @@ const cartSchema = new Schema({
                 required:true,
                 default:1,
             },
+            productAmount:{
+                type:Number,
+                required:true,
+            },
             productImage:{
                 type:String,
                 required:true,

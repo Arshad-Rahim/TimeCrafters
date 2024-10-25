@@ -1,11 +1,119 @@
 <%- include('../../views/partials/user/header') %>
+<head>
 
+	<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+	<link href="https://cdn.jsdelivr.net/npm/@sweetalert2/theme-dark@4/dark.css" rel="stylesheet">
+  </head>
 <style>
+.indian-rupee::before {
+        content: "\20B9"; /* Unicode for Indian Rupee symbol */
+        font-family: Arial, sans-serif;
+        margin-right: 2px;
+        font-weight: 300; /* Light font weight */
+        color: #666; /* Lighter color */
+    }
 
     .body{
         margin-top: 50px
     }
 
+
+    /* Container Styles */
+.cart-totals-container {
+    max-width: 500px;
+    margin: 0 auto;
+    padding: 2rem 2.5rem;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    background-color: #fff;
+}
+
+/* Header Styles */
+.cart-totals-header {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #eee;
+}
+
+/* Row Styles */
+.price-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 0;
+    border-bottom: 1px solid #eee;
+}
+
+.price-row:last-of-type {
+    border-bottom: none;
+    margin-top: 1rem;
+    padding-top: 1.5rem;
+}
+
+/* Label Styles */
+.price-label {
+    font-size: 1rem;
+    color: #666;
+    font-weight: 500;
+}
+
+/* Amount Styles */
+.price-amount {
+    font-size: 1.1rem;
+    color: #333;
+    font-weight: 600;
+}
+
+/* Final Amount Styles */
+.final-amount {
+    font-size: 1.3rem;
+    color: #000;
+    font-weight: 700;
+}
+
+/* Button Styles */
+.checkout-button {
+    width: 100%;
+    padding: 1rem;
+    margin-top: 1.5rem;
+    background-color: #333;
+    color: white;
+    border: none;
+    border-radius: 7px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.checkout-button:hover {
+    background-color: #555;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    .cart-totals-container {
+        padding: 1.5rem;
+        margin: 0 1rem;
+    }
+    
+    .cart-totals-header {
+        font-size: 1.3rem;
+    }
+    
+    .price-label,
+    .price-amount {
+        font-size: 0.9rem;
+    }
+    
+    .final-amount {
+        font-size: 1.1rem;
+    }
+}
 
     
 </style>
@@ -13,7 +121,7 @@
 
 
 	<!-- Cart -->
-     <div class="body">
+     <div id ='body' class="body">
 
       
     
@@ -21,7 +129,7 @@
         <!-- breadcrumb -->
         <div class="container">
             <div class="bread-crumb flex-w p-l-25 p-r-15 p-t-30 p-lr-0-lg">
-                <a href="index.html" class="stext-109 cl8 hov-cl1 trans-04">
+                <a href="/" class="stext-109 cl8 hov-cl1 trans-04">
                     Home
                     <i class="fa fa-angle-right m-l-9 m-r-10" aria-hidden="true"></i>
                 </a>
@@ -34,7 +142,9 @@
             
     
         <!-- Shoping Cart -->
-        <form class="bg0 p-t-75 p-b-85">
+
+
+        <form  class="bg0 p-t-75 p-b-85">
             <div class="container">
                 <div class="row">
                     <div class="col-lg-10 col-xl-7 m-lr-auto m-b-50">
@@ -53,7 +163,6 @@
     
                                    <% if(cart && cart.items && cart.items.length>0){ %>
                                     <% cart.items.forEach(item =>{ %>
-    
                                     <tr class="table_row">
                                         <td class="column-1">
                                             <div class="how-itemcart1">
@@ -62,26 +171,25 @@
                                         </td>
                                         <td class="column-2"><%= item.productName %></td>
                                         <td class="column-2"><%= item.color%></td>
-                                        <td class="column-3"><%= item.regularPrice %></td>
-                                        <td class="column-3"><%= item.salePrice %></td>
+                                        <td class="column-3"><span class="indian-rupee"></span><%= item.regularPrice %></td>
+                                        <td class="column-3"><span class="indian-rupee"></span><%= item.salePrice %></td>
                                         <td class="column-4">
-                                            <div class="wrap-num-product flex-w m-l-auto m-r-0">
-                                                <div class="btn-num-product-down cl8 hov-btn3 trans-04 flex-c-m">
+                                            <div  class="wrap-num-product flex-w m-l-auto m-r-0">
+                                                <div class="btn-num-product-down cl8 hov-btn3 trans-04 flex-c-m" onclick="decrement(`<%= item.productId._id%>`,`<%= item.quantity%>`)">
                                                     <i class="fs-16 zmdi zmdi-minus"></i>
                                                 </div>
     
-                                                <input class="mtext-104 cl3 txt-center num-product" type="number" name="num-product2" value="1">
-    
-                                                <div class="btn-num-product-up cl8 hov-btn3 trans-04 flex-c-m">
+                                                <input class="mtext-104 cl3 txt-center num-product" type="number" name="num-product2" value='<%= item.quantity %>'    disabled>
+                                                <div class="btn-num-product-up cl8 hov-btn3 trans-04 flex-c-m" onclick="increment(`<%= item.productId._id%>`,`<%= item.quantity %>`)">
                                                     <i class="fs-16 zmdi zmdi-plus"></i>
                                                 </div>
                                             </div>
                                         </td>
                                         
-                                        <td class="column-5"><%= cart.totalPrice %></td>
+                                        <td class="column-5"><span class="indian-rupee"></span><%= item.productAmount %></td>
                                     </tr>
                                     <% }) %>
-                                    <% } %>
+                                    <% } %>	
                                 </table>
                             </div>
     
@@ -101,80 +209,55 @@
                         </div>
                     </div>
     
-                    <div class="col-sm-10 col-lg-7 col-xl-5 m-lr-auto m-b-50">
+                    <div  class="col-sm-10 col-lg-7 col-xl-5 m-lr-auto m-b-50">
                         <div class="bor10 p-lr-40 p-t-30 p-b-40 m-l-63 m-r-40 m-lr-0-xl p-lr-15-sm">
                             <h4 class="mtext-109 cl2 p-b-30">
                                 Cart Totals
                             </h4>
     
-                            <div class="flex-w flex-t bor12 p-b-13">
+                            <div  class="flex-w flex-t bor12 p-b-13">
                                 <div class="size-208">
                                     <span class="stext-110 cl2">
-                                        Subtotal:
+                                        Base Price :
                                     </span>
                                 </div>
     
-                                <div class="size-209">
+                                <div  class="size-209">
                                     <span class="mtext-110 cl2">
-                                        $79.65
+                                        <span class="indian-rupee"></span><%= cartCalculation.basePrice %>
                                     </span>
                                 </div>
                             </div>
-    
-                            <div class="flex-w flex-t bor12 p-t-15 p-b-30">
-                                <div class="size-208 w-full-ssm">
+
+                            <div   class="flex-w flex-t bor12 p-b-13">
+                                <div class="size-208">
                                     <span class="stext-110 cl2">
-                                        Shipping:
+                                        Savings :
                                     </span>
                                 </div>
     
-                                <div class="size-209 p-r-18 p-r-0-sm w-full-ssm">
-                                    <p class="stext-111 cl6 p-t-2">
-                                        There are no shipping methods available. Please double check your address, or contact us if you need any help.
-                                    </p>
-                                    
-                                    <div class="p-t-15">
-                                        <span class="stext-112 cl8">
-                                            Calculate Shipping
-                                        </span>
-    
-                                        <div class="rs1-select2 rs2-select2 bor8 bg0 m-b-12 m-t-9">
-                                            <select class="js-select2" name="time">
-                                                <option>Select a country...</option>
-                                                <option>USA</option>
-                                                <option>UK</option>
-                                            </select>
-                                            <div class="dropDownSelect2"></div>
-                                        </div>
-    
-                                        <div class="bor8 bg0 m-b-12">
-                                            <input class="stext-111 cl8 plh3 size-111 p-lr-15" type="text" name="state" placeholder="State /  country">
-                                        </div>
-    
-                                        <div class="bor8 bg0 m-b-22">
-                                            <input class="stext-111 cl8 plh3 size-111 p-lr-15" type="text" name="postcode" placeholder="Postcode / Zip">
-                                        </div>
-                                        
-                                        <div class="flex-w">
-                                            <div class="flex-c-m stext-101 cl2 size-115 bg8 bor13 hov-btn3 p-lr-15 trans-04 pointer">
-                                                Update Totals
-                                            </div>
-                                        </div>
-                                            
-                                    </div>
+                                <div  class="size-209">
+                                    <span class="mtext-110 cl2">
+                                        <span class="indian-rupee"></span><%= cartCalculation.savings %>
+                                    </span>
                                 </div>
                             </div>
+
+
+                           
     
-                            <div class="flex-w flex-t p-t-27 p-b-33">
+                          
+    
+                            <div  class="flex-w flex-t p-t-27 p-b-33">
                                 <div class="size-208">
                                     <span class="mtext-101 cl2">
-                                        Total:
+                                         Amount :
                                     </span>
                                 </div>
     
                                 <div class="size-209 p-t-1">
                                     <span class="mtext-110 cl2">
-                                        $79.65
+                                        <span class="indian-rupee"></span><%= cartCalculation.totalPrice %>
                                     </span>
                                 </div>
                             </div>
@@ -193,3 +276,70 @@
 	
 		
     <%- include('../../views/partials/user/footer') %>
+
+
+    <script>
+
+
+
+function increment(productId,quantity){
+  
+    quantity++;
+    submitAjax(quantity,productId);
+}
+
+function decrement(productId,quantity){
+    if(quantity>=1){
+        quantity--;
+       submitAjax(quantity,productId);
+    }
+}
+
+
+function submitAjax(quantity,productId){
+    console.log('submit ajax athunnunto')
+   
+
+
+    $.ajax({
+        url:`/cart`,
+        type:'PUT',
+        dataType:'json',
+        contentType:'application/json',
+        data:JSON.stringify({quantity,productId}),
+
+        success:function(response){
+            if(response.success){
+                // Swal.fire({  
+                //     toast:true,
+                //     position:'center',
+                //     icon:'success',
+                //     title:'Success',
+                //     text:response.message,
+                //     timer:1500,
+                //     customClass:'center-toast',
+                // // })
+
+                $('#body').load('/cart #body')
+
+            }
+        },
+
+        error: function(xhr){
+            const response = xhr.responseJSON;
+            Swal.fire({
+                toast:true,
+                position:'center',
+                icon:'error',
+                title:'Error',
+                text:response.message,
+                showConfirmButton:false,
+                timer:1500,
+                customClass:'center-toast',
+            })
+        }
+    })
+}
+
+
+    </script>

@@ -47,9 +47,9 @@ router.delete('/deleteAddress/:id',userController.deleteAddress);
 
 
 // cart
-router.get('/cart',cartController.getCart);
+router.get('/cart',userAuth,cartController.getCart);
 router.post('/cart/:id',cartController.postCart);
-
+router.put('/cart',cartController.putQuantity);
 
 
 // passport

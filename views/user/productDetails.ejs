@@ -345,7 +345,7 @@ body {
 								<div class="size-204 flex-w flex-m respon6-next">
 									
 
-									<button style="margin-top: 15px;" class="flex-c-m stext-101 cl0 size-101 bg1 bor1 hov-btn1 p-lr-15 trans-04" onclick="addToCart(event,'<%= productDetails.id%>')">
+									<button style="margin-top: 15px;" class="flex-c-m stext-101 cl0 size-101 bg1 bor1 hov-btn1 p-lr-15 trans-04" onclick="addToCart(event,'<%= productDetails.id%>','<%= productDetails.blackQuantity%>','<%= productDetails.silverQuantity%>','<%= productDetails.goldenQuantity%>')">
 										Add to cart
 									</button>
 								</div>
@@ -623,7 +623,7 @@ let colorStock;
 
 
 
-		function addToCart(event,productId){
+		function addToCart(event,productId,black,silver,golden){
 			
 			event.preventDefault();
 
@@ -641,17 +641,17 @@ let colorStock;
 				return;
 			}
 			
-			addToCartAjax(productId,selectedColor)
+			addToCartAjax(productId,selectedColor,black,silver,golden)
 		}
 
 
-	function addToCartAjax(productId,color){
+	function addToCartAjax(productId,color,black,silver,golden){
 		if(color=='black'){
-		 colorStock ='<%= productDetails.blackQuantity%>'
+		 colorStock = black;
 		}else if(color=='silver'){
-			 colorStock = ' <%= productDetails.silverQuantity%>'
+			 colorStock = silver;
 		}else {
-			 colorStock = ' <%= productDetails.goldQuantity%>'
+			 colorStock = golden	
 		}
 			$.ajax({
 				type:'POST',
