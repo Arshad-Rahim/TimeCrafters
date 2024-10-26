@@ -8,10 +8,7 @@ const getCart = async(req,res) =>{
   const userId = req.session.user;
 
   const cart = await Cart.findOne({userId})
-  .populate({
-    path:'items.productId',
-    select:'productName salePrice productImage'
-  })
+  .populate('items.productId')
 
   
 
@@ -228,8 +225,69 @@ const getCart = async(req,res) =>{
   }
 
 
+
+  const getCheckOut = async(req,res) =>{
+    try {
+
+     const userId = req.session.user;
+
+     const cart = await Cart.findOne({userId})
+     .populate({
+      path:'items.productId',
+      select:'productName salePrice productImage'
+     })
+
+     const cartCalculation = {
+      basePrice:cart.items.reduce((total,item) =>total +(item.regularPrice * item.quantity),0),
+      totalPrice:cart.items.reduce((total,item) =>total + (item.salePrice * item.quantity),0),
+     }
+
+     cartCalculation.savings = cartCalculation.basePrice - cartCalculation.totalPrice;
+     if(req.session.user){
+      return res.render('checkOut',{cart,cartCalculation});
+     }else{
+      return res.redirect('/login');
+     }
+      
+    } catch (error) {
+      console.log("Error in getCheckOut",error);
+    }
+  }
+
+
+  const deleteCartProduct = async(req,res) =>{
+    try {
+
+      const userId = req.session.user;
+      const productId = req.params.id;
+      const cart = await Cart.findOne({userId});
+      const foundIndex = cart.items.findIndex(item => item.productId.toString() == productId.toString());
+    
+
+      if(foundIndex == -1){
+        return res.status(400).json({
+          success:false,
+          message:'Item is not found in cart',
+        })
+      }
+// splice vech delete the product from the array
+cart.items.splice(foundIndex,1);
+await cart.save();
+return res.status(200).json({
+  success:true,
+  message:'Product deleted From the cart',
+
+})
+    } catch (error) {
+      console.log('Error in deleteAddress',error);
+    }
+  }
+
+
   module.exports={
     getCart,
     postCart,
     putQuantity,
+    getCheckOut,
+    deleteCartProduct,
   }

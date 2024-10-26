@@ -50,7 +50,11 @@ router.delete('/deleteAddress/:id',userController.deleteAddress);
 router.get('/cart',userAuth,cartController.getCart);
 router.post('/cart/:id',cartController.postCart);
 router.put('/cart',cartController.putQuantity);
+router.delete('/deleteCartProduct/:id',cartController.deleteCartProduct);
 
+
+// checkOut
+router.get('/checkOut',userAuth,cartController.getCheckOut);
 
 // passport
 router.get(

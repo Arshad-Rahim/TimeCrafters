@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Buy Now - Checkout</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+        body {
+            font-family: 'Poppins', sans-serif;
+        }
+    </style>
+</head>
+<%- include('../../views/partials/user/header') %>
+
+<body class="bg-gray-100">
+   
+    <div style="margin-top: 50px;" class="container mx-auto px-4 py-8 max-w-7xl">
+        <!-- <nav class="text-sm mb-8">
+            <ol class="list-none p-0 inline-flex">
+                <li class="flex items-center text-blue-600">
+                    <a href="/" class="hover:underline">Home</a>
+                    <svg class="fill-current w-3 h-3 mx-3" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><path d="M285.476 272.971L91.132 467.314c-9.373 9.373-24.569 9.373-33.941 0l-22.667-22.667c-9.357-9.357-9.375-24.522-.04-33.901L188.505 256 34.484 101.255c-9.335-9.379-9.317-24.544.04-33.901l22.667-22.667c9.373-9.373 24.569-9.373 33.941 0L285.475 239.03c9.373 9.372 9.373 24.568.001 33.941z"/></svg>
+                </li>
+                <li class="flex items-center text-blue-600">
+                    <a href="/shop" class="hover:underline">Shop</a>
+                    <svg class="fill-current w-3 h-3 mx-3" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><path d="M285.476 272.971L91.132 467.314c-9.373 9.373-24.569 9.373-33.941 0l-22.667-22.667c-9.357-9.357-9.375-24.522-.04-33.901L188.505 256 34.484 101.255c-9.335-9.379-9.317-24.544.04-33.901l22.667-22.667c9.373-9.373 24.569-9.373 33.941 0L285.475 239.03c9.373 9.372 9.373 24.568.001 33.941z"/></svg>
+                </li>
+                <li class="flex items-center text-blue-600">
+                    <a href="/cart" class="hover:underline">Your Cart</a>
+                    <svg class="fill-current w-3 h-3 mx-3" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><path d="M285.476 272.971L91.132 467.314c-9.373 9.373-24.569 9.373-33.941 0l-22.667-22.667c-9.357-9.357-9.375-24.522-.04-33.901L188.505 256 34.484 101.255c-9.335-9.379-9.317-24.544.04-33.901l22.667-22.667c9.373-9.373 24.569-9.373 33.941 0L285.475 239.03c9.373 9.372 9.373 24.568.001 33.941z"/></svg>
+                </li>
+                <li class="text-gray-500">CheckOut</li>
+            </ol>
+        </nav> -->
+
+        <div class="container">
+            <div class="bread-crumb flex-w p-l-25 p-r-15 p-t-30 p-lr-0-lg">
+                <a href="/" class="stext-109 cl8 hov-cl1 trans-04">
+                    Home
+                    <i class="fa fa-angle-right m-l-9 m-r-10" aria-hidden="true"></i>
+                </a>
+    
+                <span class="stext-109 cl4">
+                    Shoping Cart
+                </span>
+            </div>
+        </div>
+
+        <h1 class="text-3xl font-bold text-center mb-8">Buy now</h1>
+
+        <div class="flex flex-col lg:flex-row gap-8">
+            <div class="lg:w-2/3">
+                <div class="bg-white shadow-md rounded-lg overflow-hidden mb-8">
+                    <table class="w-full">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Image</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Quantity</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Price</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Offer Price</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Subtotal</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            <% if(cart && cart.items && cart.items.length>0){ %>
+                                <% cart.items.forEach(item =>{ %>
+                            <tr>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                   <img src="uploads/re-image/<%= item.productImage %>" alt="IMG">
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="text-sm font-medium text-gray-900"><%= item.productName %></div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="text-sm text-gray-500"><%= item.quantity %></div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="text-sm text-gray-500">₹<%= item.regularPrice %></div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="text-sm text-gray-900">₹<%= item.salePrice %></div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="text-sm font-medium text-gray-900">₹<%= item.productAmount %></div>
+                                </td>
+                            </tr>
+                            <% }) %>
+                            <% } %>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="bg-white shadow-md rounded-lg p-6">
+                    <h2 class="text-xl font-semibold mb-4">Delivery Address</h2>
+                    <div class="space-y-4">
+                        <div class="flex items-center space-x-4">
+                            <input type="radio" id="office" name="address" value="office" class="h-4 w-4 text-blue-600">
+                            <label for="office" class="flex-1">
+                                <span class="font-medium">Office</span>
+                                <address class="text-sm text-gray-500 not-italic">
+                                    sreenilayam house<br>
+                                    Machamthode<br>
+                                    Thachampara,<br>
+                                    kerala,palakkad<br>
+                                    678582<br>
+                                    Phone: 9562731090
+                                </address>
+                            </label>
+                        </div>
+                        <div class="flex items-center space-x-4">
+                            <input type="radio" id="home" name="address" value="home" class="h-4 w-4 text-blue-600" checked>
+                            <label for="home" class="flex-1">
+                                <span class="font-medium">Home</span>
+                                <address class="text-sm text-gray-500 not-italic">
+                                    sreenilayam house<br>
+                                    Machamthode<br>
+                                    Thachampara,<br>
+                                    kerala,palakkad<br>
+                                    678582<br>
+                                    Phone: 9605631090
+                                </address>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="lg:w-1/3">
+                <div class="bg-white shadow-md rounded-lg p-6">
+                    <h2 class="text-xl font-semibold mb-4">Order Summary</h2>
+                    <div class="space-y-3">
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Base price</span>
+                            <span class="font-medium">₹<%= cartCalculation.basePrice %></span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Savings</span>
+                            <span class="font-medium text-green-600">-₹<%= cartCalculation.savings %></span>
+                        </div>
+                        <!-- <div class="flex justify-between">
+                            <span class="text-gray-600">Delivery charge</span>
+                            <span class="font-medium">₹40</span>
+                        </div> -->
+                        <div class="border-t pt-3 mt-3">
+                            <div class="flex justify-between">
+                                <span class="font-semibold">Payable Amount</span>
+                                <span class="font-bold text-lg">₹<%= cartCalculation.totalPrice %></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-6">
+                        <h3 class="text-lg font-semibold mb-2">Coupon Code</h3>
+                        <div class="grid grid-cols-3 gap-2">
+                            <input type="text" placeholder="Enter coupon code" class="col-span-2 px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <button class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition duration-150 ease-in-out">
+                                Apply
+                            </button>
+                        </div>
+                    </div>
+
+                    <button class="w-full mt-6 px-4 py-3 bg-green-600 text-white rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition duration-150 ease-in-out text-lg font-semibold">
+                        Proceed to Payment
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+<%- include('../../views/partials/user/footer') %>
