@@ -11,29 +11,18 @@
             font-family: 'Poppins', sans-serif;
         }
     </style>
+
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<link href="https://cdn.jsdelivr.net/npm/@sweetalert2/theme-dark@4/dark.css" rel="stylesheet">
+
 </head>
 <%- include('../../views/partials/user/header') %>
 
 <body class="bg-gray-100">
    
     <div style="margin-top: 50px;" class="container mx-auto px-4 py-8 max-w-7xl">
-        <!-- <nav class="text-sm mb-8">
-            <ol class="list-none p-0 inline-flex">
-                <li class="flex items-center text-blue-600">
-                    <a href="/" class="hover:underline">Home</a>
-                    <svg class="fill-current w-3 h-3 mx-3" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><path d="M285.476 272.971L91.132 467.314c-9.373 9.373-24.569 9.373-33.941 0l-22.667-22.667c-9.357-9.357-9.375-24.522-.04-33.901L188.505 256 34.484 101.255c-9.335-9.379-9.317-24.544.04-33.901l22.667-22.667c9.373-9.373 24.569-9.373 33.941 0L285.475 239.03c9.373 9.372 9.373 24.568.001 33.941z"/></svg>
-                </li>
-                <li class="flex items-center text-blue-600">
-                    <a href="/shop" class="hover:underline">Shop</a>
-                    <svg class="fill-current w-3 h-3 mx-3" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><path d="M285.476 272.971L91.132 467.314c-9.373 9.373-24.569 9.373-33.941 0l-22.667-22.667c-9.357-9.357-9.375-24.522-.04-33.901L188.505 256 34.484 101.255c-9.335-9.379-9.317-24.544.04-33.901l22.667-22.667c9.373-9.373 24.569-9.373 33.941 0L285.475 239.03c9.373 9.372 9.373 24.568.001 33.941z"/></svg>
-                </li>
-                <li class="flex items-center text-blue-600">
-                    <a href="/cart" class="hover:underline">Your Cart</a>
-                    <svg class="fill-current w-3 h-3 mx-3" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><path d="M285.476 272.971L91.132 467.314c-9.373 9.373-24.569 9.373-33.941 0l-22.667-22.667c-9.357-9.357-9.375-24.522-.04-33.901L188.505 256 34.484 101.255c-9.335-9.379-9.317-24.544.04-33.901l22.667-22.667c9.373-9.373 24.569-9.373 33.941 0L285.475 239.03c9.373 9.372 9.373 24.568.001 33.941z"/></svg>
-                </li>
-                <li class="text-gray-500">CheckOut</li>
-            </ol>
-        </nav> -->
+       
 
         <div class="container">
             <div class="bread-crumb flex-w p-l-25 p-r-15 p-t-30 p-lr-0-lg">
@@ -95,35 +84,30 @@
 
                 <div class="bg-white shadow-md rounded-lg p-6">
                     <h2 class="text-xl font-semibold mb-4">Delivery Address</h2>
+                
                     <div class="space-y-4">
-                        <div class="flex items-center space-x-4">
-                            <input type="radio" id="office" name="address" value="office" class="h-4 w-4 text-blue-600">
-                            <label for="office" class="flex-1">
-                                <span class="font-medium">Office</span>
+                        <% for(i=0; i<address.length; i++){ %>
+                        <div class="flex items-center space-x-4 border p-4 rounded-lg">
+                            <input type="radio" id="address_<%= i %>" name="address" value="<%= address[i]._id %>" class="h-4 w-4 text-blue-600">
+                            <label for="address_<%= i %>" class="flex-1">
+                                <span class="font-medium"><%= address[i].addressType %></span>
                                 <address class="text-sm text-gray-500 not-italic">
-                                    sreenilayam house<br>
-                                    Machamthode<br>
-                                    Thachampara,<br>
-                                    kerala,palakkad<br>
-                                    678582<br>
-                                    Phone: 9562731090
+                                    <%= address[i].houseName %><br>
+                                    <%= address[i].street %><br>
+                                    <%= address[i].landmark %>,<br>
+                                    <%= address[i].state %>, <%= address[i].district %>, <%= address[i].city %><br>
+                                    <%= address[i].zipCode %><br>
+                                    <%= address[i].mobileNumber %><br>
+                                    <%= address[i].altMobileNumber %>
                                 </address>
                             </label>
+                            <a href="/editAddress/<%= address[i]._id %>" class="px-3 py-1 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition duration-300">Edit</a>
                         </div>
-                        <div class="flex items-center space-x-4">
-                            <input type="radio" id="home" name="address" value="home" class="h-4 w-4 text-blue-600" checked>
-                            <label for="home" class="flex-1">
-                                <span class="font-medium">Home</span>
-                                <address class="text-sm text-gray-500 not-italic">
-                                    sreenilayam house<br>
-                                    Machamthode<br>
-                                    Thachampara,<br>
-                                    kerala,palakkad<br>
-                                    678582<br>
-                                    Phone: 9605631090
-                                </address>
-                            </label>
-                        </div>
+                        <% } %>
+                    </div>
+                
+                    <div class="mt-6">
+                        <a href="/addAddress" class="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition duration-300">Add New Address</a>
                     </div>
                 </div>
             </div>
@@ -161,10 +145,9 @@
                             </button>
                         </div>
                     </div>
-
-                    <button class="w-full mt-6 px-4 py-3 bg-green-600 text-white rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition duration-150 ease-in-out text-lg font-semibold">
+                    <button onclick="orderSuccess(event)" class="w-full mt-6 px-4 py-3 bg-green-600 text-white rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition duration-150 ease-in-out text-lg font-semibold">
                         Proceed to Payment
-                    </button>
+                    </button >
                 </div>
             </div>
         </div>
@@ -172,3 +155,101 @@
 </body>
 </html>
 <%- include('../../views/partials/user/footer') %>
+
+
+<script>
+    let selectedAddress;
+    let selectedAddressDetails;
+    document.querySelectorAll('input[name="address"]').forEach(radio =>{
+        radio.addEventListener('change',async(event) =>{
+            selectedAddress = event.target.value;
+           
+
+
+            const addressContainer = event.target.nextElementSibling;
+       
+            const locationText = addressContainer.querySelector('address').childNodes[6].textContent.trim();
+            const state = locationText.split(',')[0].trim(); // This will give just 'Kerala'
+            const district = locationText.split(',')[1].trim();
+            const city = locationText.split(',')[2].trim();
+       
+            selectedAddressDetails = {
+            addressType: addressContainer.querySelector('span').textContent,
+            houseName: addressContainer.querySelector('address').childNodes[0].textContent.trim(),
+            street: addressContainer.querySelector('address').childNodes[2].textContent.trim(),
+            state: state,
+            district: district,
+            city: city,
+            landmark: addressContainer.querySelector('address').childNodes[4].textContent.trim(),
+            state: addressContainer.querySelector('address').childNodes[6].textContent.trim(),
+            zipCode: addressContainer.querySelector('address').childNodes[8].textContent.trim(),
+            mobileNumber: addressContainer.querySelector('address').childNodes[10].textContent.trim(),
+            altMobileNumber: addressContainer.querySelector('address').childNodes[12].textContent.trim()
+        };
+        
+
+        })
+    })
+
+    function orderSuccess(event){
+        event.preventDefault()
+        console.log(selectedAddress)
+        if(!selectedAddress){
+            Swal.fire({
+            toast:true,
+            position:'center',
+            icon:'warning',
+            title:'Warning',
+            text:'please select an Address',
+            showConfirmButton:false,
+            timer:1500,
+            customClass:'center-toast',
+        })
+        return;
+        }
+        orderSuccessAjax()
+    }
+
+    function orderSuccessAjax(){
+        $.ajax({
+            type:'POST',
+            url:'/orderSuccess/',
+            dataType:'json',
+            contentType:'application/json',
+            data:JSON.stringify({
+                selectedAddress,selectedAddressDetails
+            }),
+            success: function (response) {
+        if (response.success) {
+          Swal.fire({
+            toast: true,
+            position: "center",
+            icon: "success",
+            title: "Success",
+            text: response.message,
+            timer: 1500,
+            customClass: "center-toast",
+          }).then(() =>{
+                    window.location.href=response.redirectURL;
+                });
+        }
+      },
+
+      error: function (xhr, status, error) {
+        Swal.fire({
+          toast: true,
+          position: "center",
+          icon: "error",
+          title: "Error",
+          text: xhr.responseJSON ? xhr.responseJSON.error : "An error occurred",
+          showConfirmButton: false,
+          timer: 1500,
+          customClass: "center-toast",
+        });
+      },
+            
+        })
+        
+    }
+
+</script>

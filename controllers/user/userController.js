@@ -9,6 +9,8 @@ const Brand = require('../../models/brandSchema');
 const Address = require('../../models/addressSchema');
 const mongoose = require('mongoose');
 const ObjectId = mongoose.Types.ObjectId;
+const Order = require('../../models/orderScheama');
+const Cart = require('../../models/cartSchema')
 
 
 const pageNotFound = async (req,res) =>{
@@ -355,7 +357,7 @@ const getFilteredCategory = async(req,res) =>{
     }else{
       
       product = await Product.find({category:categoryId});
-    }
+    }category
 
     const cat = await Category.find();
     return res.render('userProductList',{product,cat,categoryId});
@@ -766,7 +768,47 @@ const deleteAddress = async(req,res) =>{
 }
 
 
+const getOrderList = async(req,res) =>{
+  try {
 
+    if(req.session.user){
+      const userId = req.session.user;
+      const cart = await Cart.findOne({userId});
+      const orders = await Order.find({userId}).sort({createdAt:-1}).populate('userId').populate('items.productId');
+      return res.render('orderList',{orders:orders,cart});
+    }else{
+      return res.redirect('/login');
+    }
+    
+  } catch (error) {
+    console.log('Error in getOrderList',error);
+  }
+}
+
+
+
+
+const getOrderDetails = async(req,res) =>{
+  try {
+
+   
+    if(req.session.user){
+      const userId = req.session.user;
+      const {id} = req.params;
+    
+      const cart = await Cart.findOne({userId});
+      const findOrder = await Order.findOne({_id:id}).sort({createdAt:-1}).populate('items.productId');
+
+      return res.render('orderDetails',{order:findOrder,cart});
+    }else{
+      return res.redirect('/login');
+    }
+    
+    
+  } catch (error) {
+    console.log('Error in getOrderDetails',error);
+  }
+}
 module.exports = {
   loadHome,
   Loadlogin,
@@ -792,7 +834,8 @@ module.exports = {
   getEditAddress,
   putEditAddress,
   deleteAddress,
- 
+  getOrderList,
+  getOrderDetails,
   
 
 };

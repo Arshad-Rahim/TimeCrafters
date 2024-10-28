@@ -88,30 +88,29 @@
                 </div> <!-- card body .// -->
             </div> <!-- card .// -->
             <div class="pagination-container">
-
                 <nav aria-label="Page navigation">
                   <ul class="pagination justify-content-center mb-20">
                     <% if (currentPage > 1) { %>
                       <li class="page-item">
-                        <a class="page-link" href="?page=<%= currentPage - 1 %>">Previous</a>
+                        <a class="page-link" href="/admin/category?page=<%= currentPage - 1 %>">Previous</a>
                       </li>
                     <% } %>
-              
+                    
                     <% for (let i = 1; i <= totalPages; i++) { %>
                       <li class="page-item <%= i === currentPage ? 'active' : '' %>">
-                        <a class="page-link" href="?page=<%= i %>"><%= i %></a>
+                        <a class="page-link" href="/admin/category?page=<%= i %>"><%= i %></a>
                       </li>
                     <% } %>
-              
+                    
                     <% if (currentPage < totalPages) { %>
                       <li class="page-item">
-                        <a class="page-link" href="?page=<%= currentPage + 1 %>">Next</a>
+                        <a class="page-link" href="/admin/category?page=<%= currentPage + 1 %>">Next</a>
                       </li>
                     <% } %>
                   </ul>
                 </nav>
               </div>
-        </section> <!-- content-main end// -->
+        </section> 
 
 
 
@@ -130,61 +129,50 @@ function handleFormSubmit(event){
     const name = document.getElementsByName('name')[0].value;
     const description = document.getElementById('descriptionId').value;
 
+    $.ajax({
+        url:`/admin/addCategory`,
+        type:"POST",
+        dataType:'json',
+        contentType:'application/json',
+        data:JSON.stringify({categoryName:name,description:description}),
+   
+        success:function(response){
+if(response.success){
+    Swal.fire({
+                    toast:true,
+                    position:'center',
+                    icon:'success',
+                    title:'Success',
+                    text:response.message,
+                    showConfirmButton:false,
+                    timer:1500,
+                    customClass:'center-toast',
 
-    fetch('/admin/addCategory',{
-        method:'POST',
-        headers:{
-            'Content-Type':'application/json'
-        },
-        body:JSON.stringify({categoryName:name,description:description})
-    }).then(response =>{
-        
-        if(!response.ok){
-            return response.json().then(err =>{
-                throw new Error(err.error);
+
+                }) .then(() =>{
+                    window.location.href=response.redirectURL;
+                });
+}
+               
+            },
+
+            error: function(response) {
+
+                Swal.fire({
+                toast: true,
+                position: 'top',
+                icon: 'error',
+                title: 'Error',
+                text: 'Category name alredy exist',
+                showConfirmButton: false,
+                timer: 1500,
+                customClass: 'center-toast',
             });
         }
-        return response.json();
-    }).then(data =>{
-            Swal.fire({
-                toast:true,
-                position: 'top',
-                icon:'success',
-                title: 'Success',
-                text: 'Category added successfully!',
-                showConfirmButton:false,
-                timer:1500,
-                customClass: 'center-toast'
-            }).then(()=>{
-                location.reload();
-            });
+   
     })
-    
-    .catch(error=>{
-        if(error.message === "Category already existing"){
-            Swal.fire({
-                toast:true,
-                position: 'top',
-                icon:'error',
-                title:'Oops',
-                text:'Category alredy exists',
-                showConfirmButton:false,
-                timer:1500,
-                customClass: 'center-toast'
-            });
-        }else{
-            Swal.fire({
-                toast:true,
-                position: 'top',
-                icon:'error',
-                title:'Oops',
-                text:'An error occured while adding the category',
-                showConfirmButton:false,
-                timer:1500,
-                customClass: 'center-toast'
-            })
-        }
-    })
+
+
 }
 
 

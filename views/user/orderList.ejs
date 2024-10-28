@@ -1,0 +1,70 @@
+<%- include('../../views/partials/user/header') %>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Orders</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+        body {
+            font-family: 'Poppins', sans-serif;
+        }
+    </style>
+</head>
+<body class="bg-gray-100"></body>
+    <div style="margin-top: 55px;" class="container mx-auto px-4 py-8">
+        <h1 class="text-3xl font-bold mb-8">Your Orders</h1>
+
+        <div class="space-y-6">
+            <% if(orders && orders.length > 0) { %>
+                <% orders.forEach(order => { %>
+                    <div class="bg-white shadow-md rounded-lg overflow-hidden">
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 p-4 border-b">
+                            <div>
+                                <p class="text-sm text-gray-600">Order Placed:</p>
+                                <p class="font-semibold"><%= order.createdAt.toLocaleDateString() %></p>
+                            </div>
+                            <div>
+                                <p class="text-sm text-gray-600">Delivery By:</p>
+                                <p class="font-semibold"><%= new Date(order.createdAt.getTime() + (7 * 24 * 60 * 60 * 1000)).toLocaleDateString() %></p>
+                            </div>
+                            <div>
+                                <p class="text-sm text-gray-600">Total:</p>
+                                <p class="font-semibold"><%= order.orderTotal %></p>
+                            </div>
+                            <div>
+                                <p class="text-sm text-gray-600">Ship To:</p>
+                                <p class="font-semibold"><%= order.userId.name %></p>
+                            </div>
+                        </div>
+                        <div class="p-4 border-b">
+                            <p class="font-semibold">Order: <%= order._id %></p>
+                            <a href="/orderDetails/<%= order._id %>" class="text-blue-600 hover:underline">View Order Details</a>
+                        </div>
+                        
+                        <% order.items.forEach(item => { %>
+                            <div class="p-4 flex items-center">
+                                <img src="uploads/re-image/<%= item.productImage %>" alt="Img" class="w-20 h-20 object-cover mr-4">
+                                <div class="flex-grow">
+                                    <h3 class="font-semibold"><%= item.ProductName %></h3>
+                                    <p class="text-gray-600">Price: <%= item.ProductTotal %></p>
+                                </div>
+                                <div class="flex items-center space-x-2">
+                                    <span class="px-2 py-1 bg-yellow-100 text-yellow-800 rounded-full text-sm">Pending</span>
+                                    <button class="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600 transition duration-300">Cancel</button>
+                                    <button class="px-3 py-1 bg-gray-200 text-gray-800 rounded hover:bg-gray-300 transition duration-300">Invoice</button>
+                                </div>
+                            </div>
+                        <% }) %>
+                    </div>
+                <% }) %>
+            <% } else { %>
+                <div class="bg-white shadow-md rounded-lg p-6 text-center">
+                    <p class="text-gray-600">No orders found</p>
+                </div>
+            <% } %>
+        </div>
+    </div>
+</body>
+<%- include('../../views/partials/user/footer') %>

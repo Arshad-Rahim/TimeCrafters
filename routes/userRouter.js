@@ -45,6 +45,10 @@ router.put('/editAddress/:id',userController.putEditAddress);
 router.delete('/deleteAddress/:id',userController.deleteAddress);
 
 
+router.get('/orderList',userAuth,userController.getOrderList);
+router.get('/orderDetails/:id',userAuth,userController.getOrderDetails);
+
+
 
 // cart
 router.get('/cart',userAuth,cartController.getCart);
@@ -53,9 +57,13 @@ router.put('/cart',cartController.putQuantity);
 router.delete('/deleteCartProduct/:id',cartController.deleteCartProduct);
 
 
+
 // checkOut
 router.get('/checkOut',userAuth,cartController.getCheckOut);
 
+// orderSuccess
+router.post('/orderSuccess',userAuth,cartController.postOrderSuccess);
+router.get('/orderSuccess',userAuth,cartController.getOrderSuccess)
 // passport
 router.get(
   "/auth/google",

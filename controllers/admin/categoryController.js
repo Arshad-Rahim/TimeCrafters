@@ -5,6 +5,7 @@ const categoryInfo = async (req, res) => {
     const page = parseInt(req.query.page) || 1;
     const limit = 3;
     const skip = (page - 1) * limit;
+    
 
     const categoryData = await Category.find({})
       .sort({ createdAt: -1 })
@@ -36,10 +37,14 @@ const addCategory = async (req, res) => {
     const { categoryName, description } = req.body;
     
 
-    const existingCategory = await Category.findOne({ categoryName });
+
+    const existingCategory = await Category.findOne({ name:categoryName });
 
     if (existingCategory) {
-      return res.status(400).json({ error: "Category already existing" });
+      return res.status(400).json({
+        success:false,
+         message: "Category already existing",
+         });
     } else {
       const newCategory = new Category({
         name:categoryName,
@@ -47,7 +52,11 @@ const addCategory = async (req, res) => {
       });
 
       await newCategory.save();
-      return res.json({ message: "Category added succesfully" });
+      return res.status(200).json({
+        success:true,
+         message: "Category added succesfully",
+         redirectURL:'/admin/category',
+         });
     }
   } catch (error) {
     return res.json({ error: "Internal Server Error " });
