@@ -47,7 +47,8 @@ router.delete('/deleteAddress/:id',userController.deleteAddress);
 
 router.get('/orderList',userAuth,userController.getOrderList);
 router.get('/orderDetails/:id',userAuth,userController.getOrderDetails);
-
+// Route in your routes file
+router.delete('/deleteOrderListProduct/:orderId/:productId', userAuth, userController.deleteOrderListProduct);
 
 
 // cart

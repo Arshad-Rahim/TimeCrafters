@@ -1,0 +1,136 @@
+<%- include("../../views/partials/admin/header") %>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Management</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+        body {
+            font-family: 'Poppins', sans-serif;
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <div class="container mx-auto px-4 py-8">
+        <h1 class="text-3xl font-bold mb-6">Order Management</h1>
+        
+        <div class="bg-white shadow-md rounded-lg overflow-hidden">
+            <table class="w-full">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Order ID</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Customer</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Products</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    <% order.forEach(order =>{ %> 
+                    <tr>
+                     
+                        <td class="px-6 py-4 whitespace-nowrap"><%= order._id %></td>
+                        <td class="px-6 py-4 whitespace-nowrap"><%= order.userId.name %></td>
+                        <td class="px-6 py-4">
+                            <% order.items.forEach(item =>{%>
+                            <div class="mb-4">
+                                <h4 class="font-semibold"><%= item.ProductName %></h4>
+                                <p class="text-sm text-gray-500">Status: <%= item.orderStatus %></p>
+                                <% if(item.orderStatus =="Canceled") {%>
+                                    <div class="mt-2 flex items-center">
+                                        <select class="mr-2 border rounded px-2 py-1">
+                                            <option>Pending</option>
+                                            <option>Shipped</option>
+                                            <option>Delivered</option>
+                                            <option selected>Cancelled</option>
+                                        </select>
+                                        <span class="bg-red-100 text-red-800 px-3 py-1 rounded">Cancelled</span>
+                                    </div>
+                                    <%}else{%>
+
+
+                                <div class="mt-2 flex items-center">
+                                    <select class="mr-2 border rounded px-2 py-1"
+                                    onchange="updateStatus(this.value,'<%= order._id%>','<%= item.productId%>')"
+                                    >
+                        <option value="Pending" <%= item.orderStatus === 'Pending' ? 'selected' : '' %>>Pending</option>
+                        <option value="Shipped" <%= item.orderStatus === 'Shipped' ? 'selected' : '' %>>Shipped</option>
+                        <option value="Delivered" <%= item.orderStatus === 'Delivered' ? 'selected' : '' %>>Delivered</option>
+                        <option value="Cancelled" <%= item.orderStatus === 'Cancelled' ? 'selected' : '' %>>Cancelled</option>
+                                    </select>
+                                    <button class="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 transition duration-300">Cancel</button>
+                                </div>
+                                <% } %>
+                            </div>
+                            <% }) %>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap"><%= order.createdAt.toLocaleDateString() %></td>
+                        <td class="px-6 py-4 whitespace-nowrap"><%= order.orderTotal %></td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <button class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition duration-300">Order Details</button>
+                        </td>
+                        
+                    </tr>
+                    <% }) %>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- <div class="mt-4 flex justify-center">
+            <nav class="inline-flex rounded-md shadow">
+                <a href="#" class="px-3 py-2 rounded-l-md border border-gray-300 bg-white text-gray-500 hover:bg-gray-50">&laquo; Previous</a>
+                <a href="#" class="px-3 py-2 border-t border-b border-gray-300 bg-white text-gray-700 hover:bg-gray-50">1</a>
+                <a href="#" class="px-3 py-2 rounded-r-md border border-gray-300 bg-white text-gray-500 hover:bg-gray-50">Next &raquo;</a>
+            </nav>
+        </div> -->
+    </div>
+
+    
+</body>
+<%- include("../../views/partials/admin/footer") %>
+
+
+<script>
+    function updateStatus(status,orderId,productId){
+
+        $.ajax({
+            url:`/admin/updateStatus/${orderId}/${productId}`,
+            type:"PUT",
+            dataType:'json',
+            contentType:"application/json",
+            data: JSON.stringify({status}),
+       
+        success: function (response) {
+        if (response.success) {
+          Swal.fire({
+            toast: true,
+            position: "top",
+            icon: "success",
+            title: "Success",
+            text: response.message,
+            timer: 1500,
+            customClass: "center-toast",
+            showConfirmButton:false,
+          })
+        }
+      },
+
+      error: function (xhr, status, error) {
+        Swal.fire({
+          toast: true,
+          position: "center",
+          icon: "error",
+          title: "Error",
+          text: xhr.responseJSON ? xhr.responseJSON.error : "An error occurred",
+          showConfirmButton: false,
+          timer: 1500,
+          customClass: "center-toast",
+        });
+      },
+    });
+
+    }
+</script>

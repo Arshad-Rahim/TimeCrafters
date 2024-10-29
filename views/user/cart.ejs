@@ -314,15 +314,7 @@ function submitAjax(quantity,productId){
 
         success:function(response){
             if(response.success){
-                // Swal.fire({  
-                //     toast:true,
-                //     position:'center',
-                //     icon:'success',
-                //     title:'Success',
-                //     text:response.message,
-                //     timer:1500,
-                //     customClass:'center-toast',
-                // // })
+              
 
                 $('#body').load('/cart #body')
 
@@ -403,7 +395,7 @@ function deleteCartProductAjax(productId){
                 position: 'center',
                 icon: 'error',
                 title: 'Error',
-                text: xhr.responseJSON ? xhr.responseJSON.error : 'An error occurred',
+                text: 'Error in deleting the product',
                 showConfirmButton: false,
                 timer: 1500,
                 customClass: 'center-toast',

@@ -809,6 +809,50 @@ const getOrderDetails = async(req,res) =>{
     console.log('Error in getOrderDetails',error);
   }
 }
+
+
+
+const deleteOrderListProduct = async(req,res) =>{
+  try {
+
+    const { orderId, productId } = req.params;
+    const userId = req.session.id;
+    
+  const order = await Order.findOne({_id:orderId});
+
+
+
+const itemIndex = order.items.findIndex(item => item.productId.toString() == productId)
+
+if(itemIndex == -1){
+  return res.status(400).json({
+    success:false,
+    message:'item not found in the order',
+  })
+}
+
+order.items[itemIndex].orderStatus = 'Canceled';
+
+
+  order.orderTotal = order.items
+  .filter(item =>item.orderStatus !== 'Canceled')
+  .reduce((acc,curr) =>acc+curr.ProductTotal,0)
+
+  await order.save();
+
+  return res.status(200).json({
+    success:true,
+    message:'Order cancelled succesfully',
+    redirectURL:'/orderList'
+  })
+
+    
+  } catch (error) {
+    console.log('Error in deleteOrderListProduct',error);
+  }
+}
+
+
 module.exports = {
   loadHome,
   Loadlogin,
@@ -836,6 +880,7 @@ module.exports = {
   deleteAddress,
   getOrderList,
   getOrderDetails,
+  deleteOrderListProduct,
   
 
 };

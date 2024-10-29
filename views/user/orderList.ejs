@@ -9,14 +9,19 @@
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
         body {
             font-family: 'Poppins', sans-serif;
+
+
         }
     </style>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+	<link href="https://cdn.jsdelivr.net/npm/@sweetalert2/theme-dark@4/dark.css" rel="stylesheet">
 </head>
 <body class="bg-gray-100"></body>
     <div style="margin-top: 55px;" class="container mx-auto px-4 py-8">
         <h1 class="text-3xl font-bold mb-8">Your Orders</h1>
 
-        <div class="space-y-6">
+        <div id="refresh" class="space-y-6">
             <% if(orders && orders.length > 0) { %>
                 <% orders.forEach(order => { %>
                     <div class="bg-white shadow-md rounded-lg overflow-hidden">
@@ -51,9 +56,18 @@
                                     <p class="text-gray-600">Price: <%= item.ProductTotal %></p>
                                 </div>
                                 <div class="flex items-center space-x-2">
+                                    <% if(item.orderStatus == 'Pending') {%>
                                     <span class="px-2 py-1 bg-yellow-100 text-yellow-800 rounded-full text-sm">Pending</span>
-                                    <button class="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600 transition duration-300">Cancel</button>
+                                    <% } %>
+                                    <% if(item.orderStatus == 'Canceled') {%>
+                                        <span class="px-2 py-1 bg-red-100 text-red-800 rounded-full text-sm">Canceled</span>
+                                        <% } %>
+                                    <% if(item.orderStatus !== 'Canceled'  && item.productId){ %>
+
+                                    <button onclick="cancel(event,'<%= order._id%>','<%=item.productId._id%>')" class="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600 transition duration-300">Cancel</button>
                                     <button class="px-3 py-1 bg-gray-200 text-gray-800 rounded hover:bg-gray-300 transition duration-300">Invoice</button>
+                              <% } %>
+                              
                                 </div>
                             </div>
                         <% }) %>
@@ -68,3 +82,69 @@
     </div>
 </body>
 <%- include('../../views/partials/user/footer') %>
+
+
+<script>
+
+    function cancel(event,orderId,productId){
+
+        event.preventDefault();
+
+        Swal.fire({
+            title:'Are you sure?',
+        text:'the product should be remove from the order list!',
+        icon:'warning',
+        showConfirmButton:true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText:'Yes, remove it',
+
+        }).then((result) =>{
+            if(result.isConfirmed){{
+                deleteProductAjax(orderId,productId);
+            }}
+        })
+
+    }
+
+
+    function deleteProductAjax(orderId,productId){
+
+        $.ajax({
+            url:`/deleteOrderListProduct/${orderId}/${productId}`,
+            type:'DELETE',
+            dataType:'json',
+            contentType:'application/json',
+
+            success:function(response){
+            if(response.success){
+                Swal.fire({
+                    toast:true,
+                    position:'center',
+                    icon:'success',
+                    title:response.message,
+                    showConfirmButton:false,
+                    timer:1500,
+                    customClass:'center-toast',
+
+                })
+                $('#refresh').load('/orderList #refresh');
+            }
+        },
+
+        error:function(xhr,status,error){
+            Swal.fire({
+                toast: true,
+                position: 'center',
+                icon: 'error',
+                title: 'Error',
+                text: xhr.responseJSON ? xhr.responseJSON.error : 'An error occurred',
+                showConfirmButton: false,
+                timer: 1500,
+                customClass: 'center-toast',
+            });
+        }
+
+        })
+    }
+</script>

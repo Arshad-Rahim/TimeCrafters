@@ -7,6 +7,7 @@ const customerController = require('../controllers/admin/customerController');
 const categoryController = require('../controllers/admin/categoryController');
 const brandController = require('../controllers/admin/brandController');
 const productController = require('../controllers/admin/productController');
+const orderController = require('../controllers/admin/orderController');
 
 const multer = require('multer');
 const storage = require('../helpers/multer');
@@ -54,6 +55,11 @@ router.get('/blockProduct',adminAuth,productController.blockProduct);
 router.get('/unBlockProduct',adminAuth,productController.unBlockProduct);
 router.get('/editProduct',adminAuth,productController.getEditProduct);
 router.post('/editProduct/:id',adminAuth,uploads.array('images',4),productController.editProduct);
-// here that i set images that stands for the name of the image field in form
+
+
+// order Management
+router.get('/orderManagment',adminAuth,orderController.getOrderManagment);
+router.put('/updateStatus/:orderId/:productId',adminAuth,orderController.updateStatus);
+
 
 module.exports=router;
