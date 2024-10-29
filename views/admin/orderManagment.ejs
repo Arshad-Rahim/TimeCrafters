@@ -11,6 +11,32 @@
             font-family: 'Poppins', sans-serif;
         }
     </style>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+      @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+      body {
+          font-family: 'Poppins', sans-serif;
+      }
+      .modal {
+          display: none;
+          position: fixed;
+          z-index: 1000;
+          left: 0;
+          top: 0;
+          width: 100%;
+          height: 100%;
+          overflow: auto;
+          background-color: rgba(0,0,0,0.4);
+      }
+      .modal-content {
+          background-color: #fefefe;
+          margin: 15% auto;
+          padding: 20px;
+          border: 1px solid #888;
+          width: 80%;
+          max-width: 800px;
+      }
+  </style>
 </head>
 <body class="bg-gray-100">
     <div class="container mx-auto px-4 py-8">
@@ -70,7 +96,7 @@
                         <td class="px-6 py-4 whitespace-nowrap"><%= order.createdAt.toLocaleDateString() %></td>
                         <td class="px-6 py-4 whitespace-nowrap"><%= order.orderTotal %></td>
                         <td class="px-6 py-4 whitespace-nowrap">
-                            <button class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition duration-300">Order Details</button>
+                            <button onclick="showOrderDetails('<%=order._id%>')" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition duration-300">Order Details</button>
                         </td>
                         
                     </tr>
@@ -87,6 +113,89 @@
             </nav>
         </div> -->
     </div>
+    
+    <!-- Order Details Modal -->
+    <% order.forEach(order =>{ %> 
+        <div id="orderDetailsModal-<%= order._id %>" class="modal">
+            <div class="modal-content rounded-lg">
+                <div class="flex justify-between items-center mb-4">
+                    <div>
+                        <h2 class="text-xl font-semibold">Order# <%= order._id %></h2>
+                        <p class="text-sm text-gray-500">Delivery By  <%=new Date(order.createdAt.getTime() + (7 * 24 * 60 * 60 * 1000)).toLocaleDateString()  %></p>
+                    </div>
+                    <div>
+                        <span class="close text-2xl font-bold ml-4 cursor-pointer" data-modal-id="<%= order._id %>">&times;</span>
+                    </div>
+                </div>
+                <div class="grid grid-cols-3 gap-4 mb-6">
+                    <div>
+                        <h3 class="font-semibold mb-2">Shipping Address</h3>
+                        <p class="text-sm">
+                            <%= order.userId.name %><br>
+                            <%= order.shippingAddress.houseName %><br>
+                            <%= order.shippingAddress.state %><br>
+                            Pin Code - <%= order.shippingAddress.zipCode %><br>
+                            Contact Number -<br>
+                            <%= order.shippingAddress.mobileNumber %>
+                        </p>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold mb-2">Payment Method</h3>
+                        <p class="text-sm">Cash on Delivery</p>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold mb-2">Order Summary</h3>
+                        <table class="w-full text-sm">
+                            <tr>
+                                <td>Total</td>
+                                <td class="text-right"><%= order.orderTotal %></td>
+                            </tr>
+                            <tr>
+                                <td>Delivery Charge</td>
+                                <td class="text-right">40</td>
+                            </tr>
+                            <tr class="font-semibold">
+                                <td>Grand Total</td>
+                                <td class="text-right"><%= order.orderTotal + 40 %></td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+                <% order.items.forEach(item =>{ %>
+                <div class="border-t pt-4">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center space-x-4">
+                            <img src="/uploads/re-image/<%= item.productImage %>" alt="Product Image" class="w-20 h-20 object-cover rounded">
+                            <div>
+                                <h4 class="font-semibold"><%= item.ProductName %></h4>
+                                <p class="text-sm">
+                                    Price: <%= item.ProductTotal %>
+                                </p>
+                                <% if(item.orderStatus =="Pending"){ %>
+                                <p class="text-sm text-orange-600 font-medium">Status: <%= item.orderStatus %></p>
+                                <% } %>
+                                <% if(item.orderStatus =="Canceled"){ %>
+                                    <p class="text-sm text-red-600 font-medium">Status: <%= item.orderStatus %></p>
+                                    <% } %>
+                                    <% if(item.orderStatus =="Delivered"){ %>
+                                        <p class="text-sm text-green-600 font-medium">Status: <%= item.orderStatus %></p>
+                                     <% } %>
+                                     <% if(item.orderStatus =="Shipped"){ %>
+                                        <p class="text-sm text-yellow-600 font-medium">Status: <%= item.orderStatus %></p>
+                                     <% } %>
+
+                            </div>
+                        </div>
+                        <% if(item.orderStatus != 'Canceled') { %>
+                        <button class="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition duration-300">Cancel</button>
+                        <% } %>
+                    </div>
+                </div>
+                <% }) %>
+            </div>
+        </div>
+    <% }) %>
+ 
 
     
 </body>
@@ -132,5 +241,34 @@
       },
     });
 
+    }
+</script>
+
+
+<script>
+    // Function to show modal for specific order
+    function showOrderDetails(orderId) {
+        const modal = document.getElementById(`orderDetailsModal-${orderId}`);
+        if (modal) {
+            modal.style.display = "block";
+        }
+    }
+
+    // Add click handlers for all close buttons
+    document.querySelectorAll('.close').forEach(closeBtn => {
+        closeBtn.onclick = function() {
+            const modalId = this.getAttribute('data-modal-id');
+            const modal = document.getElementById(`orderDetailsModal-${modalId}`);
+            if (modal) {
+                modal.style.display = "none";
+            }
+        }
+    });
+
+    // Close modal when clicking outside
+    window.onclick = function(event) {
+        if (event.target.classList.contains('modal')) {
+            event.target.style.display = "none";
+        }
     }
 </script>

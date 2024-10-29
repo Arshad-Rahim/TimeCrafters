@@ -55,8 +55,19 @@ const updateStatus = async(req,res) =>{
 }
 
 
+const getPopUpOrderDetails = async(req,res) =>{
+    try {
+
+        return res.render('popUpProductDetails');
+        
+    } catch (error) {
+        console.log('Error in getPopUpOrderDetails',error);
+    }
+}
+
 module.exports={
 
     getOrderManagment,
     updateStatus,
+    getPopUpOrderDetails,
 }
