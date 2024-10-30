@@ -87,7 +87,7 @@
                         <option value="Delivered" <%= item.orderStatus === 'Delivered' ? 'selected' : '' %>>Delivered</option>
                         <option value="Cancelled" <%= item.orderStatus === 'Cancelled' ? 'selected' : '' %>>Cancelled</option>
                                     </select>
-                                    <button class="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 transition duration-300">Cancel</button>
+                                    <button onclick="cancel(event,'<%= order._id%>','<%=item.productId._id%>')"  class="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 transition duration-300">Cancel</button>
                                 </div>
                                 <% } %>
                             </div>
@@ -187,7 +187,7 @@
                             </div>
                         </div>
                         <% if(item.orderStatus != 'Canceled') { %>
-                        <button class="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition duration-300">Cancel</button>
+                        <button onclick="cancel(event,'<%= order._id%>','<%=item.productId._id%>')" class="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition duration-300">Cancel</button>
                         <% } %>
                     </div>
                 </div>
@@ -271,4 +271,74 @@
             event.target.style.display = "none";
         }
     }
+</script>
+
+
+
+
+<script>
+
+
+function cancel(event,orderId,productId){
+
+event.preventDefault();
+
+Swal.fire({
+    title:'Are you sure?',
+text:'the product should be remove from the order list!',
+icon:'warning',
+showConfirmButton:true,
+confirmButtonColor: '#3085d6',
+cancelButtonColor: '#d33',
+confirmButtonText:'Yes, remove it',
+
+}).then((result) =>{
+    if(result.isConfirmed){{
+        deleteProductAjax(orderId,productId);
+    }}
+})
+
+}
+
+
+
+function deleteProductAjax(orderId,productId){
+// commom api aaki aane cheythe
+$.ajax({
+    url:`/deleteOrderListProduct/${orderId}/${productId}`,
+    type:'DELETE',
+    dataType:'json',
+    contentType:'application/json',
+
+    success:function(response){
+    if(response.success){
+        Swal.fire({
+            toast:true,
+            position:'center',
+            icon:'success',
+            title:response.message,
+            showConfirmButton:false,
+            timer:1500,
+            customClass:'center-toast',
+
+        })
+        $('#refresh').load('/orderList #refresh');
+    }
+},
+
+error:function(xhr,status,error){
+    Swal.fire({
+        toast: true,
+        position: 'center',
+        icon: 'error',
+        title: 'Error',
+        text: xhr.responseJSON ? xhr.responseJSON.error : 'An error occurred',
+        showConfirmButton: false,
+        timer: 1500,
+        customClass: 'center-toast',
+    });
+}
+
+})
+}
 </script>

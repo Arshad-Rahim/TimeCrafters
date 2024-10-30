@@ -357,7 +357,7 @@ const getFilteredCategory = async(req,res) =>{
     }else{
       
       product = await Product.find({category:categoryId});
-    }category
+    }
 
     const cat = await Category.find();
     return res.render('userProductList',{product,cat,categoryId});

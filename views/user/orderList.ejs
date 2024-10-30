@@ -62,6 +62,10 @@
                                     <% if(item.orderStatus == 'Canceled') {%>
                                         <span class="px-2 py-1 bg-red-100 text-red-800 rounded-full text-sm">Canceled</span>
                                         <% } %>
+
+                                        <% if(item.orderStatus == 'Shipped') {%>
+                                            <span class="px-2 py-1 bg-orange-100 text-red-800 rounded-full text-sm">Shipped</span>
+                                            <% } %>
                                     <% if(item.orderStatus !== 'Canceled'  && item.productId){ %>
 
                                     <button onclick="cancel(event,'<%= order._id%>','<%=item.productId._id%>')" class="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600 transition duration-300">Cancel</button>

@@ -32,7 +32,7 @@ router.post('/addCategory',adminAuth,categoryController.addCategory);
 router.get('/listCategory',adminAuth,categoryController.getListCategory);
 router.get('/unListCategory',adminAuth,categoryController.getUnListedCategory);
 router.get('/editCategory',adminAuth,categoryController.getEditCategory);
-router.post('/editCategory/:id',categoryController.editCategory);
+router.post('/editCategory/:id',adminAuth,categoryController.editCategory);
 
 
 // Brand Management routes
