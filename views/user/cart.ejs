@@ -193,7 +193,11 @@
                                         <td class="column-5"><span class="indian-rupee"></span><%= item.productAmount %></td>   
                                     </tr>
                                     <% }) %>
-                                    <% } %>	
+                                    <% } else{%>	
+                                        <div class="bg-white shadow-md rounded-lg p-6 text-center">
+                                            <h3 class="text-gray-600">No Product found in cart</h3>
+                                        </div>
+                                    <% } %>
                                 </table>
                             </div>
     

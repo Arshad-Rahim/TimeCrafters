@@ -28,6 +28,10 @@ items:[
             type:Number,
             required:true,
         },
+        regularPrice:{
+            type:Number,
+            required:true,
+        },
         ProductTotal: { type: Number, required: true },
         color:{
             type:String,

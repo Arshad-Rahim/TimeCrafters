@@ -6,25 +6,33 @@ const Order = require("../../models/orderScheama");
 
 const getCart = async (req, res) => {
   try {
+
+    if (req.session.user) {
     const userId = req.session.user;
 
     const cart = await Cart.findOne({ userId }).populate("items.productId");
+if(cart){
+  const cartCalculation = {
+    basePrice: cart.items.reduce(
+      (total, item) => total + item.regularPrice * item.quantity,
+      0
+    ),
+    totalPrice: cart.items.reduce(
+      (total, item) => total + item.salePrice * item.quantity,
+      0
+    ),
+  };
+  cartCalculation.savings =
+  cartCalculation.basePrice - cartCalculation.totalPrice;
+  return res.render("cart", { cart, cartCalculation });
 
-    const cartCalculation = {
-      basePrice: cart.items.reduce(
-        (total, item) => total + item.regularPrice * item.quantity,
-        0
-      ),
-      totalPrice: cart.items.reduce(
-        (total, item) => total + item.salePrice * item.quantity,
-        0
-      ),
-    };
 
-    cartCalculation.savings =
-      cartCalculation.basePrice - cartCalculation.totalPrice;
-    if (req.session.user) {
-      return res.render("cart", { cart, cartCalculation });
+}else{
+   const cartCalculation =0;
+   return res.render("cart", { cart, cartCalculation });
+
+}
+
     } else {
       return res.redirect("/login");
     }
@@ -149,7 +157,10 @@ const putQuantity = async (req, res) => {
     if (req.session.user) {
       const userId = req.session.user;
 
+
       const { quantity, productId } = req.body;
+      const cart = await Cart.findOne({ userId });
+
 
       if (!quantity || quantity < 1) {
         return res.status(400).json({
@@ -158,6 +169,8 @@ const putQuantity = async (req, res) => {
         });
       }
 
+
+
       if (quantity > 5) {
         return res.status(400).json({
           success: false,
@@ -165,7 +178,22 @@ const putQuantity = async (req, res) => {
         });
       }
 
-      const cart = await Cart.findOne({ userId });
+      const foundItem = cart.items.find((item) => item.productId.toString() == productId.toString());
+
+      if(!foundItem){
+        return res.status(400).json({
+          success:false,
+          message:"Product is not Found in the cart",
+        });
+      }
+
+      if(quantity > foundItem.colorStock){
+        return res.status(400).json({
+          success:false,
+          message:`Only ${foundItem.colorStock} items available in this color`
+        })
+      }
+
 
       if (!cart) {
         return res.status(404).json({
@@ -286,10 +314,13 @@ const postOrderSuccess = async (req, res) => {
       ProductName: item.productName,
       quantity: item.quantity,
       salePrice: item.salePrice,
+      regularPrice:item.regularPrice,
       ProductTotal: item.productAmount,
       color:item.color,
       productImage:item.productImage,
     }));
+
+  
 
     const saveOrderList = new Order({
       userId,
@@ -312,7 +343,41 @@ const postOrderSuccess = async (req, res) => {
       
     });
 
+    
+
     await saveOrderList.save();
+
+
+
+    for(const cartItem of cart.items){
+      const product = await Product.findOne({_id:cartItem.productId});
+      if(!product){
+        console.log('Product not found in PostOrderSuccess');
+      }
+
+
+      let colorQuantityField;
+
+      switch(cartItem.color){
+        case'gold' :
+          colorQuantityField = "goldenQuantity";
+          // product.goldenQuantity = product.goldenQuantity - cart.item.quantity;
+          break;
+        case'black':
+          colorQuantityField = 'blackQuantity';
+          break;
+        case 'silver':
+          colorQuantityField = 'silverQuantity';
+          break;
+        default:
+          console.log('unsupported color');
+      }
+
+      product[colorQuantityField] = product[colorQuantityField] - cartItem.quantity;
+      // this result the value of product object aketh array key give its resultent value
+      await product.save();
+      
+    }
 
     return res.status(200).json({
       success:true,
