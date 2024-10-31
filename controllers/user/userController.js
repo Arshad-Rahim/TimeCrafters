@@ -282,23 +282,59 @@ const resentOtp = async (req,res) =>{
 const getProductList = async(req,res) =>{
   try {
 
+
+    const page = parseInt(req.query.page) || 1;
+    const  search = req.query.query||"";
+    
+    const limit = 8;
+    const skip = (page - 1) * limit;
+
+    const totalProducts = await Product.find({
+      $or: [
+        { productName: { $regex: new RegExp(".*" + search + ".*", "i") } },
+        { brand: { $regex: new RegExp(".*" + search + ".*", "i") } },
+      ],
+    }).countDocuments();
+    const totalPages = Math.ceil(totalProducts/limit);
+
     const user = req.session.user;
     const categories = await Category.find({isListed:true});
     const productData = await Product.find({
+      $or: [
+        { productName: { $regex: new RegExp(".*" + search + ".*", "i") } },
+        { brand: { $regex: new RegExp(".*" + search + ".*", "i") } },
+      ],
       isBlocked:false,
       category:{$in:categories.map(category =>category._id)},
      
-    }).populate('category').sort({createdAt:-1});
-
+    }).populate('category')
+    .sort({createdAt:-1})
+    .skip(skip)
+    .limit(limit);
+    const brand = await Brand.find({isBlocked:false});
+    if (categories && brand) {
     if(user){
+
       const userData = await User.findOne({_id:user._id});
       
-      return res.render('userProductList',{user:userData,product:productData,cat:categories});
+      return res.render('userProductList',{
+        user:userData,
+        product:productData,
+        cat:categories,
+        currentPage:page,
+        totalPages:totalPages,
+        totalProducts:totalProducts});
     }else{
-      return res.render('userProductList',{product:productData,cat:categories});
+
+      return res.render('userProductList',{
+        product:productData,
+        cat:categories,
+        currentPage:page,
+        totalPages:totalPages,
+        totalProducts:totalProducts});
     }
 
-  
+    }
     
   } catch (error) {
     console.error('Error in getting the Product list',error);
@@ -306,6 +342,105 @@ const getProductList = async(req,res) =>{
 }
 
 
+const getFilteredCategory = async(req,res) =>{
+  const categoryId = req.params.id;
+  try {
+
+    let product;
+    const page = parseInt(req.query.page) || 1;
+    const  search = req.query.query||"";
+    const limit = 8;
+    const skip = (page - 1) * limit;
+    let totalProducts ;
+   
+
+
+    if(categoryId == "All"){
+      product = await Product.find();
+       totalProducts = await Product.find({
+        $or: [
+          { productName: { $regex: new RegExp(".*" + search + ".*", "i") } },
+          { brand: { $regex: new RegExp(".*" + search + ".*", "i") } },
+        ],
+      }).countDocuments();
+    }else{
+      
+      product = await Product.find({category:categoryId});
+      totalProducts =  0;
+    }
+    const totalPages = Math.ceil(totalProducts/limit);
+
+    const cat = await Category.find();
+    return res.render('userProductList',{
+      product,cat,categoryId,
+      currentPage:page,
+      totalPages:totalPages,
+      totalProducts:totalProducts,
+
+    });
+    
+    
+  } catch (error) {
+    console.log('Error in GetFilterCategory',error);
+  }
+}
+
+
+
+const getSearchProduct = async (req,res) =>{
+  const limit = 1;
+ 
+  try {
+
+console.log(req.query)
+    const search = req.query.search || "";
+    console.log(search)
+    const page = req.query.page || 1;
+
+console.log(search)
+    const productData = await Product.find({
+      $or: [
+        { productName: { $regex: new RegExp(".*" + search + ".*", "i") } },
+        { brand: { $regex: new RegExp(".*" + search + ".*", "i") } },
+      ],
+    }).sort({_id: -1})
+      .limit(limit * 1)
+      .skip((page - 1) * limit)
+      .populate("category")
+      .exec();
+      const count = await Product.find({
+        $or: [
+          { productName: { $regex: new RegExp(".*" + search + ".*", "i") } },
+          { brand: { $regex: new RegExp(".*" + search + ".*", "i") } },
+        ],
+      }).countDocuments();
+      const category = await Category.find({ isListed: true });
+      const brand = await Brand.find({ isBlocked: false });
+
+      if (category && brand) {
+
+        console.log(Math.ceil(count / limit))
+         
+          return res.render('userProductList',{
+            product: productData,
+            currentPage: page,
+            totalPages: Math.ceil(count / limit),
+            cat: category,
+            brand: brand,
+            search:search,
+          });
+        
+       
+      } else {
+        return res
+          .status(400)
+          .json("Error in category and brand in get all product");
+      }
+    
+  } catch (error) {
+    console.error("Error in getSearchProduct", error);
+  }
+}
 
 
 
@@ -346,27 +481,7 @@ const getProductDetails = async(req,res) =>{
 
 
 
-const getFilteredCategory = async(req,res) =>{
-  const categoryId = req.params.id;
-  try {
 
-    let product;
-
-    if(categoryId == "All"){
-      product = await Product.find();
-    }else{
-      
-      product = await Product.find({category:categoryId});
-    }
-
-    const cat = await Category.find();
-    return res.render('userProductList',{product,cat,categoryId});
-    
-    
-  } catch (error) {
-    console.log('Error in GetFilterCategory',error);
-  }
-}
 
 
 
@@ -881,6 +996,7 @@ module.exports = {
   getOrderList,
   getOrderDetails,
   deleteOrderListProduct,
+  getSearchProduct,
   
 
 };

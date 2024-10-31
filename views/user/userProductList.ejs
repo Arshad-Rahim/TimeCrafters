@@ -1,6 +1,13 @@
 <%-include('../../views/partials/user/header')  %>
 
+
+<head>
+    <script src="https://cdn.jsdelivr.net/npm/lodash@4.17.21/lodash.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
 <style>
+
 
 .regular-price {
   font-size: 14px;
@@ -13,6 +20,156 @@
   font-size: 18px;
   color: #333;
   font-weight: bold;
+}
+
+
+.search-container {
+        transition: all 0.3s ease;
+    }
+    
+    .search-container:focus-within {
+        box-shadow: 0 4px 12px rgba(108, 122, 224, 0.2);
+        border-color: #6c7ae0;
+    }
+    
+    .search-icon-btn:hover {
+        color: #6c7ae0;
+    }
+    
+    .search-submit-btn:hover {
+        background-color: #5563d0;
+    }
+    
+    .search-input::placeholder {
+        color: #999;
+    }
+    
+    @media (max-width: 768px) {
+        .search-container {
+            margin: 0 15px;
+        }
+        
+        .search-submit-btn {
+            padding: 12px 16px;
+            font-size: 14px;
+        }
+        
+        .search-input {
+            font-size: 14px;
+        }
+    }
+    
+	.search-container {
+    display: flex;
+    align-items: center;
+    background-color: #fff;
+    border-radius: 50px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    max-width: 800px;
+    margin: 0 auto;
+    overflow: hidden;
+    border: 1px solid #e0e0e0;
+    padding-right: 5px; /* Added padding for submit button */
+}
+
+/* Search Icon Button Styles */
+.search-icon-btn {
+    background: none;
+    border: none;
+    padding: 12px 15px;
+    display: flex;
+    align-items: center;
+    color: #666;
+    cursor: pointer;
+}
+
+.search-icon-btn i {
+    font-size: 20px;
+}
+
+/* Search Input Styles */
+.search-input {
+    flex: 1;
+    border: none;
+    outline: none;
+    padding: 12px 15px;
+    font-size: 16px;
+    background: transparent;
+    min-width: 0; /* Prevents input from overflowing */
+}
+
+/* Submit Button Styles */
+.search-submit-btn {
+    background-color: #6c7ae0;
+    color: white;
+    border: none;
+    padding: 8px 24px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border-radius: 25px;
+    margin: 5px;
+    white-space: nowrap;
+    font-weight: 500;
+}
+
+.search-submit-btn:hover {
+    background-color: #5562c7;
+    transform: translateY(-1px);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .search-container {
+        max-width: 90%;
+        margin: 0 auto;
+    }
+
+    .search-submit-btn {
+        padding: 8px 16px;
+        font-size: 14px;
+    }
+}
+
+@media (max-width: 480px) {
+    .search-container {
+        flex-direction: column;
+        border-radius: 15px;
+        padding: 10px;
+    }
+    
+    .search-input {
+        width: 100%;
+        padding: 10px;
+        margin: 5px 0;
+    }
+    
+    .search-submit-btn {
+        width: calc(100% - 10px);
+        margin: 5px;
+        border-radius: 8px;
+        padding: 10px;
+    }
+    
+    .search-icon-btn {
+        padding: 8px;
+    }
+}
+
+/* Focus States */
+.search-container:focus-within {
+    box-shadow: 0 3px 12px rgba(108, 122, 224, 0.2);
+    border-color: #6c7ae0;
+}
+
+/* Placeholder Color */
+.search-input::placeholder {
+    color: #999;
+}
+
+/* Input Text Color */
+.search-input {
+    color: #333;
 }
 </style>
 
@@ -51,15 +208,23 @@
 				
 				<!-- Search product -->
 				<div class="dis-none panel-search w-full p-t-10 p-b-15">
-					<div class="bor8 dis-flex p-l-15">
-						<button class="size-113 flex-c-m fs-16 cl2 hov-cl1 trans-04">
+					<form action="/search"  class="search-container bor8 dis-flex p-l-15">
+						<button class="search-icon-btn">
 							<i class="zmdi zmdi-search"></i>
 						</button>
-
-						<input class="mtext-107 cl2 size-114 plh2 p-r-15" type="text" name="search-product" placeholder="Search">
-					</div>	
+				
+						<input id="searchBar" 
+							   class="search-input mtext-107 cl2 size-114 plh2" 
+							   type="text" 
+							   name="search" 
+							   placeholder="Search products..."
+						>
+						
+						<button class="search-submit-btn">
+							Submit
+						</button>
+					</form>    
 				</div>
-
 				<!-- Filter -->
 				<div class="dis-none panel-filter w-full p-t-10">
 					<div class="wrap-filter flex-w bg6 w-full p-lr-40 p-t-27 p-lr-15-sm">
@@ -301,14 +466,22 @@
 				</a>
 			</div> -->
 
-
-        <!-- <div class="mt-4 flex justify-center">
+        <div class="flex-c-m flex-w w-full p-t-45">
             <nav class="inline-flex rounded-md shadow">
-                <a href="#" class="px-3 py-2 rounded-l-md border border-gray-300 bg-white text-gray-500 hover:bg-gray-50">&laquo; Previous</a>
-                <a href="#" class="px-3 py-2 border-t border-b border-gray-300 bg-white text-gray-700 hover:bg-gray-50">1</a>
-                <a href="#" class="px-3 py-2 rounded-r-md border border-gray-300 bg-white text-gray-500 hover:bg-gray-50">Next &raquo;</a>
-            </nav>
-        </div> -->
+				<% if(currentPage > 1) {%>
+                <a href="/userProductList?page=<%= currentPage - 1 %>" class="px-3 py-2 rounded-l-md border border-gray-300 bg-white text-gray-500 hover:bg-gray-50">&laquo; Previous</a>
+				<% } %>
+
+				<% for(let i =1; i<= totalPages;i++){ %>
+
+                <a href="/userProductList?page=<%= i %>" class= "px-3 py-2 border-t border-b border-gray-300 bg-white text-gray-700 hover:bg-gray-50"><%= i %></a>
+             
+				<% } %>
+			   <% if(currentPage < totalPages){%>
+				<a href="/userProductList?page=<%= currentPage + 1 %>" class="px-3 py-2 rounded-r-md border border-gray-300 bg-white text-gray-500 hover:bg-gray-50">Next &raquo;</a>
+            <% } %>
+			</nav>
+        </div> 
 			
 		</div>
 
@@ -326,7 +499,69 @@
 				}
 			}
 		</script>
+
+
+<!-- 
+<script>
+
+	const searchInput = document.getElementById('searchBar');
 	
-		
+
+	// function
+	const performSearch = (query)=>{
+		if(query){
+			$.ajax({
+				url:`/search?query=${query}`,
+				type:'GET',
+				dataType:'json',
+			   contentType:'application/json',
+
+	success:function(response){
+		if(response.success){
+			Swal.fire({
+				toast:true,
+				position:'center',
+				icon:'success',
+				title:response.message,
+				showConfirmButton:false,
+				timer:1500,
+				customClass:'center-toast',
+
+			})
+			.then(() =>{
+				window.location.href=response.redirectURL;
+				// ivde ninn redirect cheyth oru puthiya route aa route render with new data vech ath implement cheyyanam
+			})
+			// $('#body').load('/cart #body')
+		}
+	},
+	error:function(xhr,status,error){
+		Swal.fire({
+			toast: true,
+			position: 'center',
+			icon: 'error',
+			title: 'Error',
+			text: 'Error in finding the Product',
+			showConfirmButton: false,
+			timer: 1500,
+			customClass: 'center-toast',
+		});
+	}
+			})
+
+		}
+	}
+
+
+
+	const debouncedSearch = _.debounce((event) =>{
+		const query = event.target.value;
+		performSearch(query);
+	},300);
+
+
+	searchInput.addEventListener('input',debouncedSearch);
+</script>
+	 -->
 
     <%-include('../../views/partials/user/footer')  %>
