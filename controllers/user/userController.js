@@ -284,10 +284,29 @@ const getProductList = async(req,res) =>{
 
 
     const page = parseInt(req.query.page) || 1;
-    const  search = req.query.query||"";
+    const  search = req.query.search||"";
+    const filter = req.query.filter || "new";
     
     const limit = 8;
     const skip = (page - 1) * limit;
+
+
+    function getSortObject(filter) {
+      switch (filter) {
+        case 'atoZ':
+          return { productName: 1 };
+        case 'ztoA':
+          return { productName: -1 };
+        case 'new':
+          return { createdAt: -1 };
+        case 'lowToHigh':
+          return { salePrice: 1 };
+        case 'highToLow':
+          return { salePrice: -1 };
+        default:
+          return { createdAt: -1 };
+      }
+    }
 
     const totalProducts = await Product.find({
       $or: [
@@ -295,10 +314,14 @@ const getProductList = async(req,res) =>{
         { brand: { $regex: new RegExp(".*" + search + ".*", "i") } },
       ],
     }).countDocuments();
+
+
     const totalPages = Math.ceil(totalProducts/limit);
 
     const user = req.session.user;
     const categories = await Category.find({isListed:true});
+
+
     const productData = await Product.find({
       $or: [
         { productName: { $regex: new RegExp(".*" + search + ".*", "i") } },
@@ -308,7 +331,7 @@ const getProductList = async(req,res) =>{
       category:{$in:categories.map(category =>category._id)},
      
     }).populate('category')
-    .sort({createdAt:-1})
+    .sort(getSortObject(filter))
     .skip(skip)
     .limit(limit);
     const brand = await Brand.find({isBlocked:false});
@@ -323,7 +346,11 @@ const getProductList = async(req,res) =>{
         cat:categories,
         currentPage:page,
         totalPages:totalPages,
-        totalProducts:totalProducts});
+        totalProducts:totalProducts,
+        search: search,
+        currentFilter: filter,
+      
+      });
     }else{
 
       return res.render('userProductList',{
@@ -331,7 +358,11 @@ const getProductList = async(req,res) =>{
         cat:categories,
         currentPage:page,
         totalPages:totalPages,
-        totalProducts:totalProducts});
+        totalProducts:totalProducts,
+        search: search,
+        currentFilter: filter,
+      
+      });
     }
 
     }
@@ -346,39 +377,67 @@ const getFilteredCategory = async(req,res) =>{
   const categoryId = req.params.id;
   try {
 
-    let product;
     const page = parseInt(req.query.page) || 1;
-    const  search = req.query.query||"";
+    const  search = req.query.search||"";
+    const filter = req.query.filter || "new";
     const limit = 8;
     const skip = (page - 1) * limit;
-    let totalProducts ;
+    
    
-
-
-    if(categoryId == "All"){
-      product = await Product.find();
-       totalProducts = await Product.find({
-        $or: [
-          { productName: { $regex: new RegExp(".*" + search + ".*", "i") } },
-          { brand: { $regex: new RegExp(".*" + search + ".*", "i") } },
-        ],
-      }).countDocuments();
-    }else{
-      
-      product = await Product.find({category:categoryId});
-      totalProducts =  0;
+    function getSortObject(filter) {
+      switch (filter) {
+        case 'atoZ':
+          return { productName: 1 };
+        case 'ztoA':
+          return { productName: -1 };
+        case 'new':
+          return { createdAt: -1 };
+        case 'lowToHigh':
+          return { salePrice: 1 };
+        case 'highToLow':
+          return { salePrice: -1 };
+        default:
+          return { createdAt: -1 };
+      }
     }
+
+    let query = {
+      isBlocked: false,
+      $or: [
+        { productName: { $regex: new RegExp(".*" + search + ".*", "i") } },
+        { brand: { $regex: new RegExp(".*" + search + ".*", "i") } },
+      ]
+    };
+
+
+    if (categoryId !== "All") {
+      query.category = categoryId;
+    }
+
+    const totalProducts = await Product.countDocuments(query);
     const totalPages = Math.ceil(totalProducts/limit);
 
-    const cat = await Category.find();
-    return res.render('userProductList',{
-      product,cat,categoryId,
-      currentPage:page,
-      totalPages:totalPages,
-      totalProducts:totalProducts,
+    const product = await Product.find(query)
+    .populate('category')
+    .sort(getSortObject(filter))
+    .skip(skip)
+    .limit(limit);
 
+    const categories = await Category.find({ isListed: true });
+    const brand = await Brand.find({ isBlocked: false });
+
+    return res.render('userProductList', {
+      product,
+      cat: categories,
+      brand,
+      categoryId,
+      currentPage: page,
+      totalPages: totalPages,
+      totalProducts: totalProducts,
+      search: search,
+      currentFilter: filter,
     });
-    
+
     
   } catch (error) {
     console.log('Error in GetFilterCategory',error);
@@ -388,22 +447,45 @@ const getFilteredCategory = async(req,res) =>{
 
 
 const getSearchProduct = async (req,res) =>{
-  const limit = 1;
+  const limit = 8;
  
   try {
 
 console.log(req.query)
     const search = req.query.search || "";
-    console.log(search)
+    const filter = req.query.filter || "lowToHigh";
     const page = req.query.page || 1;
 
-console.log(search)
+    function getSortObject(filter){
+      switch(filter){
+        case 'atoZ':{
+          return {productName: 1}
+        };
+        case 'ztoA' :{
+          return {productName :-1}
+        };
+        case 'new' :{
+          return {createdAt:-1}
+        };
+        case 'lowToHigh':{
+          return {salePrice:1}
+        };
+        case  'highToLow':{
+          return {salePrice:-1}
+        };
+        default:{
+          return {createdAt : 1}
+        }
+      }
+    }
+
     const productData = await Product.find({
       $or: [
         { productName: { $regex: new RegExp(".*" + search + ".*", "i") } },
         { brand: { $regex: new RegExp(".*" + search + ".*", "i") } },
       ],
-    }).sort({_id: -1})
+    })
+    .sort(getSortObject(filter))
       .limit(limit * 1)
       .skip((page - 1) * limit)
       .populate("category")
@@ -419,7 +501,6 @@ console.log(search)
 
       if (category && brand) {
 
-        console.log(Math.ceil(count / limit))
          
           return res.render('userProductList',{
             product: productData,
@@ -428,6 +509,7 @@ console.log(search)
             cat: category,
             brand: brand,
             search:search,
+            currentFilter: filter,
           });
         
        

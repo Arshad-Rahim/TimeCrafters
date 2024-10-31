@@ -8,6 +8,10 @@
 </head>
 <style>
 
+.filter-link-active {
+    color: #6c7ae0 !important;
+    font-weight: bold;
+}
 
 .regular-price {
   font-size: 14px;
@@ -208,22 +212,13 @@
 				
 				<!-- Search product -->
 				<div class="dis-none panel-search w-full p-t-10 p-b-15">
-					<form action="/search"  class="search-container bor8 dis-flex p-l-15">
-						<button class="search-icon-btn">
+					<div class="bor8 dis-flex p-l-15">
+						<button class="size-113 flex-c-m fs-16 cl2 hov-cl1 trans-04">
 							<i class="zmdi zmdi-search"></i>
 						</button>
-				
-						<input id="searchBar" 
-							   class="search-input mtext-107 cl2 size-114 plh2" 
-							   type="text" 
-							   name="search" 
-							   placeholder="Search products..."
-						>
-						
-						<button class="search-submit-btn">
-							Submit
-						</button>
-					</form>    
+
+						<input class="mtext-107 cl2 size-114 plh2 p-r-15" type="text" name="search-product" placeholder="Search">
+					</div>	
 				</div>
 				<!-- Filter -->
 				<div class="dis-none panel-filter w-full p-t-10">
@@ -235,40 +230,23 @@
 
 							<ul>
 								<li class="p-b-6">
-									<a href="#" class="filter-link stext-106 trans-04">
-										Default
+									<a href="/search?filter=new<%= search ? '&search=' + search : '' %>" class="filter-link stext-106 trans-04 <%= currentFilter === 'new' ? 'filter-link-active' : '' %>">
+										New Arrivals
 									</a>
 								</li>
 
 								<li class="p-b-6">
-									<a href="#" class="filter-link stext-106 trans-04">
-										Popularity
+									<a href="/search?filter=atoZ<%= search ? '&search=' + search : '' %>"  class="filter-link stext-106 trans-04 <%= currentFilter === 'atoZ' ? 'filter-link-active' : '' %>">>
+										aA - zZ
 									</a>
 								</li>
 
 								<li class="p-b-6">
-									<a href="#" class="filter-link stext-106 trans-04">
-										Average rating
+									<a href="search?filter=ztoA<%= search ? '&search=' + search : '' %>" class="filter-link stext-106 trans-04 <%= currentFilter === 'ztoA' ? 'filter-link-active' : '' %>">
+										zZ - aA
 									</a>
 								</li>
 
-								<li class="p-b-6">
-									<a href="#" class="filter-link stext-106 trans-04 filter-link-active">
-										Newness
-									</a>
-								</li>
-
-								<li class="p-b-6">
-									<a href="#" class="filter-link stext-106 trans-04">
-										Price: Low to High
-									</a>
-								</li>
-
-								<li class="p-b-6">
-									<a href="#" class="filter-link stext-106 trans-04">
-										Price: High to Low
-									</a>
-								</li>
 							</ul>
 						</div>
 
@@ -278,139 +256,26 @@
 							</div>
 
 							<ul>
+								
+
 								<li class="p-b-6">
-									<a href="#" class="filter-link stext-106 trans-04 filter-link-active">
-										All
+									<a href="/search?filter=lowToHigh<%= search ? '&search=' + search : '' %>"  class="filter-link stext-106 trans-04 <%= currentFilter === 'lowToHigh' ? 'filter-link-active' : '' %>">
+										
+										Price: Low to High
 									</a>
 								</li>
 
 								<li class="p-b-6">
-									<a href="#" class="filter-link stext-106 trans-04">
-										$0.00 - $50.00
+									<a href="/search?filter=highToLow<%= search ? '&search=' + search : '' %>" class="filter-link stext-106 trans-04 <%= currentFilter === 'highToLow' ? 'filter-link-active' : '' %>">
+										>
+										Price: High to Low
 									</a>
 								</li>
 
-								<li class="p-b-6">
-									<a href="#" class="filter-link stext-106 trans-04">
-										$50.00 - $100.00
-									</a>
-								</li>
-
-								<li class="p-b-6">
-									<a href="#" class="filter-link stext-106 trans-04">
-										$100.00 - $150.00
-									</a>
-								</li>
-
-								<li class="p-b-6">
-									<a href="#" class="filter-link stext-106 trans-04">
-										$150.00 - $200.00
-									</a>
-								</li>
-
-								<li class="p-b-6">
-									<a href="#" class="filter-link stext-106 trans-04">
-										$200.00+
-									</a>
-								</li>
+					
 							</ul>
 						</div>
 
-						<div class="filter-col3 p-r-15 p-b-27">
-							<div class="mtext-102 cl2 p-b-15">
-								Color
-							</div>
-
-							<ul>
-								<li class="p-b-6">
-									<span class="fs-15 lh-12 m-r-6" style="color: #222;">
-										<i class="zmdi zmdi-circle"></i>
-									</span>
-
-									<a href="#" class="filter-link stext-106 trans-04">
-										Black
-									</a>
-								</li>
-
-								<li class="p-b-6">
-									<span class="fs-15 lh-12 m-r-6" style="color: #4272d7;">
-										<i class="zmdi zmdi-circle"></i>
-									</span>
-
-									<a href="#" class="filter-link stext-106 trans-04 filter-link-active">
-										Blue
-									</a>
-								</li>
-
-								<li class="p-b-6">
-									<span class="fs-15 lh-12 m-r-6" style="color: #b3b3b3;">
-										<i class="zmdi zmdi-circle"></i>
-									</span>
-
-									<a href="#" class="filter-link stext-106 trans-04">
-										Grey
-									</a>
-								</li>
-
-								<li class="p-b-6">
-									<span class="fs-15 lh-12 m-r-6" style="color: #00ad5f;">
-										<i class="zmdi zmdi-circle"></i>
-									</span>
-
-									<a href="#" class="filter-link stext-106 trans-04">
-										Green
-									</a>
-								</li>
-
-								<li class="p-b-6">
-									<span class="fs-15 lh-12 m-r-6" style="color: #fa4251;">
-										<i class="zmdi zmdi-circle"></i>
-									</span>
-
-									<a href="#" class="filter-link stext-106 trans-04">
-										Red
-									</a>
-								</li>
-
-								<li class="p-b-6">
-									<span class="fs-15 lh-12 m-r-6" style="color: #aaa;">
-										<i class="zmdi zmdi-circle-o"></i>
-									</span>
-
-									<a href="#" class="filter-link stext-106 trans-04">
-										White
-									</a>
-								</li>
-							</ul>
-						</div>7080a77f0d40130b0b1428
-
-						<div class="filter-col4 p-b-27">
-							<div class="mtext-102 cl2 p-b-15">
-								Tags
-							</div>
-
-							<div class="flex-w p-t-4 m-r--5">
-								<a href="#" class="flex-c-m stext-107 cl6 size-301 bor7 p-lr-15 hov-tag1 trans-04 m-r-5 m-b-5">
-									Fashion
-								</a>
-
-								<a href="#" class="flex-c-m stext-107 cl6 size-301 bor7 p-lr-15 hov-tag1 trans-04 m-r-5 m-b-5">
-									Lifestyle
-								</a>
-
-								<a href="#" class="flex-c-m stext-107 cl6 size-301 bor7 p-lr-15 hov-tag1 trans-04 m-r-5 m-b-5">
-									Denim
-								</a>
-
-								<a href="#" class="flex-c-m stext-107 cl6 size-301 bor7 p-lr-15 hov-tag1 trans-04 m-r-5 m-b-5">
-									Streetstyle
-								</a>
-
-								<a href="#" class="flex-c-m stext-107 cl6 size-301 bor7 p-lr-15 hov-tag1 trans-04 m-r-5 m-b-5">
-									Crafts
-								</a>
-							</div>
-						</div>
 					</div>
 				</div>
 			</div>
@@ -466,102 +331,68 @@
 				</a>
 			</div> -->
 
-        <div class="flex-c-m flex-w w-full p-t-45">
-            <nav class="inline-flex rounded-md shadow">
-				<% if(currentPage > 1) {%>
-                <a href="/userProductList?page=<%= currentPage - 1 %>" class="px-3 py-2 rounded-l-md border border-gray-300 bg-white text-gray-500 hover:bg-gray-50">&laquo; Previous</a>
-				<% } %>
-
-				<% for(let i =1; i<= totalPages;i++){ %>
-
-                <a href="/userProductList?page=<%= i %>" class= "px-3 py-2 border-t border-b border-gray-300 bg-white text-gray-700 hover:bg-gray-50"><%= i %></a>
-             
-				<% } %>
-			   <% if(currentPage < totalPages){%>
-				<a href="/userProductList?page=<%= currentPage + 1 %>" class="px-3 py-2 rounded-r-md border border-gray-300 bg-white text-gray-500 hover:bg-gray-50">Next &raquo;</a>
-            <% } %>
-			</nav>
-        </div> 
+			<div class="flex-c-m flex-w w-full p-t-45">
+				<nav class="inline-flex rounded-md shadow">
+					<% if(currentPage > 1) { %>
+					<a href="/search?page=<%= currentPage - 1 %><%= search ? '&search=' + search : '' %><%= currentFilter ? '&filter=' + currentFilter : '' %>" 
+					   class="px-3 py-2 rounded-l-md border border-gray-300 bg-white text-gray-500 hover:bg-gray-50">
+						&laquo; Previous
+					</a>
+					<% } %>
+			
+					<% for(let i = 1; i <= totalPages; i++) { %>
+					<a href="/search?page=<%= i %><%= search ? '&search=' + search : '' %><%= currentFilter ? '&filter=' + currentFilter : '' %>" 
+					   class="px-3 py-2 border-t border-b border-gray-300 bg-white text-gray-700 hover:bg-gray-50 <%= currentPage == i ? 'bg-blue-50' : '' %>">
+						<%= i %>
+					</a>
+					<% } %>
+			
+					<% if(currentPage < totalPages) { %>
+					<a href="/search?page=<%= currentPage + 1 %><%= search ? '&search=' + search : '' %><%= currentFilter ? '&filter=' + currentFilter : '' %>" 
+					   class="px-3 py-2 rounded-r-md border border-gray-300 bg-white text-gray-500 hover:bg-gray-50">
+						Next &raquo;
+					</a>
+					<% } %>
+				</nav>
+			</div>
 			
 		</div>
 
 </div>
 		<script>
 			let currentCategory = 'All';
-		
-			function filterProducts(category) {
-				if (currentCategory !== category) {
-					currentCategory = category;
-					window.location.replace('/userProductList/' + category);
-					
-				}else{
-					window.location.replace('/userProductList/All');
-				}
-			}
+
+function filterProducts(category) {
+    if (currentCategory !== category) {
+        currentCategory = category;
+        const searchParams = new URLSearchParams(window.location.search);
+        const search = searchParams.get('search') || '';
+        const filter = searchParams.get('filter') || '';
+        
+        let url = `/userProductList/${category}`;
+        if (search || filter) {
+            url += '?';
+            if (search) url += `search=${search}`;
+            if (filter) url += `${search ? '&' : ''}filter=${filter}`;
+        }
+        window.location.replace(url);
+    } else {
+        const searchParams = new URLSearchParams(window.location.search);
+        const search = searchParams.get('search') || '';
+        const filter = searchParams.get('filter') || '';
+        
+        let url = '/userProductList/All';
+        if (search || filter) {
+            url += '?';
+            if (search) url += `search=${search}`;
+            if (filter) url += `${search ? '&' : ''}filter=${filter}`;
+        }
+        window.location.replace(url);
+    }
+}
 		</script>
 
 
-<!-- 
-<script>
 
-	const searchInput = document.getElementById('searchBar');
-	
-
-	// function
-	const performSearch = (query)=>{
-		if(query){
-			$.ajax({
-				url:`/search?query=${query}`,
-				type:'GET',
-				dataType:'json',
-			   contentType:'application/json',
-
-	success:function(response){
-		if(response.success){
-			Swal.fire({
-				toast:true,
-				position:'center',
-				icon:'success',
-				title:response.message,
-				showConfirmButton:false,
-				timer:1500,
-				customClass:'center-toast',
-
-			})
-			.then(() =>{
-				window.location.href=response.redirectURL;
-				// ivde ninn redirect cheyth oru puthiya route aa route render with new data vech ath implement cheyyanam
-			})
-			// $('#body').load('/cart #body')
-		}
-	},
-	error:function(xhr,status,error){
-		Swal.fire({
-			toast: true,
-			position: 'center',
-			icon: 'error',
-			title: 'Error',
-			text: 'Error in finding the Product',
-			showConfirmButton: false,
-			timer: 1500,
-			customClass: 'center-toast',
-		});
-	}
-			})
-
-		}
-	}
-
-
-
-	const debouncedSearch = _.debounce((event) =>{
-		const query = event.target.value;
-		performSearch(query);
-	},300);
-
-
-	searchInput.addEventListener('input',debouncedSearch);
-</script>
-	 -->
 
     <%-include('../../views/partials/user/footer')  %>
