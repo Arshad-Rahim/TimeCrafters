@@ -3,6 +3,10 @@ const router = express.Router();
 
 const userController = require("../controllers/user/userController");
 const cartController = require('../controllers/user/cartController');
+const productController = require('../controllers/user/productController');
+const addressController = require('../controllers/user/addressController');
+const orderController = require('../controllers/user/orderController');
+
 const {userAuth} = require('../middleware/auth');
 const passport = require("passport");
 
@@ -15,14 +19,14 @@ router.get("/signup", userController.loadSignup);
 router.post("/signup", userController.signup);
 router.post("/verify-otp", userController.verifyOtpSignup);
 router.post("/resent-otp", userController.resentOtp);
-router.get('/userProductList',userController.getProductList);
 
-router.get('/search',userController.getSearchProduct);
 
-router.get('/productDetails/:id',userController.getProductDetails);
+router.get('/userProductList',productController.getProductList);
+router.get('/search',productController.getSearchProduct);
+router.get('/productDetails/:id',productController.getProductDetails);
 
 // category filtering
-router.get('/userProductList/:id',userController.getFilteredCategory);
+router.get('/userProductList/:id',productController.getFilteredCategory);
 
 
 // forgetPassword
@@ -39,20 +43,19 @@ router.post('/setNewPassword',userController.postPasswordEnter);
 router.get('/userProfile',userController.getUserProfile);
 router.post('/userProfile',userController.postUserProfile);
 
-router.get('/myAddress',userController.getMyAddress);
-
-router.get('/addAddress',userController.getAddAddress);
-router.post('/addAddress',userController.postAddAddress);
-
-router.get('/editAddress/:id',userController.getEditAddress);
-router.put('/editAddress/:id',userController.putEditAddress);
-router.delete('/deleteAddress/:id',userController.deleteAddress);
 
 
-router.get('/orderList',userAuth,userController.getOrderList);
-router.get('/orderDetails/:id',userAuth,userController.getOrderDetails);
-// Route in your routes file
-router.delete('/deleteOrderListProduct/:orderId/:productId', userController.deleteOrderListProduct);
+router.get('/myAddress',addressController.getMyAddress);
+router.get('/addAddress',addressController.getAddAddress);
+router.post('/addAddress',addressController.postAddAddress);
+router.get('/editAddress/:id',addressController.getEditAddress);
+router.put('/editAddress/:id',addressController.putEditAddress);
+router.delete('/deleteAddress/:id',addressController.deleteAddress);
+
+
+router.get('/orderList',userAuth,orderController.getOrderList);
+router.get('/orderDetails/:id',userAuth,orderController.getOrderDetails);
+router.delete('/deleteOrderListProduct/:orderId/:productId', orderController.deleteOrderListProduct);
 
 
 // cart
