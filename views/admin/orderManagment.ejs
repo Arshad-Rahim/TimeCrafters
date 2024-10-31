@@ -293,6 +293,7 @@ cancelButtonColor: '#d33',
 confirmButtonText:'Yes, remove it',
 
 }).then((result) =>{
+    
     if(result.isConfirmed){{
         deleteProductAjax(orderId,productId);
     }}
@@ -304,6 +305,7 @@ confirmButtonText:'Yes, remove it',
 
 function deleteProductAjax(orderId,productId){
 // commom api aaki aane cheythe
+
 $.ajax({
     url:`/deleteOrderListProduct/${orderId}/${productId}`,
     type:'DELETE',

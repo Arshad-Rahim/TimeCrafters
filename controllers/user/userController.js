@@ -1037,6 +1037,27 @@ order.items[itemIndex].orderStatus = 'Canceled';
 
   await order.save();
 
+  const colorQuantityMap = {
+    'gold':'goldenQuantity',
+    'black':'blackQuantity',
+    'silver':'silverQuantity',
+  }
+  const product = await Product.findOne({_id:productId});
+
+const cancelItem = order.items[itemIndex];
+  const colorQuantityField = colorQuantityMap[cancelItem.color];
+
+  if(!colorQuantityField){
+    return res.status(400).json({
+      success: false,
+      message: `Unsupported color in deleteOrderListProduct`,
+    });
+  }
+
+  product[colorQuantityField] = product[colorQuantityField] + cancelItem.quantity;
+
+await product.save();
+
   return res.status(200).json({
     success:true,
     message:'Order cancelled succesfully',
