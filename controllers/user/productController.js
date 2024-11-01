@@ -107,7 +107,7 @@ const getSearchProduct = async (req,res) =>{
    
     try {
   
-  console.log(req.query)
+  
       const search = req.query.search || "";
       const filter = req.query.filter || "lowToHigh";
       const page = req.query.page || 1;
