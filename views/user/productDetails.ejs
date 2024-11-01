@@ -5,10 +5,12 @@
 	<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 	<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 	<link href="https://cdn.jsdelivr.net/npm/@sweetalert2/theme-dark@4/dark.css" rel="stylesheet">
+	
   </head>
 <style>
 
 body {
+	
             font-family: Arial, sans-serif;
             margin: 20px;
         }
@@ -115,6 +117,7 @@ body {
       max-width: 100%;
       height: auto;
     }
+	
 </style>
 
 <!-- <script>
@@ -156,37 +159,33 @@ body {
 							<div class="wrap-slick3-arrows flex-sb-m flex-w"></div>
 
 							<div class="slick3 gallery-lb">
-								<div class="item-slick3" data-thumb="/uploads/re-image/<%= productDetails.productImage[0] %>">
-									<div class="pd_img wrap-pic-w pos-relative">
-										<img id="mainProductImage"  class="zoomImg" src="/uploads/re-image/<%= productDetails.productImage[0] %>" alt="IMG-PRODUCT">
+    <div class="item-slick3" data-thumb="/uploads/re-image/<%= productDetails.productImage[0] %>">
+        <div class="pd_img wrap-pic-w pos-relative">
+            <img class="zoomImg" data-index="0" src="/uploads/re-image/<%= productDetails.productImage[0] %>" alt="IMG-PRODUCT">
+            <a class="flex-c-m size-108 how-pos1 bor0 fs-16 cl10 bg0 hov-btn3 trans-04" href="/uploads/re-image/<%= productDetails.productImage[0] %>">
+                <i class="fa fa-expand"></i>
+            </a>
+        </div>
+    </div>
 
-										<a class="flex-c-m size-108 how-pos1 bor0 fs-16 cl10 bg0 hov-btn3 trans-04" href="/uploads/re-image/<%= productDetails.productImage[0] %>">
-											<i class="fa fa-expand"></i>
-										</a>
-									</div>
-								</div>
+    <div class="item-slick3" data-thumb="/uploads/re-image/<%= productDetails.productImage[3] %>">
+        <div class="wrap-pic-w pos-relative">
+            <img class="zoomImg" data-index="1" src="/uploads/re-image/<%= productDetails.productImage[3] %>" alt="IMG-PRODUCT">
+            <a class="flex-c-m size-108 how-pos1 bor0 fs-16 cl10 bg0 hov-btn3 trans-04" href="/uploads/re-image/<%= productDetails.productImage[3] %>">
+                <i class="fa fa-expand"></i>
+            </a>
+        </div>
+    </div>
 
-								<div class="item-slick3" data-thumb="/uploads/re-image/<%= productDetails.productImage[3] %>">
-									<div class="wrap-pic-w pos-relative">
-										<img  class="zoomImg" src="/uploads/re-image/<%= productDetails.productImage[3] %>" alt="IMG-PRODUCT">
-
-										<a class="flex-c-m size-108 how-pos1 bor0 fs-16 cl10 bg0 hov-btn3 trans-04" href="/uploads/re-image/<%= productDetails.productImage[3] %>">
-											<i class="fa fa-expand"></i>
-										</a>
-									</div>
-								</div>
-
-								<div class="item-slick3" data-thumb="/uploads/re-image/<%= productDetails.productImage[2] %>">
-									<div class="wrap-pic-w pos-relative">
-										<img  class="zoomImg" src="/uploads/re-image/<%= productDetails.productImage[2] %>" alt="IMG-PRODUCT">
-
-										<a class="flex-c-m size-108 how-pos1 bor0 fs-16 cl10 bg0 hov-btn3 trans-04" href="/uploads/re-image/<%= productDetails.productImage[2] %>">
-											<i class="fa fa-expand"></i>
-										</a>
-									</div>
-								</div>
-								
-							</div>	
+    <div class="item-slick3" data-thumb="/uploads/re-image/<%= productDetails.productImage[2] %>">
+        <div class="wrap-pic-w pos-relative">
+            <img class="zoomImg" data-index="2" src="/uploads/re-image/<%= productDetails.productImage[2] %>" alt="IMG-PRODUCT">
+            <a class="flex-c-m size-108 how-pos1 bor0 fs-16 cl10 bg0 hov-btn3 trans-04" href="/uploads/re-image/<%= productDetails.productImage[2] %>">
+                <i class="fa fa-expand"></i>
+            </a>
+        </div>
+    </div>
+</div>
 						</div>
 					</div>
 				</div>
@@ -511,15 +510,15 @@ body {
 //     zoomSize: 1000,
 // });
 
-$('.zoomImg').extm({
-  zoomElement: false,
-  squareOverlay: true,
-  imageSrc: $('#mainProductImage').attr('src'),
-  lazy: true,
-  zoomLevel: 1,
-  position: 'right',
-  zoomSize: 1000,
-});
+// $('.zoomImg').extm({
+//   zoomElement: false,
+//   squareOverlay: true,
+//   imageSrc: $('#mainProductImage').attr('src'),
+//   lazy: true,
+//   zoomLevel: 1,
+//   position: 'right',
+//   zoomSize: 1000,
+// });
 
 
 

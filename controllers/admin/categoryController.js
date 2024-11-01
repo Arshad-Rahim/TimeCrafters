@@ -37,8 +37,11 @@ const addCategory = async (req, res) => {
     const { categoryName, description } = req.body;
     
 
+const LowerCaseCategoryName = categoryName.trim().toLowerCase();
 
-    const existingCategory = await Category.findOne({ name:categoryName });
+    const existingCategory = await Category.findOne({
+       name:{$regex:new RegExp(`^${LowerCaseCategoryName}$`, 'i')} 
+      });
 
     if (existingCategory) {
       return res.status(400).json({
