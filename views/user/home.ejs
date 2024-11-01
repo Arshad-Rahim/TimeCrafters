@@ -2,6 +2,14 @@
 		<%-include('../../views/partials/user/header')  %>
 		<style>
 
+.indian-rupee::before {
+        content: "\20B9"; /* Unicode for Indian Rupee symbol */
+        font-family: Arial, sans-serif;
+        margin-right: 2px;
+        font-weight: 300; /* Light font weight */
+        color: #666; /* Lighter color */
+    }
+
 .regular-price {
   font-size: 14px;
   color: #666;
@@ -209,7 +217,7 @@
 
 						<div class="block2-txt flex-w flex-t p-t-14">
 							<div class="block2-txt-child1 flex-col-l ">
-								<a href="/productDetails?id=<%= product[i]._id %>" class="stext-104 cl4 hov-cl1 trans-04 js-name-b2 p-b-6">
+								<a href="/productDetails/<%= product[i]._id %>" class="stext-104 cl4 hov-cl1 trans-04 js-name-b2 p-b-6">
 									<%= product[i].productName %>
 								</a>
 
@@ -217,8 +225,8 @@
 									Rs: <%= product[i].salePrice %>
 								</span> -->
 								<span class="mtext-106 cl2">
-									<del class="regular-price">Rs: <%= product[i].regularPrice %></del>
-									<span class="sale-price">Rs: <%= product[i].salePrice %></span>
+									<del class="regular-price"><span class="indian-rupee"></span><%= product[i].regularPrice %></del>
+									<span class="sale-price"><span class="indian-rupee"></span> <%= product[i].salePrice %></span>
 								  </span>
 							</div>
 

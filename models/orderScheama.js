@@ -73,7 +73,9 @@ orderTotal:
 
 
 orderSchema.pre('save',function(next){
-    const total = this.items.reduce((acc,curr) => acc+curr.ProductTotal,0);
+    const total = this.items.reduce((acc,curr) =>{
+        return curr.orderStatus !== 'Canceled' ? acc + curr.ProductTotal : acc;
+    },0);
     this.orderTotal = total;
     next();
 })
