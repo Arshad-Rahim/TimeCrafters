@@ -188,12 +188,14 @@
                   </td>
                   <td>
                     <% if(brand.isBlocked==false){ %>   
-                    <button class="btn btn-danger">
-                      <a href="/admin/blockBrand?id=<%= brand._id%>">Block</a>
+                    <button class="btn btn-danger" onclick="confirmAction('<%= brand._id%>','block')">
+                      Block
+                      <!-- <a href="/admin/blockBrand?id=<%= brand._id%>">Block</a> -->
                     </button>
                     <% }else { %>
-                    <button class="btn btn-success">
-                      <a href="/admin/unBlockBrand?id=<%= brand._id %>">Unblock</a>
+                    <button class="btn btn-success" onclick="confirmAction('<%= brand._id %>','unBlock')">
+                      Unblock
+                      <!-- <a href="/admin/unBlockBrand?id=<%= brand._id %>">Unblock</a> -->
                     </button>
                     <% } %>
                     <button class="btn btn-danger"
@@ -250,3 +252,25 @@
 </script>
 
 <%-include('../partials/admin/footer') %>
+
+
+
+<script>
+
+  function confirmAction(brandId,action){
+    Swal.fire({
+      title:'Are you Sure?',
+      text:'Please click Sure To Proceed',
+      icon:'Warning',
+      showCancelButton: true,
+      cancelButtonColor: '#6c757d',
+      confirmButtonText:'Sure',
+      cancelButtonText:'Cancel',
+    }).then((result) =>{
+      if(result.isConfirmed){
+        window.location.href=`/admin/${action}Brand?id=${brandId}`
+                       
+      }
+    });
+  }
+</script>

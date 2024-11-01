@@ -41,6 +41,7 @@
           <th scope="col">Edit</th>
         </tr>
       </thead>
+      
       <tbody>
         <% for(let i=data.length-1;i>=0;i--){ %>
         <tr>
@@ -59,22 +60,12 @@
           </td>
           <td>
             <% if (!data[i].isBlocked) { %>
-            <button class="btn btn-danger btn-sm">
-              <a
-                href="/admin/blockProduct?id=<%= data[i]._id %>"
-                class="text-white"
-                style="text-decoration: none"
-                >List</a
-              >
+            <button class="btn btn-danger btn-sm" onclick="confirmAction('<%= data[i]._id %>', 'block')">
+              List
             </button>
             <% } else { %>
-            <button class="btn btn-success btn-sm">
-              <a
-                href="/admin/unBlockProduct?id=<%= data[i]._id %>"
-                class="text-white"
-                style="text-decoration: none"
-                >UnList</a
-              >
+            <button class="btn btn-success btn-sm" onclick="confirmAction('<%= data[i]._id %>', 'unblock')">
+              UnList
             </button>
             <% } %>
           </td>
@@ -100,3 +91,26 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/js/all.min.js"></script>
 
 <%- include("../../views/partials/admin/footer") %>
+
+
+<script>
+
+  function confirmAction (productId,action){
+
+    Swal.fire({
+      title:'Are you Sure?',
+      text:'Please click Sure To Proceed',
+      icon:'Warning',
+      showCancelButton: true,
+      cancelButtonColor: '#6c757d',
+      confirmButtonText:'Sure',
+      cancelButtonText:'Cancel',
+    }).then((result) =>{
+      if(result.isConfirmed){
+        window.location.href=`/admin/${action}Product?id=${productId}`
+                       
+      }
+    });
+
+  }
+</script>

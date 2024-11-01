@@ -147,7 +147,7 @@ const getAllProducts = async (req, res) => {
 const blockProduct = async (req, res) => {
   try {
     const { id } = req.query;
-    console.log(id);
+   
 
     await Product.updateOne({ _id: id }, { $set: { isBlocked: true } });
     return res.redirect("/admin/product");

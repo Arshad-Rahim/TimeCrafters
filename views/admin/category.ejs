@@ -62,13 +62,15 @@
                                             </td>
                                             <td>
                                                 <% if (category.isListed) { %>
-                                                    <button class="btn btn-danger btn-sm">
+                                                    <button class="btn btn-danger btn-sm" onclick="conformAction('<%=category._id%>','list')">
                                                         
-                                                        <a href="/admin/listCategory?id=<%=category._id%>" class="text-white" style="text-decoration: none;">List</a>
+                                                        List
+                                                        <!-- <a href="/admin/listCategory?id=<%=category._id%>" class="text-white" style="text-decoration: none;"></a> -->
                                                     </button>
                                                 <% } else { %>
-                                                    <button class="btn btn-success btn-sm">
-                                                        <a href="/admin/unListCategory?id=<%=category._id%>" class="text-white" style="text-decoration: none;">Unlist</a>
+                                                    <button class="btn btn-success btn-sm" onclick="conformAction('<%=category._id%>','unList')">
+                                                        Unlist
+                                                        <!-- <a href="/admin/unListCategory?id=<%=category._id%>" class="text-white" style="text-decoration: none;">Unlist</a> -->
                                                     </button>
                                                 <% } %>
                                             </td>
@@ -212,4 +214,30 @@ function clearErrorMessage(){
 }
 
 
+</script>
+
+
+
+<script>
+
+    function conformAction(categoryId,action){
+
+        Swal.fire({
+      title:'Are you Sure?',
+      text:'Please click Sure To Proceed',
+      icon:'Warning',
+      showCancelButton: true,
+      cancelButtonColor: '#6c757d',
+      confirmButtonText:'Sure',
+      cancelButtonText:'Cancel',
+    }).then((result) =>{
+      if(result.isConfirmed){
+        window.location.href=`/admin/${action}Category?id=${categoryId}`
+                       
+      }
+    });
+
+  }
+
+    
 </script>

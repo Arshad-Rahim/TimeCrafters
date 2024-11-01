@@ -64,9 +64,12 @@
                                         <% } %>
 
                                         <% if(item.orderStatus == 'Shipped') {%>
-                                            <span class="px-2 py-1 bg-orange-100 text-red-800 rounded-full text-sm">Shipped</span>
+                                            <span class="px-2 py-1 bg-orange-100 text-orange-800 rounded-full text-sm">Shipped</span>
                                             <% } %>
-                                    <% if(item.orderStatus !== 'Canceled'  && item.productId){ %>
+                                            <% if(item.orderStatus == 'Delivered') {%>
+                                                <span class="px-2 py-1 bg-green-100 text-green-800 rounded-full text-sm">Delivered</span>
+                                                <% } %>
+                                    <% if(item.orderStatus !== 'Canceled' && item.orderStatus !== 'Delivered'  && item.productId){ %>
 
                                     <button onclick="cancel(event,'<%= order._id%>','<%=item.productId._id%>')" class="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600 transition duration-300">Cancel</button>
                                     <button class="px-3 py-1 bg-gray-200 text-gray-800 rounded hover:bg-gray-300 transition duration-300">Invoice</button>

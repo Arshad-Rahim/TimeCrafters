@@ -80,12 +80,14 @@
                     </td>
                     <td>
                         <% if (!data[i].isBlocked) { %>
-                            <button class="btn btn-danger btn-sm">
-                                <a href="/admin/blockUser?id=<%= data[i]._id %>" class="text-white" style="text-decoration: none;">Block</a>
+                            <button class="btn btn-danger btn-sm" onclick="confirmAction('<%= data[i]._id %>','block')">
+                                Block
+                                <!-- <a href="/admin/blockUser?id=<%= data[i]._id %>" class="text-white" style="text-decoration: none;">Block</a> -->
                             </button>
                         <% } else { %>
-                            <button class="btn btn-success btn-sm">
-                                <a href="/admin/unblockUser?id=<%= data[i]._id %>" class="text-white" style="text-decoration: none;">Unblock</a>
+                            <button class="btn btn-success btn-sm" onclick="confirmAction('<%= data[i]._id %>','unblock')">
+                                Unblock
+                                <!-- <a href="/admin/unblockUser?id=<%= data[i]._id %>" class="text-white" style="text-decoration: none;">Unblock</a> -->
                             </button>
                         <% } %>
                     </td>
@@ -100,3 +102,26 @@
   
 
 <%- include("../../views/partials/admin/footer") %>
+
+
+<script>
+
+
+    function confirmAction(Id,action){
+        Swal.fire({
+      title:'Are you Sure?',
+      text:'Please click Sure To Proceed',
+      icon:'Warning',
+      showCancelButton: true,
+      cancelButtonColor: '#6c757d',
+      confirmButtonText:'Sure',
+      cancelButtonText:'Cancel',
+    }).then((result) =>{
+      if(result.isConfirmed){
+        window.location.href=`/admin/${action}User?id=${Id}`
+
+                       
+      }
+    });
+    }
+</script>
