@@ -24,35 +24,7 @@ const pageNotFound = async (req,res) =>{
 };
 
 
-const loadHome = async (req, res) => {
-  try {
-    const user = req.session.user;
-    
-    
-    const categories = await Category.find({isListed:true});
-    
 
-    const productData = await Product.find({
-      isBlocked: false,
-      category: { $in: categories.map(category => category._id) }
-    }).sort({ createdOn: -1 }).limit(8); 
-
-   
-
-
-    if(user){
-      const userData = await User.findOne({_id:user._id});
-     
-      return res.render("home",{user:userData , product:productData,cat:categories});
-    }else{
-      return res.render('home',{product:productData});
-    }
-    
-  } catch (error) {
-    console.log("Home page  not found");
-    res.status(500).send("Server error");
-  }
-};
 
 
 
@@ -74,10 +46,51 @@ const Loadlogin = async (req, res) => {
 };
 
 
+const loadHome = async (req, res) => {
+  try {
+    const user = req.session.user;
+    const userData = await User.findOne({_id:user});
+    
+    const categories = await Category.find({isListed:true});
+    
+
+    const productData = await Product.find({
+      isBlocked: false,
+      category: { $in: categories.map(category => category._id) }
+    }).sort({ createdOn: -1 }).limit(8); 
+
+     
+ 
+
+    if(userData){
+      if(userData.isBlocked){
+        req.flash('error_msg',"User is blocked by the admin")
+        return res.render('login', {
+          error_msg: req.flash('error_msg'),
+          success_msg: req.flash('success_msg')
+        });
+       }else{
+        return res.render("home",{user:userData , product:productData,cat:categories});
+       }
+    
+     
+     
+    }else{
+      return res.render('home',{product:productData});
+    }
+    
+  } catch (error) {
+    console.log("Home page  not found");
+    res.status(500).send("Server error");
+  }
+};
+
+
 
 const login = async(req,res) =>{
   try {
    
+    
     const {email,password} = req.body;
     
 
@@ -113,6 +126,7 @@ const login = async(req,res) =>{
 
 const loadSignup = async(req,res) =>{
     try{
+      
         return res.render('signup');
     }
     catch(error){
