@@ -5,12 +5,17 @@ const User = require('../../models/userSchema');
 const getOrderManagment = async(req,res) =>{
     try {
 
-        const order = await Order.find()
+        if(req.session.admin){
+            const order = await Order.find()
         .populate('userId')
         .sort({createdAt:-1});
 
 
         return res.render('orderManagment',{order});
+        }else{
+            return res.redirect('/admin/login');
+        }
+        
 
         
     } catch (error) {
