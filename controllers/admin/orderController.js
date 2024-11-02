@@ -13,7 +13,7 @@ const getOrderManagment = async(req,res) =>{
 
         return res.render('orderManagment',{order});
         }else{
-            return res.redirect('/admin/login');
+            return res.redirect('/admin/adminLogin');
         }
         
 
