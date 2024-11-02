@@ -35,7 +35,6 @@
           <th scope="col">Category</th>
           <th scope="col">Sale Price</th>
           <th scope="col">Offer Price</th>
-          <th scope="col">Quantity</th>
           <th scope="col">Status</th>
           <th scope="col">Action</th>
           <th scope="col">Edit</th>
@@ -50,7 +49,6 @@
           <td><%= data[i].category.name %></td>
           <td><%= data[i].regularPrice %></td>
           <td><%= data[i].salePrice %></td>
-          <td><%= data[i].quantity %></td>
           <td>
             <% if (!data[i].isBlocked) { %>
             <span class="badge bg-success">Active</span>

@@ -89,5 +89,9 @@ router.get(
   }
 );
 
+
+
+router.get('/logout',userAuth,userController.logout);
+
 module.exports = router;
  

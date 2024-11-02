@@ -530,6 +530,24 @@ const postUserProfile = async(req,res) =>{
 
 
 
+const logout = async(req,res) =>{
+  try {
+
+    if(req.session.user){
+      req.session.destroy();
+      return res.redirect('/');
+    }else{
+      return res.redirect('/login');
+    }
+    
+  } catch (error) {
+    console.log('Error in logout',error);
+  }
+}
+
+
+
+
 module.exports = {
   loadHome,
   Loadlogin,
@@ -546,5 +564,6 @@ module.exports = {
   postPasswordEnter,
   getUserProfile,
   postUserProfile,
+  logout,
 
 };

@@ -252,10 +252,10 @@
         <div class="form-group">
           <label for="addressType" class="form-label">Address Type</label>
           <select name="addressType" id="addressType" class="form-control">
-            <option value="" disabled selected>Select address type</option>
-            <option value="home">Home</option>
-            <option value="work">Work</option>
-            <option value="other">Other</option>
+            <option value="" disabled>Select address type</option>
+            <option value="home" <%= address.addressType === 'home' ? 'selected' : '' %>>Home</option>
+            <option value="work" <%= address.addressType === 'work' ? 'selected' : '' %>>Work</option>
+            <option value="other" <%= address.addressType === 'other' ? 'selected' : '' %>>Other</option>
           </select>
           <div id="addressType-error" class="error-message"></div>
         </div>
@@ -417,7 +417,7 @@
     if (zipCode.trim() === "") {
       displayErrorMessage("zipCode-error", "Please enter a zipCode.");
       isValid = false;
-    } else if (!/^\d{5}(-\d{4})?$/.test(zipCode.trim())) {
+    } else if (!/^\d{6}(-\d{4})?$/.test(zipCode.trim())) {
       displayErrorMessage(
         "zipCode-error",
         "Zip code should be a 5-digit number, optionally followed by a hyphen and 4 additional digits (e.g., 12345 or 12345-6789)."
