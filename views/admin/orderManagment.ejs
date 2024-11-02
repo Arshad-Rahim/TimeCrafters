@@ -17,6 +17,13 @@
       body {
           font-family: 'Poppins', sans-serif;
       }
+      .indian-rupee::before {
+        content: "\20B9"; /* Unicode for Indian Rupee symbol */
+        font-family: Arial, sans-serif;
+        margin-right: 2px;
+        font-weight: 300; /* Light font weight */
+        color: #666; /* Lighter color */
+    }
       .modal {
           display: none;
           position: fixed;
@@ -59,7 +66,9 @@
                     <tr>
                      
                         <td class="px-6 py-4 whitespace-nowrap"><%= order._id %></td>
-                        <td class="px-6 py-4 whitespace-nowrap"><%= order.userId.name %></td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <%= order.userId ? order.userId.name : 'Deleted User' %>
+                        </td>
                         <td class="px-6 py-4">
                             <% order.items.forEach(item =>{%>
                             <div class="mb-4">
@@ -71,9 +80,9 @@
                                             <option>Pending</option>
                                             <option>Shipped</option>
                                             <option>Delivered</option>
-                                            <option selected>Cancelled</option>
+                                            <option selected>Canceled</option>
                                         </select>
-                                        <span class="bg-red-100 text-red-800 px-3 py-1 rounded">Cancelled</span>
+                                        <span class="bg-red-100 text-red-800 px-3 py-1 rounded">Canceled</span>
                                     </div>
                                     <%}else{%>
 
@@ -85,7 +94,7 @@
                         <option value="Pending" <%= item.orderStatus === 'Pending' ? 'selected' : '' %>>Pending</option>
                         <option value="Shipped" <%= item.orderStatus === 'Shipped' ? 'selected' : '' %>>Shipped</option>
                         <option value="Delivered" <%= item.orderStatus === 'Delivered' ? 'selected' : '' %>>Delivered</option>
-                        <option value="Cancelled" <%= item.orderStatus === 'Cancelled' ? 'selected' : '' %>>Cancelled</option>
+                        <option value="Canceled" <%= item.orderStatus === 'Canceled' ? 'selected' : '' %>>Canceled</option>
                                     </select>
                                     <button onclick="cancel(event,'<%= order._id%>','<%=item.productId._id%>')"  class="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 transition duration-300">Cancel</button>
                                 </div>
@@ -94,7 +103,7 @@
                             <% }) %>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap"><%= order.createdAt.toLocaleDateString() %></td>
-                        <td class="px-6 py-4 whitespace-nowrap"><%= order.orderTotal %></td>
+                        <td class="px-6 py-4 whitespace-nowrap"><span class="indian-rupee"></span><%= order.orderTotal %></td>
                         <td class="px-6 py-4 whitespace-nowrap">
                             <button onclick="showOrderDetails('<%=order._id%>')" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition duration-300">Order Details</button>
                         </td>
@@ -125,7 +134,9 @@
                     <div>
                         <h3 class="font-semibold mb-2">Shipping Address</h3>
                         <p class="text-sm">
-                            <%= order.userId.name %><br>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <%= order.userId ? order.userId.name : 'Deleted User' %>
+                            </td><br>
                             <%= order.shippingAddress.houseName %><br>
                             <%= order.shippingAddress.state %><br>
                             Pin Code - <%= order.shippingAddress.zipCode %><br>
@@ -142,15 +153,15 @@
                         <table class="w-full text-sm">
                             <tr>
                                 <td>Total</td>
-                                <td class="text-right"><%= order.orderTotal %></td>
+                                <td class="text-right"><span class="indian-rupee"></span><%= order.orderTotal %></td>
                             </tr>
                             <tr>
                                 <td>Delivery Charge</td>
-                                <td class="text-right">0</td>
+                                <td class="text-right"><span class="indian-rupee"></span>0</td>
                             </tr>
                             <tr class="font-semibold">
                                 <td>Grand Total</td>
-                                <td class="text-right"><%= order.orderTotal + 0 %></td>
+                                <td class="text-right"><span class="indian-rupee"></span><%= order.orderTotal + 0 %></td>
                             </tr>
                         </table>
                     </div>
@@ -163,7 +174,7 @@
                             <div>
                                 <h4 class="font-semibold"><%= item.ProductName %></h4>
                                 <p class="text-sm">
-                                    Price: <%= item.ProductTotal %>
+                                    Price: <span class="indian-rupee"></span><%= item.ProductTotal %>
                                 </p>
                                 <% if(item.orderStatus =="Pending"){ %>
                                 <p class="text-sm text-orange-600 font-medium">Status: <%= item.orderStatus %></p>
@@ -240,7 +251,7 @@
 
 
 <script>
-    // Function to show modal for specific order
+    
     function showOrderDetails(orderId) {
         const modal = document.getElementById(`orderDetailsModal-${orderId}`);
         if (modal) {
@@ -298,7 +309,7 @@ confirmButtonText:'Yes, remove it',
 
 
 function deleteProductAjax(orderId,productId){
-// commom api aaki aane cheythe
+
 
 $.ajax({
     url:`/deleteOrderListProduct/${orderId}/${productId}`,

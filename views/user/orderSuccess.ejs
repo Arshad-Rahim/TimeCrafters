@@ -8,6 +8,13 @@
             background-color: #ffffff;
             color: #333333;
         }
+        .indian-rupee::before {
+        content: "\20B9"; /* Unicode for Indian Rupee symbol */
+        font-family: Arial, sans-serif;
+        margin-right: 2px;
+        font-weight: 300; /* Light font weight */
+        color: #666; /* Lighter color */
+    }
     </style></head>
   
 <body class="min-h-screen flex flex-col">
@@ -42,9 +49,9 @@
                                 <td class="px-4 py-2"><%= order.items[i].ProductName %></td>
                                 <td class="px-4 py-2"><%= order.items[i].color%></td>
                                 <td class="px-4 py-2"><%= order.items[i].quantity %></td>
-                                <td class="px-4 py-2"><%= cart.items[i].regularPrice * order.items[i].quantity  %></td>
-                                <td class="px-4 py-2"><%= (cart.items[i].regularPrice - cart.items[i].salePrice)* order.items[i].quantity %></td>
-                                <td class="px-4 py-2"><%= cart.items[i].salePrice * order.items[i].quantity %></td>
+                                <td class="px-4 py-2"><span class="indian-rupee"></span><%= cart.items[i].regularPrice * order.items[i].quantity  %></td>
+                                <td class="px-4 py-2"><span class="indian-rupee"></span><%= (cart.items[i].regularPrice - cart.items[i].salePrice)* order.items[i].quantity %></td>
+                                <td class="px-4 py-2"><span class="indian-rupee"></span><%= cart.items[i].salePrice * order.items[i].quantity %></td>
                             </tr>
                             <% } %>
 
@@ -73,15 +80,15 @@
                     <h2 class="text-2xl font-semibold mb-4">Order Summary</h2>
                     <div class="flex justify-between mb-2">
                         <span>Subtotal:</span>
-                        <span><%= order.orderTotal %></span>
+                        <span><span class="indian-rupee"></span><%= order.orderTotal %></span>
                     </div>
                     <div class="flex justify-between mb-2">
                         <span>Delivery Charge:</span>
-                        <span>₹40</span>
+                        <span><span class="indian-rupee"></span>0</span>
                     </div>
                     <div class="flex justify-between font-semibold text-lg mt-4 pt-4 border-t border-gray-700">
                         <span>Grand Total:</span>
-                        <span><%= order.orderTotal + 40 %></span>
+                        <span><span class="indian-rupee"></span><%= order.orderTotal + 0 %></span>
                     </div>
                 </div>
             </div>
