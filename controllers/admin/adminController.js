@@ -11,9 +11,9 @@ const loadLogin = async (req, res) => {
   try {
     if (req.session.admin) {
       return res.redirect("/admin");
+    } else {
+      return res.render("adminLogin");
     }
-
-    return res.render("adminLogin");
   } catch (error) {
     console.log("error in loadind admin loging page", error);
     return res.redirect("/admin/adminLogin");
@@ -43,11 +43,7 @@ const login = async (req, res) => {
 
 const loadDashboard = async (req, res) => {
   try {
-    if (req.session.admin) {
-      return res.render("dashboard");
-    } else {
-      return res.redirect("/admin/adminLogin");
-    }
+    return res.render("dashboard");
   } catch (error) {
     console.log("Error to load Dashboard", error);
   }
@@ -63,7 +59,7 @@ const logout = async (req, res) => {
       }
     });
   } catch (err) {
-    console.log("unexpected error during the logout",err);
+    console.log("unexpected error during the logout", err);
   }
 };
 

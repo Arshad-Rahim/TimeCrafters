@@ -2,6 +2,9 @@ const User = require('../models/userSchema');
 
 
 const userAuth = (req,res,next) =>{
+
+
+   
     if(req.session.user){
         User.findById(req.session.user)
         .then(data =>{
@@ -29,20 +32,18 @@ const userAuth = (req,res,next) =>{
 
 const adminAuth = (req,res,next) =>{
    
-    User.findOne({isAdmin:true})
-    .then(data =>{
-        
-        if(data){
-            next();
-        }else{
-            
-            return res.redirect('/admin/adminLogin');
-        }
-    })
-    .catch(error =>{
-        console.log('Error in admin auth middleware');
-        res.status(500).send('inernal server error');
-    })
+try {
+    if(req.session.admin){
+        next();
+    }else{
+        return res.redirect('/admin/adminLogin');
+    }
+    
+} catch (error) {
+    console.log('Error in the adminAuth middleware',error);
+}
+
+
 }
 
 module.exports={

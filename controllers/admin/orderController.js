@@ -1,78 +1,58 @@
-const Order = require('../../models/orderScheama');
-const User = require('../../models/userSchema');
+const Order = require("../../models/orderScheama");
+const User = require("../../models/userSchema");
 
+const getOrderManagment = async (req, res) => {
+  try {
+    const order = await Order.find().populate("userId").sort({ createdAt: -1 });
 
-const getOrderManagment = async(req,res) =>{
-    try {
+    return res.render("orderManagment", { order });
+  } catch (error) {
+    console.log("Error in getOrderManagment", error);
+  }
+};
 
-        if(req.session.admin){
-            const order = await Order.find()
-        .populate('userId')
-        .sort({createdAt:-1});
+const updateStatus = async (req, res) => {
+  try {
+    let { orderId, productId } = req.params;
 
+    const { status } = req.body;
 
-        return res.render('orderManagment',{order});
-        }else{
-            return res.redirect('/admin/adminLogin');
-        }
-        
+    const order = await Order.findOne({ _id: orderId });
 
-        
-    } catch (error) {
-        console.log('Error in getOrderManagment',error);
+    const itemIndex = order.items.findIndex(
+      (item) => item.productId.toString() == productId
+    );
+
+    if (itemIndex == -1) {
+      return res.status(400).json({
+        success: false,
+        message: "item not found in the order",
+      });
     }
-}
 
+    order.items[itemIndex].orderStatus = status;
 
-const updateStatus = async(req,res) =>{
-    try {
+    await order.save();
 
-        let {orderId,productId} = req.params;
+    return res.status(200).json({
+      success: true,
+      message: "Order status changed Succesfully",
+    });
+  } catch (error) {
+    console.log("Error in updateStatus", error);
+  }
+};
 
-        const {status} = req.body;
+const getPopUpOrderDetails = async (req, res) => {
+  try {
+    return res.render("popUpProductDetails");
+  } catch (error) {
+    console.log("Error in getPopUpOrderDetails", error);
+  }
+};
 
-
-        const order = await Order.findOne({_id:orderId});
-
-        const itemIndex = order.items.findIndex(item => item.productId.toString() == productId);
-
-
-
-        if(itemIndex == -1){
-            return res.status(400).json({
-              success:false,
-              message:'item not found in the order',
-            })
-          }
-
-          order.items[itemIndex].orderStatus = status;
-
-          await order.save();
-
-          return res.status(200).json({
-            success:true,
-            message:'Order status changed Succesfully',
-          })
-        
-    } catch (error) {
-        console.log("Error in updateStatus",error);
-    }
-}
-
-
-const getPopUpOrderDetails = async(req,res) =>{
-    try {
-
-        return res.render('popUpProductDetails');
-        
-    } catch (error) {
-        console.log('Error in getPopUpOrderDetails',error);
-    }
-}
-
-module.exports={
-
-    getOrderManagment,
-    updateStatus,
-    getPopUpOrderDetails,
-}
+module.exports = {
+  getOrderManagment,
+  updateStatus,
+  getPopUpOrderDetails,
+};

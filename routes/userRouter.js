@@ -40,7 +40,7 @@ router.post('/setNewPassword',userController.postPasswordEnter);
 
 // userProfile
 
-router.get('/userProfile',userController.getUserProfile);
+router.get('/userProfile',userAuth,userController.getUserProfile);
 router.post('/userProfile',userController.postUserProfile);
 
 
