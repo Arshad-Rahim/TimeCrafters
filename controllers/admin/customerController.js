@@ -16,27 +16,28 @@ const customerInfo = async (req, res) => {
         }
         const limit = 0;
 
-        const userData = await User.find({
-            isAdmin: false,
-            $or: [
-                { name: { $regex: '.*' + search + '.*' } },
-                { email: { $regex: '.*' + search + '.*' } },
+        const [userData,count] = await Promise.all([
+            User.find({
+                isAdmin: false,
+                $or: [
+                    { name: { $regex: '.*' + search + '.*' } },
+                    { email: { $regex: '.*' + search + '.*' } },
+    
+                ],
+            })
+                .limit(limit * 1)
+                .skip((page - 1) * limit)
+                .exec(),
+                User.find({
+                    isAdmin: false,
+                    $or: [
+                        { name: { $regex: '.*' + search + '.*' } },
+                        { email: { $regex: '.*' + search + '.*' } },
+        
+                    ]
+                }).countDocuments(),
+        ])
 
-            ],
-        })
-            .limit(limit * 1)
-            .skip((page - 1) * limit)
-            .exec();
-
-
-        const count = await User.find({
-            isAdmin: false,
-            $or: [
-                { name: { $regex: '.*' + search + '.*' } },
-                { email: { $regex: '.*' + search + '.*' } },
-
-            ]
-        }).countDocuments();
 
         const totalPages = Math.ceil(count / limit);
 

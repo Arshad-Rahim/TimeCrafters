@@ -38,16 +38,17 @@ const Loadlogin = async (req, res) => {
 const loadHome = async (req, res) => {
   try {
     const user = req.session.user;
-    const userData = await User.findOne({ _id: user });
-
-    const categories = await Category.find({ isListed: true });
-
-    const productData = await Product.find({
-      isBlocked: false,
-      category: { $in: categories.map((category) => category._id) },
-    })
-      .sort({ createdOn: -1 })
-      .limit(8);
+const categories = await  Category.find({ isListed: true });
+    const [userData,productData] = await Promise.all([
+      User.findOne({ _id: user }),
+      Product.find({
+        isBlocked: false,
+        category: { $in: categories.map((category) => category._id) },
+      })
+        .sort({ createdOn: -1 })
+        .limit(8),
+    ])
+   
 
     if (userData) {
       if (userData.isBlocked) {

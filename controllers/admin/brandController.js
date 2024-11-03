@@ -6,22 +6,19 @@ const getBrandPage = async (req, res) => {
     const limit = 3;
     const skip = (page - 1) * limit;
 
-    const brandData = await Brand.find({})
-      .sort({ createdAt: -1 })
-      .skip(skip)
-      .limit(limit);
+    const [brandData, totalBrands] = await Promise.all([
+      Brand.find({}).sort({ createdAt: -1 }).skip(skip).limit(limit),
+      Brand.countDocuments(),
+    ]);
 
-    const totalBrands = await Brand.countDocuments();
     const totalPages = Math.ceil(totalBrands / limit);
 
-
-      return res.render("brands", {
-        data: brandData,
-        currentPage: page,
-        totalPages: totalPages,
-        totalBrands: totalBrands,
-      });
-  
+    return res.render("brands", {
+      data: brandData,
+      currentPage: page,
+      totalPages: totalPages,
+      totalBrands: totalBrands,
+    });
   } catch (error) {
     console.error("Error to rendering brands", error);
     return res.status(500).send("Server error");
@@ -86,8 +83,7 @@ const getEditBrand = async (req, res) => {
     const id = req.query.id;
     const brand = await Brand.findOne({ _id: id });
 
-      return res.render("editBrand", { brand: brand });
-    
+    return res.render("editBrand", { brand: brand });
   } catch (error) {
     console.error("Error to rendering editing brand page", error);
   }

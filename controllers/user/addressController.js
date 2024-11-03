@@ -72,8 +72,14 @@ const getEditAddress = async (req, res) => {
   try {
     const id = req.params.id;
     const userId = req.session.user;
-    const userData = await User.findOne({ _id: userId });
-    const address = await Address.findOne({ _id: id });
+    // instead of multiple await we can use promise all to reduce the time complexity
+    // const userData = await User.findOne({_id:userId});
+    // const address = awiat Address.findOne({_id:id});
+    // instead of the two above await we can reduce it to await into one await using promise
+    const [userData,address] = await Promise.all([
+      User.findOne({ _id: userId }),
+      Address.findOne({ _id: id }),
+    ])
 
     return res.render("editAddress", { userData, address });
   } catch (error) {

@@ -6,11 +6,14 @@ const User = require("../../models/userSchema");
 const getOrderList = async (req, res) => {
   try {
     const userId = req.session.user;
-    const cart = await Cart.findOne({ userId });
-    const orders = await Order.find({ userId })
-      .sort({ createdAt: -1 })
-      .populate("userId")
-      .populate("items.productId");
+    const [cart, orders] = await Promise.all([
+      Cart.findOne({ userId }),
+      Order.find({ userId })
+        .sort({ createdAt: -1 })
+        .populate("userId")
+        .populate("items.productId"),
+    ]);
+
     return res.render("orderList", { orders: orders, cart });
   } catch (error) {
     console.log("Error in getOrderList", error);
@@ -23,11 +26,12 @@ const getOrderDetails = async (req, res) => {
     const { id } = req.params;
 
     // let promise = Promise.all()
-
-    const cart = await Cart.findOne({ userId });
-    const findOrder = await Order.findOne({ _id: id })
-      .sort({ createdAt: -1 })
-      .populate("items.productId");
+    const [cart, findOrder] = await Promise.all([
+      Cart.findOne({ userId }),
+      Order.findOne({ _id: id })
+        .sort({ createdAt: -1 })
+        .populate("items.productId"),
+    ]);
 
     return res.render("orderDetails", { order: findOrder, cart });
   } catch (error) {

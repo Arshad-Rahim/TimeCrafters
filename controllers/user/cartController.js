@@ -231,12 +231,15 @@ const putQuantity = async (req, res) => {
 const getCheckOut = async (req, res) => {
   try {
     const userId = req.session.user;
-    const address = await Address.find({ userId });
 
-    const cart = await Cart.findOne({ userId }).populate({
-      path: "items.productId",
-      select: "productName salePrice productImage",
-    });
+    // instead of multople await using promise to solve with single await
+    const [address, cart] = await Promise.all([
+      Address.find({ userId }),
+      Cart.findOne({ userId }).populate({
+        path: "items.productId",
+        select: "productName salePrice productImage",
+      }),
+    ]);
 
     const cartCalculation = {
       basePrice: cart.items.reduce(
@@ -365,10 +368,13 @@ const postOrderSuccess = async (req, res) => {
 const getOrderSuccess = async (req, res) => {
   try {
     const userId = req.session.user;
-    const cart = await Cart.findOne({ userId });
-    const findOrder = await Order.findOne({ userId })
-      .sort({ createdAt: -1 })
-      .populate("items.productId");
+
+    const [cart, findOrder] = await Promise.all([
+      Cart.findOne({ userId }),
+      Order.findOne({ userId })
+        .sort({ createdAt: -1 })
+        .populate("items.productId"),
+    ]);
 
     return res.render("orderSuccess", { order: findOrder, cart });
   } catch (error) {

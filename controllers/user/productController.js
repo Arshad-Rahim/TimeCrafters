@@ -29,31 +29,34 @@ const getProductList = async (req, res) => {
       }
     }
 
-    const totalProducts = await Product.find({
-      $or: [
-        { productName: { $regex: new RegExp(".*" + search + ".*", "i") } },
-        { brand: { $regex: new RegExp(".*" + search + ".*", "i") } },
-      ],
-    }).countDocuments();
-
-    const totalPages = Math.ceil(totalProducts / limit);
-
-    const user = req.session.user;
     const categories = await Category.find({ isListed: true });
 
-    const productData = await Product.find({
-      $or: [
-        { productName: { $regex: new RegExp(".*" + search + ".*", "i") } },
-        { brand: { $regex: new RegExp(".*" + search + ".*", "i") } },
-      ],
-      isBlocked: false,
-      category: { $in: categories.map((category) => category._id) },
-    })
-      .populate("category")
-      .sort(getSortObject(filter))
-      .skip(skip)
-      .limit(limit);
-    const brand = await Brand.find({ isBlocked: false });
+    const [totalProducts, productData, brand] = await Promise.all([
+      Product.find({
+        $or: [
+          { productName: { $regex: new RegExp(".*" + search + ".*", "i") } },
+          { brand: { $regex: new RegExp(".*" + search + ".*", "i") } },
+        ],
+      }).countDocuments(),
+
+      Product.find({
+        $or: [
+          { productName: { $regex: new RegExp(".*" + search + ".*", "i") } },
+          { brand: { $regex: new RegExp(".*" + search + ".*", "i") } },
+        ],
+        isBlocked: false,
+        category: { $in: categories.map((category) => category._id) },
+      })
+        .populate("category")
+        .sort(getSortObject(filter))
+        .skip(skip)
+        .limit(limit),
+
+      Brand.find({ isBlocked: false }),
+    ]);
+
+    const totalPages = Math.ceil(totalProducts / limit);
+    const user = req.session.user;
     if (categories && brand) {
       if (user) {
         const userData = await User.findOne({ _id: user._id });
@@ -116,25 +119,28 @@ const getSearchProduct = async (req, res) => {
       }
     }
 
-    const productData = await Product.find({
-      $or: [
-        { productName: { $regex: new RegExp(".*" + search + ".*", "i") } },
-        { brand: { $regex: new RegExp(".*" + search + ".*", "i") } },
-      ],
-    })
-      .sort(getSortObject(filter))
-      .limit(limit * 1)
-      .skip((page - 1) * limit)
-      .populate("category")
-      .exec();
-    const count = await Product.find({
-      $or: [
-        { productName: { $regex: new RegExp(".*" + search + ".*", "i") } },
-        { brand: { $regex: new RegExp(".*" + search + ".*", "i") } },
-      ],
-    }).countDocuments();
     const category = await Category.find({ isListed: true });
-    const brand = await Brand.find({ isBlocked: false });
+
+    const [productData, count, brand] = await Promise.all([
+      Product.find({
+        $or: [
+          { productName: { $regex: new RegExp(".*" + search + ".*", "i") } },
+          { brand: { $regex: new RegExp(".*" + search + ".*", "i") } },
+        ],
+      })
+        .sort(getSortObject(filter))
+        .limit(limit * 1)
+        .skip((page - 1) * limit)
+        .populate("category")
+        .exec(),
+      Product.find({
+        $or: [
+          { productName: { $regex: new RegExp(".*" + search + ".*", "i") } },
+          { brand: { $regex: new RegExp(".*" + search + ".*", "i") } },
+        ],
+      }).countDocuments(),
+      Brand.find({ isBlocked: false }),
+    ]);
 
     if (category && brand) {
       return res.render("userProductList", {
@@ -159,19 +165,19 @@ const getSearchProduct = async (req, res) => {
 const getProductDetails = async (req, res) => {
   try {
     const id = req.params.id;
-    const productDetails = await Product.findById({ _id: id }).populate(
-      "category"
-    );
-
-    const user = req.session.user;
     const categories = await Category.find({ isListed: true });
 
-    const productData = await Product.find({
-      isBlocked: false,
-      category: { $in: categories.map((category) => category._id) },
-    })
-      .populate("category")
-      .sort({ createdAt: -1 });
+    const [productDetails, productData] = await Promise.all([
+      Product.findById({ _id: id }).populate("category"),
+      Product.find({
+        isBlocked: false,
+        category: { $in: categories.map((category) => category._id) },
+      })
+        .populate("category")
+        .sort({ createdAt: -1 }),
+    ]);
+
+    const user = req.session.user;
 
     if (user) {
       const userData = await User.findOne({ _id: user._id });
@@ -234,17 +240,19 @@ const getFilteredCategory = async (req, res) => {
       query.category = categoryId;
     }
 
-    const totalProducts = await Product.countDocuments(query);
-    const totalPages = Math.ceil(totalProducts / limit);
-
-    const product = await Product.find(query)
-      .populate("category")
-      .sort(getSortObject(filter))
-      .skip(skip)
-      .limit(limit);
-
     const categories = await Category.find({ isListed: true });
-    const brand = await Brand.find({ isBlocked: false });
+
+    const [totalProducts, product, brand] = await Promise.all([
+      Product.countDocuments(query),
+      Product.find(query)
+        .populate("category")
+        .sort(getSortObject(filter))
+        .skip(skip)
+        .limit(limit),
+      Brand.find({ isBlocked: false }),
+    ]);
+
+    const totalPages = Math.ceil(totalProducts / limit);
 
     return res.render("userProductList", {
       product,

@@ -8,8 +8,10 @@ const sharp = require("sharp");
 
 const getAddProduct = async (req, res) => {
   try {
-    const category = await Category.find({ isListed: true });
-    const brand = await Brand.find({ isBlocked: false });
+    const [category, brand] = await Promise.all([
+      Category.find({ isListed: true }),
+      Brand.find({ isBlocked: false }),
+    ]);
 
     res.render("addProduct", {
       cat: category,
@@ -27,6 +29,8 @@ const addProduct = async (req, res) => {
     const productExists = await Product.findOne({
       productName: product.productName,
     });
+
+    const categoryId = await Category.findOne({ name: product.category });
 
     if (!productExists) {
       const images = [];
@@ -48,8 +52,6 @@ const addProduct = async (req, res) => {
           images.push(resizedFilename);
         }
       }
-
-      const categoryId = await Category.findOne({ name: product.category });
 
       if (!categoryId) {
         return res.status(400).json("invalid category name");
@@ -91,27 +93,28 @@ const getAllProducts = async (req, res) => {
     const search = req.query.search || "";
     const page = req.query.page || 1;
 
-    const productData = await Product.find({
-      $or: [
-        { productName: { $regex: new RegExp(".*" + search + ".*", "i") } },
-        { brand: { $regex: new RegExp(".*" + search + ".*", "i") } },
-      ],
-    })
-      .sort({ _id: -1 })
-      .limit(limit * 1)
-      .skip((page - 1) * limit)
-      .populate("category")
-      .exec();
-
-    const count = await Product.find({
-      $or: [
-        { productName: { $regex: new RegExp(".*" + search + ".*", "i") } },
-        { brand: { $regex: new RegExp(".*" + search + ".*", "i") } },
-      ],
-    }).countDocuments();
-
     const category = await Category.find({ isListed: true });
-    const brand = await Brand.find({ isBlocked: false });
+
+    const [productData, count, brand] = await Promise.all([
+      Product.find({
+        $or: [
+          { productName: { $regex: new RegExp(".*" + search + ".*", "i") } },
+          { brand: { $regex: new RegExp(".*" + search + ".*", "i") } },
+        ],
+      })
+        .sort({ _id: -1 })
+        .limit(limit * 1)
+        .skip((page - 1) * limit)
+        .populate("category")
+        .exec(),
+      Product.find({
+        $or: [
+          { productName: { $regex: new RegExp(".*" + search + ".*", "i") } },
+          { brand: { $regex: new RegExp(".*" + search + ".*", "i") } },
+        ],
+      }).countDocuments(),
+      Brand.find({ isBlocked: false }),
+    ]);
 
     if (category && brand) {
       return res.render("product", {
@@ -156,10 +159,12 @@ const unBlockProduct = async (req, res) => {
 const getEditProduct = async (req, res) => {
   try {
     const id = req.query.id;
-    const brand = await Brand.find({ isBlocked: false });
-    const category = await Category.find({ isListed: true });
+    const [brand, category, product] = await Promise.all([
+      Brand.find({ isBlocked: false }),
+      Category.find({ isListed: true }),
+      Product.findOne({ _id: id }),
+    ]);
 
-    const product = await Product.findOne({ _id: id });
     return res.render("editProduct", {
       product: product,
       brand: brand,
@@ -173,15 +178,16 @@ const getEditProduct = async (req, res) => {
 const editProduct = async (req, res) => {
   try {
     const id = req.params.id;
-    const product = await Product.find({ _id: id });
     const data = req.body;
-    // ith vechan update category id kittunne
-    const category = await Category.findOne({ name: data.category });
 
-    const existingProduct = await Product.findOne({
-      productName: data.productName,
-      _id: { $ne: id },
-    });
+    const [product, category, existingProduct] = await Promise.all([
+      Product.find({ _id: id }),
+      Category.findOne({ name: data.category }),
+      Product.findOne({
+        productName: data.productName,
+        _id: { $ne: id },
+      }),
+    ]);
 
     if (existingProduct) {
       return res
