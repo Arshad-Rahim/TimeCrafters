@@ -8,6 +8,7 @@ const categoryController = require('../controllers/admin/categoryController');
 const brandController = require('../controllers/admin/brandController');
 const productController = require('../controllers/admin/productController');
 const orderController = require('../controllers/admin/orderController');
+const offerController = require('../controllers/admin/offerController');    
 
 const multer = require('multer');
 const storage = require('../helpers/multer');
@@ -60,6 +61,12 @@ router.post('/editProduct/:id',adminAuth,uploads.array('images',4),productContro
 // order Management
 router.get('/orderManagment',adminAuth,orderController.getOrderManagment);
 router.put('/updateStatus/:orderId/:productId',adminAuth,orderController.updateStatus);
+
+
+// offer managment
+router.get('/productOffers',adminAuth,offerController.productOffers);
+router.get('/categoryOffers',adminAuth,offerController.categoryOffers);
+router.post('/addProductOffer',adminAuth,offerController.addProductOffer);
 
 
 module.exports=router;

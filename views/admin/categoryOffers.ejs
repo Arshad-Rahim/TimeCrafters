@@ -1,0 +1,172 @@
+<%- include("../../views/partials/admin/header") %>
+
+    <style>
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            background: #f5f5f5;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .tabs {
+            margin-bottom: 20px;
+            border-bottom: 1px solid #ddd;
+        }
+        .tab {
+            display: inline-block;
+            padding: 10px 20px;
+            color: #666;
+            text-decoration: none;
+            border-bottom: 2px solid transparent;
+        }
+        .tab.active {
+            color: #000;
+            border-bottom: 2px solid #000;
+        }
+        .card {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #666;
+        }
+        .form-control {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        .btn {
+            background: #475569;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            width: 100%;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            color: #666;
+            font-weight: normal;
+        }
+        .delete-btn {
+            color: #ef4444;
+            background: none;
+            border: none;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body style="margin-top: 20px;">
+    <div  class="container">
+        <h1>Offer Management</h1>
+        
+        <div class="tabs">
+            <a href="/admin/productOffers" class="tab">Product Offers</a>
+            <a href="/admin/categoryOffers" class="tab active">Category Offers</a>
+        </div>
+
+        <div class="card">
+            <h2>Add New Offer</h2>
+            <p class="description">Create a new offer for categories</p>
+            
+            <form>
+                <div class="form-group">
+                    <label>Offer Name</label>
+                    <input type="text" class="form-control" placeholder="Enter offer name">
+                </div>
+                
+           
+                
+                <div class="form-group">
+                    <label>Offer Percentage</label>
+                    <input type="text" class="form-control" placeholder="Enter value">
+                </div>
+                
+                <div class="form-group">
+                    <label>End Date</label>
+                    <input type="date" class="form-control" placeholder="mm/dd/yyyy">
+                </div>
+                
+                <div class="form-group">
+                    <label>Select Category</label>
+                    <select class="form-control">
+                        <option value="">Select a category</option>
+                        <option value="electronics">Electronics</option>
+                        <option value="clothing">Clothing</option>
+                        <option value="books">Books</option>
+                        <option value="home">Home & Garden</option>
+                    </select>
+                </div>
+                
+                <button type="submit" class="btn">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"/>
+                        <line x1="12" y1="8" x2="12" y2="16"/>
+                        <line x1="8" y1="12" x2="16" y2="12"/>
+                    </svg>
+                    Add Offer
+                </button>
+            </form>
+        </div>
+
+        <div class="card">
+            <h2>Category Offers</h2>
+            <p class="description">Manage offers for product categories</p>
+            
+            <table>
+                <thead>
+                    <tr>
+                        <th>NAME</th>
+                        <th>APPLIED CATEGORY</th>
+                        <th>PERCENTAGE</th>
+                        <th>END DATE</th>
+                        <th>ACTION</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>ELEC15</td>
+                        <td>Electronics</td>
+                        <td>15%</td>
+                        <td>12/31/2024</td>
+                        <td>
+                            <button class="delete-btn">🗑</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>BOOKS10</td>
+                        <td>Books</td>
+                        <td>10%</td>
+                        <td>03/15/2024</td>
+                        <td>
+                            <button class="delete-btn">🗑</button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</body>
+<%- include("../../views/partials/admin/footer") %>

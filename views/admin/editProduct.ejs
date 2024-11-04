@@ -397,16 +397,13 @@ if (!/^(0|[1-9]\d*)$/.test(goldenQuantity)) {
                   displayErrorMessage('salePrice-error', 'Please enter a valid non-negative price.');
                   isValid = false;
               }
-              if (parseFloat(price) <= parseFloat(saleprice)) {
-      displayErrorMessage('regularPrice-error', 'Regular price must be greater than sale price.');
-      isValid = false;
-   }
-  
-  
-             
-  
-  
-            
+              if (Number(price) < Number(saleprice)) {
+  displayErrorMessage('regularPrice-error', 'Regular price must be greater than sale price.');
+  isValid = false;
+} else if (Number(price) === Number(saleprice)) {
+  isValid = true;
+}
+
               
 
               if (additionalInfo.trim() === "") {

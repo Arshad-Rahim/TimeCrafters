@@ -1,0 +1,363 @@
+<%- include("../../views/partials/admin/header") %>
+<head>
+    <script>
+        document.addEventListener('DOMContentLoaded', initializeFormValidation);
+    </script>
+</head>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            background: #f5f5f5;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .tabs {
+            margin-bottom: 20px;
+            border-bottom: 1px solid #ddd;
+        }
+        .tab {
+            display: inline-block;
+            padding: 10px 20px;
+            color: #666;
+            text-decoration: none;
+            border-bottom: 2px solid transparent;
+        }
+        .tab.active {
+            color: #000;
+            border-bottom: 2px solid #000;
+        }
+        .card {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #666;
+        }
+        .form-control {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        .btn {
+            background: #475569;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            width: 100%;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            color: #666;
+            font-weight: normal;
+        }
+        .delete-btn {
+            color: #ef4444;
+            background: none;
+            border: none;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body style="margin-top: 20px;">
+    <div class="container">
+        <h1>Offer Management</h1>
+        
+        <div class="tabs">
+            <a href="/admin/productOffers" class="tab active">Product Offers</a>
+            <a href="/admin/categoryOffers" class="tab">Category Offers</a>
+        </div>
+
+        <div class="card">
+            <h2>Add New Offer</h2>
+            <p>Create a new offer for products</p>
+            
+            <form method='post' action='/admin/addProductOffer' enctype="multipart/form-data" onsubmit="return handleFormSubmit(event)">
+                <div class="form-group">
+                    <label>Offer Name</label>
+                    <input type="text" name="offerName" class="form-control" placeholder="Enter offer name">
+                </div>
+                
+               
+                
+                <div class="form-group">
+                    <label>Offer Percentage</label>
+                    <input type="text" name="offerPercentage" class="form-control" placeholder="Enter value">
+                </div>
+                
+                <div class="form-group">
+                    <label>End Date</label>
+                    <input name="endDate" type="date" class="form-control">
+                </div>
+                
+                <div class="form-group">
+                    <label>Select Product</label>
+                    <input name='selectedProduct'type="text" class="form-control" placeholder="Search for a product">
+                </div>
+                
+                <button  type="submit" class="btn" >Add Offer</button>
+            </form>
+        </div>
+
+        <div class="card">
+            <h2>Product Offers</h2>
+            <p>Manage offers for specific products</p>
+            
+            <table>
+                <thead>
+                    <tr>
+                        <th>NAME</th>
+                        <th>APPLIED PRODUCT</th>
+                        <th>PERCENTAGE</th>
+                        <th>END DATE</th>
+                        <th>ACTION</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>I16OFF10</td>
+                        <td>Apple iPhone 16</td>
+                        <td>10%</td>
+                        <td>11/6/2024</td>
+                        <td>
+                            <button class="delete-btn">🗑</button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</body>
+<%- include("../../views/partials/admin/footer") %>
+
+<script>
+function initializeFormValidation() {
+  const inputs = document.querySelectorAll('.form-control');
+
+  inputs.forEach(input => {
+    input.addEventListener('input', function() {
+      clearErrorForField(this);
+    });
+
+    input.addEventListener('blur', function() {
+      validateField(this);
+    });
+  });
+}
+
+function handleFormSubmit(event) {
+  event.preventDefault();
+  if (!validateForm()) {
+    return;
+  }
+
+  const offerName = document.getElementsByName('offerName')[0].value;
+  const offerPercentage = document.getElementsByName('offerPercentage')[0].value;
+  const endDate = document.getElementsByName('endDate')[0].value;
+  const selectedProduct = document.getElementsByName('selectedProduct')[0].value;
+
+  $.ajax({
+    url: `/admin/addProductOffer`,
+    type: "POST",
+    dataType: 'json',
+    contentType: 'application/json',
+    data: JSON.stringify({ offerName, offerPercentage, endDate, selectedProduct }),
+    success: function(response) {
+      if (response.success) {
+        Swal.fire({
+          toast: true,
+          position: 'center',
+          icon: 'success',
+          title: 'Success',
+          text: response.message,
+          showConfirmButton: false,
+          timer: 1500,
+          customClass: 'center-toast',
+        }).then(() =>{
+            window.location.href=response.redirectURL;
+        })
+      }
+    },
+    error: function(xhr,response) {
+        const errorMessage = xhr.responseJSON ? xhr.responseJSON.message : 'Failed to add offer. Please try again.';
+      Swal.fire({
+        toast: true,
+        position: 'top',
+        icon: 'error',
+        title: 'Error',
+        text:errorMessage,
+        showConfirmButton: false,
+        timer: 1500,
+        customClass: 'center-toast',
+      });
+    }
+  });
+}
+
+function validateForm() {
+  clearErrors();
+  const offerName = document.getElementsByName('offerName')[0];
+  const offerPercentage = document.getElementsByName('offerPercentage')[0];
+  const endDate = document.getElementsByName('endDate')[0];
+  const selectedProduct = document.getElementsByName('selectedProduct')[0];
+  let isValid = true;
+
+  // Validate offer name
+  if (!offerName.value.trim()) {
+    showFieldError(offerName, 'Offer name is required');
+    isValid = false;
+  } else if (offerName.value.length < 3) {
+    showFieldError(offerName, 'Offer name must be at least 3 characters long');
+    isValid = false;
+  }
+
+  // Validate percentage
+  if (!offerPercentage.value.trim()) {
+    showFieldError(offerPercentage, 'Offer percentage is required');
+    isValid = false;
+  } else {
+    const percentageValue = parseFloat(offerPercentage.value);
+    if (isNaN(percentageValue) || percentageValue <= 0 || percentageValue > 100) {
+      showFieldError(offerPercentage, 'Offer percentage must be between 0 and 100');
+      isValid = false;
+    }
+  }
+
+  // Validate end date
+  if (!endDate.value) {
+    showFieldError(endDate, 'End date is required');
+    isValid = false;
+  } else {
+    const selectedDate = new Date(endDate.value);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    if (selectedDate < today) {
+      showFieldError(endDate, 'End date cannot be in the past');
+      isValid = false;
+    }
+  }
+
+  // Validate product selection
+  if (!selectedProduct.value.trim()) {
+    showFieldError(selectedProduct, 'Product selection is required');
+    isValid = false;
+  }
+
+  return isValid;
+}
+
+function showFieldError(field, message) {
+  field.style.borderColor = '#ef4444';
+  field.style.backgroundColor = '#fef2f2';
+
+  const errorDiv = document.createElement('div');
+  errorDiv.className = 'field-error';
+  errorDiv.style.color = '#ef4444';
+  errorDiv.style.fontSize = '0.875rem';
+  errorDiv.style.marginTop = '4px';
+  errorDiv.style.marginBottom = '8px';
+  errorDiv.textContent = message;
+
+  const formGroup = field.closest('.form-group');
+  if (formGroup) {
+    const existingError = formGroup.querySelector('.field-error');
+    if (existingError) {
+      existingError.remove();
+    }
+    formGroup.appendChild(errorDiv);
+  }
+}
+
+function clearErrors() {
+  const inputs = document.querySelectorAll('.form-control');
+  inputs.forEach(input => {
+    input.style.borderColor = '#ddd';
+    input.style.backgroundColor = 'white';
+  });
+
+  const errorMessages = document.querySelectorAll('.field-error');
+  errorMessages.forEach(error => error.remove());
+}
+
+function clearErrorForField(field) {
+  field.style.borderColor = '#ddd';
+  field.style.backgroundColor = 'white';
+  const formGroup = field.closest('.form-group');
+  if (formGroup) {
+    const errorMessage = formGroup.querySelector('.field-error');
+    if (errorMessage) {
+      errorMessage.remove();
+    }
+  }
+}
+
+function validateField(field) {
+  clearErrorForField(field);
+
+  switch (field.name) {
+    case 'offerName':
+      if (!field.value.trim()) {
+        showFieldError(field, 'Offer name is required');
+      } else if (field.value.length < 3) {
+        showFieldError(field, 'Offer name must be at least 3 characters long');
+      }
+      break;
+
+    case 'offerPercentage':
+      if (!field.value.trim()) {
+        showFieldError(field, 'Offer percentage is required');
+      } else {
+        const percentageValue = parseFloat(field.value);
+        if (isNaN(percentageValue) || percentageValue <= 0 || percentageValue > 100) {
+          showFieldError(field, 'Offer percentage must be between 0 and 100');
+        }
+      }
+      break;
+
+    case 'endDate':
+      if (!field.value) {
+        showFieldError(field, 'End date is required');
+      } else {
+        const selectedDate = new Date(field.value);
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        if (selectedDate < today) {
+          showFieldError(field, 'End date cannot be in the past');
+        }
+      }
+      break;
+
+    case 'selectedProduct':
+      if (!field.value.trim()) {
+        showFieldError(field, 'Product selection is required');
+      }
+      break;
+  }
+}
+
+// Initialize form validation when the document loads
+document.addEventListener('DOMContentLoaded', initializeFormValidation);
+</script>
