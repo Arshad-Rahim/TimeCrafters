@@ -1,34 +1,38 @@
 const User = require('../models/userSchema');
 
 
-const userAuth = (req,res,next) =>{
+const userAuth = async (req, res, next) => {
+    try {
+        if (!req.session.user) {
+            console.log('No user session found');
+            return res.redirect('/login');
+        }
 
-
-   
-    if(req.session.user){
-        User.findById(req.session.user)
-        .then(data =>{
-            if(data && !data.isBlocked){
-               return next();
-            }else{
-                req.session.destroy();
-               return  res.redirect('/login');
-                
-            }
-        })
-        .catch(error =>{
-            console.log("Error in user auth Middleware",error);
-            res.status(500).send('internal server error');
-            
-        })
-    }else
-    {   
+        const user = await User.findById(req.session.user);
         
-        return res.redirect('/login');  
+        if (!user) {
+            console.log('User not found in database');
+            req.session.destroy((err) => {
+                if (err) console.log('Error destroying session:', err);
+            });
+            return res.redirect('/login');
+        }
+
+        if (user.isBlocked) {
+            console.log('User is blocked');
+            req.session.destroy((err) => {
+                if (err) console.log('Error destroying session:', err);
+            });
+            return res.status(403).redirect('/login?error=Account%20is%20blocked');
+        }
+
+        next();
+
+    } catch (error) {
+        console.log("Error in userAuth middleware:", error);
+        return res.status(500).redirect('/login?error=Internal%20server%20error');
     }
-}
-
-
+};
 
 const adminAuth = (req,res,next) =>{
    

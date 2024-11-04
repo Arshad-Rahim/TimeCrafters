@@ -73,7 +73,7 @@ const addProduct = async (req, res) => {
         status: "Available",
       });
       await newProduct.save();
-      return res.redirect("/admin/addProduct");
+      return res.redirect("/admin/product");
     } else {
       return res
         .status(400)

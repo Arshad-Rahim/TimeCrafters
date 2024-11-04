@@ -10,16 +10,25 @@ const getCart = async (req, res) => {
 
     const cart = await Cart.findOne({ userId }).populate("items.productId");
     if (cart) {
-      const cartCalculation = {
-        basePrice: cart.items.reduce(
-          (total, item) => total + item.regularPrice * item.quantity,
-          0
-        ),
-        totalPrice: cart.items.reduce(
-          (total, item) => total + item.salePrice * item.quantity,
-          0
-        ),
-      };
+      // const cartCalculation = {
+      //   basePrice: cart.items.reduce(
+      //     (total, item) => total + item.regularPrice * item.quantity,
+      //     0
+      //   ),
+      //   totalPrice: cart.items.reduce(
+      //     (total, item) => total + item.salePrice * item.quantity,
+      //     0
+      //   ),
+      // };
+
+      const cartCalculation = cart.items.reduce(
+        (acc, item) => ({
+          basePrice: acc.basePrice + item.regularPrice * item.quantity,
+          totalPrice: acc.totalPrice + item.salePrice * item.quantity,
+        }),
+        { basePrice: 0, totalPrice: 0 }
+      );
+
       cartCalculation.savings =
         cartCalculation.basePrice - cartCalculation.totalPrice;
       return res.render("cart", { cart, cartCalculation });
@@ -143,12 +152,18 @@ const postCart = async (req, res) => {
   }
 };
 
-const putQuantity = async (req, res) => {
+const putQuantity = async (req, res) => { 
   try {
     const userId = req.session.user;
 
     const { quantity, productId } = req.body;
-    const cart = await Cart.findOne({ userId });
+
+
+  const [cart,product] = await Promise.all([
+    Cart.findOne({ userId }),
+    Product.findById(productId),
+  ]);
+
 
     if (!quantity || quantity < 1) {
       return res.status(400).json({
@@ -189,7 +204,6 @@ const putQuantity = async (req, res) => {
       });
     }
 
-    const product = await Product.findById(productId);
 
     if (!product) {
       return res.status(404).json({
@@ -264,23 +278,44 @@ const deleteCartProduct = async (req, res) => {
   try {
     const userId = req.session.user;
     const productId = req.params.id;
-    const cart = await Cart.findOne({ userId });
-    const foundIndex = cart.items.findIndex(
-      (item) => item.productId.toString() == productId.toString()
+    // const cart = await Cart.findOne({ userId });
+    // const foundIndex = cart.items.findIndex(
+    //   (item) => item.productId.toString() == productId.toString()
+    // );
+
+    // if (foundIndex == -1) {
+    //   return res.status(400).json({
+    //     success: false,
+    //     message: "Item is not found in cart",
+    //   });
+    // }
+    // // splice vech delete the product from the array
+    // cart.items.splice(foundIndex, 1);
+    // await cart.save();
+    // return res.status(200).json({
+    //   success: true,
+    //   message: "Product deleted From the cart",
+    // });
+
+    const result = await Cart.updateOne(
+      {userId:userId},
+      {
+        $pull:{
+          items:{productId: new mongoose.Types.ObjectId(productId)}
+        }
+      }
     );
 
-    if (foundIndex == -1) {
+    if(result.modifiedCount==0){
       return res.status(400).json({
-        success: false,
-        message: "Item is not found in cart",
-      });
+        success:false,
+        message:'Item not found in the cart',
+      })
     }
-    // splice vech delete the product from the array
-    cart.items.splice(foundIndex, 1);
-    await cart.save();
+
     return res.status(200).json({
       success: true,
-      message: "Product deleted From the cart",
+      message: "Product deleted from the cart"
     });
   } catch (error) {
     console.log("Error in deleteAddress", error);

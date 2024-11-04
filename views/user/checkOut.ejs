@@ -236,12 +236,13 @@
       },
 
       error: function (xhr, status, error) {
+        const response = xhr.responseJSON;
         Swal.fire({
           toast: true,
           position: "center",
           icon: "error",
           title: "Error",
-          text: xhr.responseJSON ? xhr.responseJSON.error : "An error occurred",
+          text: response.message,
           showConfirmButton: false,
           timer: 1500,
           customClass: "center-toast",

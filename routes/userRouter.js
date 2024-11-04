@@ -6,6 +6,7 @@ const cartController = require('../controllers/user/cartController');
 const productController = require('../controllers/user/productController');
 const addressController = require('../controllers/user/addressController');
 const orderController = require('../controllers/user/orderController');
+const wishlistController = require('../controllers/user/wishlistController');
 
 const {userAuth} = require('../middleware/auth');
 const passport = require("passport");
@@ -64,6 +65,11 @@ router.post('/cart/:id',cartController.postCart);
 router.put('/cart',cartController.putQuantity);
 router.delete('/deleteCartProduct/:id',cartController.deleteCartProduct);
 
+
+// wishlist
+router.post('/wishlist/:productId',wishlistController.wishlist);
+router.get('/wishlist',userAuth,wishlistController.getWishlist);
+router.delete('/deleteWishlistProduct/:id',wishlistController.deleteWishlistProduct);
 
 
 // checkOut
