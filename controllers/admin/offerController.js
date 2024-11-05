@@ -1,11 +1,13 @@
 
 const Offer = require('../../models/offerSchema');
 const Product = require('../../models/productSchema');
+const Category = require('../../models/categorySchema');
 
 const productOffers = async(req,res)=>{
     try {
 
-        return res.render('offerManagment');
+        const offer = await Offer.find({type:'product'});
+        return res.render('offerManagment',{offer});
         
     } catch (error) {
         console.log('Error n offerManagment',error);
@@ -17,7 +19,13 @@ const productOffers = async(req,res)=>{
 const categoryOffers = async(req,res) =>{
     try {
 
-        return res.render('categoryOffers');
+
+        const [category,offer] = await Promise.all([
+            await Category.find(),
+            Offer.find({type:'category'}),
+        ])
+
+        return res.render('categoryOffers',{category:category,offer});
         
     } catch (error) {
         console.log('Error in the categoryOffes',error);
@@ -75,10 +83,78 @@ const addProductOffer = async(req,res) =>{
 
 
 
+const addCategoryOffer = async(req,res) =>{
+    try {
+        
+        const {offerName,offerPercentage,endDate,selectedCategory} = req.body;
+        // selected category is passing in here
+
+        const offerNameLowerCase = offerName.trim().toLowerCase();
+     const exisitingOfferName = await Offer.findOne({
+        name:{ $regex: new RegExp(`^${offerNameLowerCase}$`, "i")}
+     });
+
+     const targetCategory = await Category.findById(selectedCategory);
+     if(!targetCategory) {
+       return res.status(400).json({
+         success: false,
+         message: 'Selected category not found'
+       });
+     }
+
+
+
+if(exisitingOfferName){
+    return res.status(400).json({
+      success:false,
+      message:'Offer Name already existing'
+    });
+  } else {
+      
+        const multiplier = 1 - (offerPercentage / 100);
+
+        await Product.updateMany(
+            { category: targetCategory._id },
+            [  
+                {
+                    $set: {
+                        salePrice: {
+                            $multiply: ["$regularPrice", multiplier]
+                        },
+                        productOffer: offerPercentage
+                    }
+                }
+            ]
+        );
+
+
+      const newOffer = new Offer({
+        name: offerName,
+        percentage: offerPercentage,
+        type: "category",
+        targetId: targetCategory._id,
+        targetName: targetCategory.name,
+        endDate: endDate,
+      });
+
+      await newOffer.save();
+
+      return res.status(200).json({
+        success: true,
+        message: "Offer added to the Category successfully",
+        redirectURL: "/admin/categoryOffers",
+      });
+    }
+    } catch (error) {
+        console.log('Error in the addCategoryOffer',error);
+    }
+}
+
 module.exports={
 
     productOffers,
     categoryOffers,
     addProductOffer,
+    addCategoryOffer,
 
 }

@@ -137,15 +137,18 @@
                     </tr>
                 </thead>
                 <tbody>
+                  <% for(i=0;i<offer.length;i++) {%>
                     <tr>
-                        <td>I16OFF10</td>
-                        <td>Apple iPhone 16</td>
-                        <td>10%</td>
-                        <td>11/6/2024</td>
+                        <td><%= offer[i].name %></td>
+                        <td><%= offer[i].targetName %></td>
+                        <td><%= offer[i].percentage %>%</td>
+                        <td><%= new Date(offer[i].endDate).toLocaleDateString() %>
+                        </td>
                         <td>
                             <button class="delete-btn">🗑</button>
                         </td>
                     </tr>
+                    <% } %>
                 </tbody>
             </table>
         </div>

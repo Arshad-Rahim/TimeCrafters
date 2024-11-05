@@ -79,94 +79,275 @@
     </style>
 </head>
 <body style="margin-top: 20px;">
-    <div  class="container">
-        <h1>Offer Management</h1>
-        
-        <div class="tabs">
-            <a href="/admin/productOffers" class="tab">Product Offers</a>
-            <a href="/admin/categoryOffers" class="tab active">Category Offers</a>
-        </div>
-
-        <div class="card">
-            <h2>Add New Offer</h2>
-            <p class="description">Create a new offer for categories</p>
-            
-            <form>
-                <div class="form-group">
-                    <label>Offer Name</label>
-                    <input type="text" class="form-control" placeholder="Enter offer name">
-                </div>
-                
-           
-                
-                <div class="form-group">
-                    <label>Offer Percentage</label>
-                    <input type="text" class="form-control" placeholder="Enter value">
-                </div>
-                
-                <div class="form-group">
-                    <label>End Date</label>
-                    <input type="date" class="form-control" placeholder="mm/dd/yyyy">
-                </div>
-                
-                <div class="form-group">
-                    <label>Select Category</label>
-                    <select class="form-control">
-                        <option value="">Select a category</option>
-                        <option value="electronics">Electronics</option>
-                        <option value="clothing">Clothing</option>
-                        <option value="books">Books</option>
-                        <option value="home">Home & Garden</option>
-                    </select>
-                </div>
-                
-                <button type="submit" class="btn">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <circle cx="12" cy="12" r="10"/>
-                        <line x1="12" y1="8" x2="12" y2="16"/>
-                        <line x1="8" y1="12" x2="16" y2="12"/>
-                    </svg>
-                    Add Offer
-                </button>
-            </form>
-        </div>
-
-        <div class="card">
-            <h2>Category Offers</h2>
-            <p class="description">Manage offers for product categories</p>
-            
-            <table>
-                <thead>
-                    <tr>
-                        <th>NAME</th>
-                        <th>APPLIED CATEGORY</th>
-                        <th>PERCENTAGE</th>
-                        <th>END DATE</th>
-                        <th>ACTION</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>ELEC15</td>
-                        <td>Electronics</td>
-                        <td>15%</td>
-                        <td>12/31/2024</td>
-                        <td>
-                            <button class="delete-btn">🗑</button>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>BOOKS10</td>
-                        <td>Books</td>
-                        <td>10%</td>
-                        <td>03/15/2024</td>
-                        <td>
-                            <button class="delete-btn">🗑</button>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
+    <div class="container">
+      <h1>Offer Management</h1>
+  
+      <div class="tabs">
+        <a href="/admin/productOffers" class="tab">Product Offers</a>
+        <a href="/admin/categoryOffers" class="tab active">Category Offers</a>
+      </div>
+  
+      <div class="card">
+        <h2>Add New Offer</h2>
+        <p class="description">Create a new offer for categories</p>
+  
+        <form method='post' action='/admin/addCategoryOffer' enctype="multipart/form-data" onsubmit="return handleCategoryFormSubmit(event)">
+          <div class="form-group">
+            <label>Offer Name</label>
+            <input type="text" name="offerName" class="form-control" placeholder="Enter offer name">
+          </div>
+  
+          <div class="form-group">
+            <label>Offer Percentage</label>
+            <input type="text" name="offerPercentage" class="form-control" placeholder="Enter value">
+          </div>
+  
+          <div class="form-group">
+            <label>End Date</label>
+            <input name="endDate" type="date" class="form-control">
+          </div>
+  
+          <div class="form-group">
+            <label>Select Category</label>
+            <select id="selectedCategory" name="selectedCategory" class="form-control">
+              <% for(i=0;i<category.length;i++) {%>
+                <option value="<%= category[i]._id %>"><%= category[i].name %></option>
+              <%}%>
+            </select>
+          </div>
+  
+          <button type="submit" class="btn">Add Offer</button>
+        </form>
+      </div>
+  
+      <div class="card">
+        <h2>Category Offers</h2>
+        <p class="description">Manage offers for product categories</p>
+  
+        <table>
+          <thead>
+            <tr>
+              <th>NAME</th>
+              <th>APPLIED CATEGORY</th>
+              <th>PERCENTAGE</th>
+              <th>END DATE</th>
+              <th>ACTION</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% for(i=0;i<offer.length;i++) {%>
+            <tr>
+              <td><%=offer[i].name%></td>
+              <td><%=offer[i].targetName%></td>
+              <td><%= offer[i].percentage %></td>
+              <td><%= new Date(offer[i].endDate).toLocaleDateString() %>
+              </td>
+              <td>
+                <button class="delete-btn">🗑</button>
+              </td>
+            </tr>
+            <% } %>
+          </tbody>
+        </table>
+      </div>
     </div>
-</body>
+  </body>
+  
 <%- include("../../views/partials/admin/footer") %>
+<script>
+
+
+function handleCategoryFormSubmit(event) {
+    event.preventDefault();
+    if (!validateCategoryForm()) {
+      return;
+    }
+
+    const offerName = document.getElementsByName('offerName')[0].value;
+    const offerPercentage = document.getElementsByName('offerPercentage')[0].value;
+    const endDate = document.getElementsByName('endDate')[0].value;
+    const selectedCategory = document.getElementById('selectedCategory').value;
+
+    $.ajax({
+      url: `/admin/addCategoryOffer`,
+      type: "POST",
+      dataType: 'json',
+      contentType: 'application/json',
+      data: JSON.stringify({ offerName, offerPercentage, endDate, selectedCategory }),
+      success: function(response) {
+        if (response.success) {
+          Swal.fire({
+            toast: true,
+            position: 'center',
+            icon: 'success',
+            title: 'Success',
+            text: response.message,
+            showConfirmButton: false,
+            timer: 1500,
+            customClass: 'center-toast',
+          }).then(() => {
+            window.location.href = response.redirectURL;
+          });
+        }
+      },
+      error: function(xhr, response) {
+        const errorMessage = xhr.responseJSON ? xhr.responseJSON.message : 'Failed to add offer. Please try again.';
+        Swal.fire({
+          toast: true,
+          position: 'top',
+          icon: 'error',
+          title: 'Error',
+          text: errorMessage,
+          showConfirmButton: false,
+          timer: 1500,
+          customClass: 'center-toast',
+        });
+      }
+    });
+  }
+
+  function validateCategoryForm() {
+    clearErrors();
+    const offerName = document.getElementsByName('offerName')[0];
+    const offerPercentage = document.getElementsByName('offerPercentage')[0];
+    const endDate = document.getElementsByName('endDate')[0];
+    const selectedCategory = document.getElementsByName('selectedCategory')[0];
+    let isValid = true;
+
+    // Validate offer name
+    if (!offerName.value.trim()) {
+      showFieldError(offerName, 'Offer name is required');
+      isValid = false;
+    } else if (offerName.value.length < 3) {
+      showFieldError(offerName, 'Offer name must be at least 3 characters long');
+      isValid = false;
+    }
+
+    // Validate percentage
+    if (!offerPercentage.value.trim()) {
+      showFieldError(offerPercentage, 'Offer percentage is required');
+      isValid = false;
+    } else {
+      const percentageValue = parseFloat(offerPercentage.value);
+      if (isNaN(percentageValue) || percentageValue <= 0 || percentageValue > 100) {
+        showFieldError(offerPercentage, 'Offer percentage must be between 0 and 100');
+        isValid = false;
+      }
+    }
+
+    // Validate end date
+    if (!endDate.value) {
+      showFieldError(endDate, 'End date is required');
+      isValid = false;
+    } else {
+      const selectedDate = new Date(endDate.value);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      if (selectedDate < today) {
+        showFieldError(endDate, 'End date cannot be in the past');
+        isValid = false;
+      }
+    }
+
+    // Validate category selection
+    if (!selectedCategory.value) {
+      showFieldError(selectedCategory, 'Category selection is required');
+      isValid = false;
+    }
+
+    return isValid;
+  }
+
+
+  function showFieldError(field, message) {
+  field.style.borderColor = '#ef4444';
+  field.style.backgroundColor = '#fef2f2';
+
+  const errorDiv = document.createElement('div');
+  errorDiv.className = 'field-error';
+  errorDiv.style.color = '#ef4444';
+  errorDiv.style.fontSize = '0.875rem';
+  errorDiv.style.marginTop = '4px';
+  errorDiv.style.marginBottom = '8px';
+  errorDiv.textContent = message;
+
+  const formGroup = field.closest('.form-group');
+  if (formGroup) {
+    const existingError = formGroup.querySelector('.field-error');
+    if (existingError) {
+      existingError.remove();
+    }
+    formGroup.appendChild(errorDiv);
+  }
+}
+
+function clearErrors() {
+  const inputs = document.querySelectorAll('.form-control');
+  inputs.forEach(input => {
+    input.style.borderColor = '#ddd';
+    input.style.backgroundColor = 'white';
+  });
+
+  const errorMessages = document.querySelectorAll('.field-error');
+  errorMessages.forEach(error => error.remove());
+}
+
+function clearErrorForField(field) {
+  field.style.borderColor = '#ddd';
+  field.style.backgroundColor = 'white';
+  const formGroup = field.closest('.form-group');
+  if (formGroup) {
+    const errorMessage = formGroup.querySelector('.field-error');
+    if (errorMessage) {
+      errorMessage.remove();
+    }
+  }
+}
+
+function validateField(field) {
+  clearErrorForField(field);
+
+  switch (field.name) {
+    case 'offerName':
+      if (!field.value.trim()) {
+        showFieldError(field, 'Offer name is required');
+      } else if (field.value.length < 3) {
+        showFieldError(field, 'Offer name must be at least 3 characters long');
+      }
+      break;
+
+    case 'offerPercentage':
+      if (!field.value.trim()) {
+        showFieldError(field, 'Offer percentage is required');
+      } else {
+        const percentageValue = parseFloat(field.value);
+        if (isNaN(percentageValue) || percentageValue <= 0 || percentageValue > 100) {
+          showFieldError(field, 'Offer percentage must be between 0 and 100');
+        }
+      }
+      break;
+
+    case 'endDate':
+      if (!field.value) {
+        showFieldError(field, 'End date is required');
+      } else {
+        const selectedDate = new Date(field.value);
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        if (selectedDate < today) {
+          showFieldError(field, 'End date cannot be in the past');
+        }
+      }
+      break;
+
+    case 'selectedProduct':
+      if (!field.value.trim()) {
+        showFieldError(field, 'Product selection is required');
+      }
+      break;
+  }
+}
+
+// Initialize form validation when the document loads
+document.addEventListener('DOMContentLoaded', initializeFormValidation);
+</script>

@@ -67,6 +67,6 @@ router.put('/updateStatus/:orderId/:productId',adminAuth,orderController.updateS
 router.get('/productOffers',adminAuth,offerController.productOffers);
 router.get('/categoryOffers',adminAuth,offerController.categoryOffers);
 router.post('/addProductOffer',adminAuth,offerController.addProductOffer);
-
+router.post('/addCategoryOffer',adminAuth,offerController.addCategoryOffer);
 
 module.exports=router;
