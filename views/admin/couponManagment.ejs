@@ -1,0 +1,558 @@
+<%-include('../partials/admin/header')  %>
+
+<head>
+   
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background-color: #f0f0f0;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+        }
+        .add-button {
+            background-color: #088178;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-bottom: 20px;
+        }
+        .add-button::before {
+            content: "+";
+            margin-right: 8px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            text-align: left;
+            padding: 12px;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background-color: #f1f3f4;
+            font-weight: bold;
+        }
+        .status {
+            background-color: #e8f5e9;
+            color: #1b5e20;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 14px;
+        }
+        .categories {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+        }
+        .categories li::before {
+            content: "•";
+            color: #4285f4;
+            display: inline-block;
+            width: 1em;
+            margin-left: -1em;
+        }
+        .action-icons {
+            display: flex;
+            gap: 10px;
+        }
+        .action-button {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background-color: #f1f3f4;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .action-button:hover {
+            background-color: #e0e0e0;
+        }
+        .action-button svg {
+            width: 18px;
+            height: 18px;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.4);
+        }
+        .modal-content {
+            background-color: #fefefe;
+            margin: 5% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 800px;
+            border-radius: 8px;
+        }
+        .modal-header {
+            margin-bottom: 20px;
+        }
+        .modal-header h2 {
+            margin: 0;
+            color: #333;
+        }
+        .form-row {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 15px;
+        }
+        .form-group {
+            flex: 1;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        .checkbox-group {
+            margin-top: 10px;
+        }
+        .checkbox-group label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        .modal-footer {
+            margin-top: 20px;
+            text-align: right;
+        }
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .btn-primary {
+            background-color: #4285f4;
+            color: white;
+        }
+        .btn-secondary {
+            background-color: #f44336;
+            color: white;
+            margin-left: 10px;
+        }
+
+        .error-message {
+    color: #ff0000;
+    font-size: 12px;
+    margin-top: 4px;
+}
+
+/* .form-group input:invalid {
+    border-color: #ff0000;
+} */
+
+.form-group input:focus {
+    border-color: #4285f4;
+    outline: none;
+}
+
+        /* .checkbox-group {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 16px;
+    border-radius: 8px;
+    background-color: #f5f5f5;
+}
+
+.checkbox-group label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 4px;
+    transition: background-color 0.2s;
+}
+
+.checkbox-group label:hover {
+    background-color: #e0e0e0;
+}
+
+.checkbox-group input[type="checkbox"] {
+    margin: 0;
+    cursor: pointer;
+    width: 16px;
+    height: 16px;
+}
+
+/* Custom checkbox styling */
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Coupon Management</h1>
+        
+        <button class="add-button" onclick="showModal()">Add New Coupon</button>
+
+        <table id="body">
+            <thead>
+                <tr>
+                    <th>CODE</th>
+                    <th>DISCOUNT</th>
+                    <th>VALID PERIOD</th>
+                    <th>USAGE LIMIT</th>
+                    <th>STATUS</th>
+                    <th>ACTIONS</th>
+                </tr>
+            </thead>
+            <tbody >
+                <% for(i=0;i<coupon.length;i++){ %>
+                <tr>
+                    <td><%=coupon[i].code%></td>
+                    <td><%= coupon[i].discountPercentage %>%</td>
+                    <td><%= new Date(coupon[i].endDate).toLocaleDateString() %>
+                    </td>
+                    <td><%= coupon[i].usageLimit %></td>
+                   
+                    <td><span class="status">Active</span></td>
+                    <td class="action-icons">
+                        <button  onclick="confirmAction('<%=coupon[i]._id%>')" class="action-button">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/>
+                            </svg>
+                        </button>
+                    </td>
+                </tr>
+                <% } %>
+            </tbody>
+        </table>
+    </div>
+
+    <div id="addCouponModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Add New Coupon</h2>
+            </div>
+            <form id="addCouponForm">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="code">Code</label>
+                        <input type="text" id="code" name="code" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="description">Description</label>
+                        <input type="text" id="description" name="description" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <!-- <div class="form-group">
+                        <label for="discountType">Discount Type</label>
+                        <select id="discountType" name="discountType" required>
+                            <option value="percentage">Percentage</option>
+                            <option value="fixed">Fixed Amount</option>
+                        </select>
+                    </div> -->
+                    <div class="form-group">
+                        <label for="discountValue">Discount Percentage</label>
+                        <input type="number" id="discountValue" name="discountValue" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="minPurchase">Minimum Purchase Amount</label>
+                        <input type="number" id="minPurchase" name="minPurchase" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="maxDiscount">Maximum Discount Amount</label>
+                        <input type="number" id="maxDiscount" name="maxDiscount" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="expirationDate">Expiration Date</label>
+                        <input type="date" id="expirationDate" name="expirationDate" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="usageLimit">Usage Limit</label>
+                        <input type="number" id="usageLimit" name="usageLimit" required>
+                    </div>
+                </div>
+                <!-- <div class="form-group">
+                    <label>Eligible Categories</label>
+                    
+<div class="checkbox-group">
+    <label>
+        <input type="checkbox" name="categories" value="flagship">
+        Flagship Phones
+    </label>
+    <label>
+        <input type="checkbox" name="categories" value="sub-flagship">
+        Sub-Flagship Phones
+    </label>
+    <label>
+        <input type="checkbox" name="categories" value="budget">
+        Budget Phones
+    </label>
+    <label>
+        <input type="checkbox" name="categories" value="gaming">
+        Gaming Phones
+    </label>
+    <label>
+        <input type="checkbox" name="categories" value="camera">
+        Camera Phones
+    </label>
+    <label>
+        <input type="checkbox" name="categories" value="rugged">
+        Rugged Phones
+    </label>
+</div>
+                </div> -->
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary">Add Coupon</button>
+                    <button type="button" class="btn btn-secondary" onclick="hideModal()">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function showModal() {
+            document.getElementById('addCouponModal').style.display = 'block';
+        }
+
+        function hideModal() {
+            document.getElementById('addCouponModal').style.display = 'none';
+        }
+
+        window.onclick = function(event) {
+            if (event.target.classList.contains('modal')) {
+                event.target.style.display = 'none';
+            }
+        }
+
+        document.getElementById('addCouponForm').onsubmit = function(e) {
+    e.preventDefault();
+    
+    // Clear previous error messages
+    document.querySelectorAll('.error-message').forEach(el => el.remove());
+    
+    // Get form values
+    const code = document.getElementById('code').value;
+    const description = document.getElementById('description').value;
+    const discount = document.getElementById('discountValue').value;
+    const minPurchase = document.getElementById('minPurchase').value;
+    const maxDiscount = document.getElementById('maxDiscount').value;
+    const expirationDate = document.getElementById('expirationDate').value;
+    const usageLimit = document.getElementById('usageLimit').value;
+
+    let hasError = false;
+
+    // Validate Coupon Code (only capital letters and numbers)
+    if (!code.match(/^[A-Z0-9]{5,15}$/)) {
+        showError('code', 'Code must be 5-15 characters long and contain only capital letters and numbers');
+        hasError = true;
+    }
+
+    // Validate Description
+    if (description.length < 10) {
+        showError('description', 'Description must be at least 10 characters long');
+        hasError = true;
+    }
+
+    // Validate Discount (1-80%)
+    const discountNum = Number(discount);
+    if (isNaN(discountNum) || discountNum < 1 || discountNum > 80) {
+        showError('discountValue', 'Discount must be between 1% and 80%');
+        hasError = true;
+    }
+
+    // Validate Minimum Purchase (at least ₹1)
+    const minPurchaseNum = Number(minPurchase);
+    if (isNaN(minPurchaseNum) || minPurchaseNum < 1) {
+        showError('minPurchase', 'Minimum purchase amount must be at least ₹1');
+        hasError = true;
+    }
+
+    // Validate Maximum Discount
+    const maxDiscountNum = Number(maxDiscount);
+    if (isNaN(maxDiscountNum) || maxDiscountNum < 1) {
+        showError('maxDiscount', 'Maximum discount must be at least ₹1');
+        hasError = true;
+    }
+
+    // Validate Maximum Discount against Minimum Purchase
+    const calculatedMaxDiscount = (minPurchaseNum * discountNum) / 100;
+    if (maxDiscountNum > calculatedMaxDiscount) {
+        showError('maxDiscount', 'Maximum discount cannot exceed the calculated discount amount');
+        hasError = true;
+    }
+
+    // Validate Expiration Date (must be future date)
+    const selectedDate = new Date(expirationDate);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    if (selectedDate < today) {
+        showError('expirationDate', 'Expiration date must be a future date');
+        hasError = true;
+    }
+
+    // Validate Usage Limit (at least 1)
+    const usageLimitNum = Number(usageLimit);
+    if (isNaN(usageLimitNum) || usageLimitNum < 1) {
+        showError('usageLimit', 'Usage limit must be at least 1');
+        hasError = true;
+    }
+
+    // If no errors, submit the form
+    if (!hasError) {
+    const code = document.getElementById('code').value;
+    const description = document.getElementById('description').value;
+    const discount = document.getElementById('discountValue').value;
+    const minPurchase = document.getElementById('minPurchase').value;
+    const maxDiscount = document.getElementById('maxDiscount').value;
+    const expirationDate = document.getElementById('expirationDate').value;
+    const usageLimit = document.getElementById('usageLimit').value;
+    $.ajax({
+    url: `/admin/addCoupon`,
+    type: "POST",
+    dataType: 'json',
+    contentType: 'application/json',
+    data: JSON.stringify({ code, description, discount, minPurchase, maxDiscount,expirationDate, usageLimit}),
+    success: function(response) {
+      if (response.success) {
+        Swal.fire({
+          toast: true,
+          position: 'center',
+          icon: 'success',
+          title: 'Success',
+          text: response.message,
+          showConfirmButton: false,
+          timer: 1500,
+          customClass: 'center-toast',
+        })
+        $('#body').load('/admin/couponManagment #body')
+      }
+    },
+    error: function(xhr,response) {
+        const errorMessage = xhr.responseJSON ? xhr.responseJSON.message : 'Failed to add offer. Please try again.';
+      Swal.fire({
+        toast: true,
+        position: 'top',
+        icon: 'error',
+        title: 'Error',
+        text:errorMessage,
+        showConfirmButton: false,
+        timer: 1500,
+        customClass: 'center-toast',
+      });
+    }
+  });
+        hideModal();
+    }
+};
+
+// Helper function to show error messages
+function showError(fieldId, message) {
+    const input = document.getElementById(fieldId);
+    const errorDiv = document.createElement('div');
+    errorDiv.className = 'error-message';
+    errorDiv.textContent = message;
+    input.parentNode.appendChild(errorDiv);
+}
+
+// Add simple input validation on typing
+document.querySelectorAll('#addCouponForm input').forEach(input => {
+    input.addEventListener('input', function() {
+        // Remove error message when user starts typing
+        const errorMessage = this.parentNode.querySelector('.error-message');
+        if (errorMessage) {
+            errorMessage.remove();
+        }
+
+        // For coupon code, convert to uppercase automatically
+        if (this.id === 'code') {
+            this.value = this.value.toUpperCase();
+        }
+    });
+});
+    </script>
+</body>
+<%-include('../partials/admin/footer')  %>
+<script>
+
+    function confirmAction(couponId){
+      Swal.fire({
+        title:'Are you Sure?',
+        text:'Please click Sure To Proceed',
+        icon:'Warning',
+        showCancelButton: true,
+        cancelButtonColor: '#6c757d',
+        confirmButtonText:'Sure',
+        cancelButtonText:'Cancel',
+      }).then((result) =>{
+        if(result.isConfirmed){
+
+        //   window.location.href=`/admin/deleteCoupon?id=${couponId}`
+        
+        $.ajax({
+    url: `/admin/deleteCoupon?id=${couponId}`,
+    type: "DELETE",
+    dataType: 'json',
+    contentType: 'application/json',
+    success: function(response) {
+      if (response.success) {
+        Swal.fire({
+          toast: true,
+          position: 'center',
+          icon: 'success',
+          title: 'Success',
+          text: response.message,
+          showConfirmButton: false,
+          timer: 1500,
+          customClass: 'center-toast',
+        })  
+        $('#body').load('/admin/couponManagment #body')
+      }
+    },
+    error: function(xhr,response) {
+        const errorMessage = xhr.responseJSON ? xhr.responseJSON.message : 'Failed to add offer. Please try again.';
+      Swal.fire({
+        toast: true,
+        position: 'top',
+        icon: 'error',
+        title: 'Error',
+        text:errorMessage,
+        showConfirmButton: false,
+        timer: 1500,
+        customClass: 'center-toast',
+      });
+    }
+  });               
+        }
+      });
+    }
+  </script>

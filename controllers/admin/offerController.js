@@ -45,9 +45,7 @@ const addProductOffer = async(req,res) =>{
      });
      const target = await Product.findOne({productName:selectedProduct});
      const offerPrice = (target.regularPrice)/100 * offerPercentage;
-     console.log(offerPrice)
      const updatedSalePrice = target.regularPrice - offerPrice;
-     console.log(updatedSalePrice);
 
    target.salePrice = updatedSalePrice;
    await target.save();
@@ -150,11 +148,83 @@ if(exisitingOfferName){
     }
 }
 
+
+
+const deleteProductOffer = async(req,res) =>{
+    try {
+
+        const offerId = req.query.id;
+        const productName = req.query.productName;
+          
+        if(!offerId){
+            return res.status(400).json({
+                success:false,
+                message:'Error in getting the Id of the Offer',
+            })
+        }else{
+             await Offer.deleteOne({_id:offerId});
+
+             const product = await Product.findOne({productName:productName});
+             product.salePrice = product.regularPrice;
+             await product.save();
+             return res.status(200).json({
+                success:true,
+                message:'Offer deleted Succesfully',
+                redirectURL:'/admin/productOffers',
+             })
+
+        }
+        
+    } catch (error) {
+        console.log('Error in deleteProductOffer',error);
+    }
+}
+
+
+const deleteCategoryOffer = async(req,res) =>{
+    try {
+
+        const offerId = req.query.id;
+        const categoryName = req.query.categoryName;
+        if(!offerId){
+            return res.status(400).json({
+                success:false,
+                message:'Error in getting the Id of the Offer',
+            })
+        }else{
+             await Offer.deleteOne({_id:offerId});
+             
+             const category = await Category.findOne({ name: categoryName });
+             await Product.updateMany(
+                { category: category._id },
+                [
+                    {
+                        $set: {
+                            salePrice: "$regularPrice"
+                        }
+                    }
+                ]
+            );
+             return res.status(200).json({
+                success:true,
+                message:'Offer deleted Succesfully',
+                redirectURL:'/admin/categoryOffers',
+             })
+
+        }
+        
+    } catch (error) {
+        console.log('Error in deleteCategoryOffer',error);
+    }
+}
+
 module.exports={
 
     productOffers,
     categoryOffers,
     addProductOffer,
     addCategoryOffer,
+    deleteProductOffer,
+    deleteCategoryOffer,
 
 }

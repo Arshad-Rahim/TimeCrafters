@@ -32,5 +32,8 @@ const offerSchema = new mongoose.Schema({
 },{timestamps:true})
 
 
+offerSchema.index({ endDate: 1 }, { expireAfterSeconds: 0 });
+
+
 const Offers = mongoose.model('Offers',offerSchema);
 module.exports = Offers;

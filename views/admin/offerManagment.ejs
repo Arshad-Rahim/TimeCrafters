@@ -126,7 +126,7 @@
             <h2>Product Offers</h2>
             <p>Manage offers for specific products</p>
             
-            <table>
+            <table id="body">
                 <thead>
                     <tr>
                         <th>NAME</th>
@@ -145,7 +145,7 @@
                         <td><%= new Date(offer[i].endDate).toLocaleDateString() %>
                         </td>
                         <td>
-                            <button class="delete-btn">🗑</button>
+                            <button onclick="confirmAction('<%=offer[i]._id%>','<%= offer[i].targetName%>')" class="delete-btn">🗑</button>
                         </td>
                     </tr>
                     <% } %>
@@ -363,4 +363,62 @@ function validateField(field) {
 
 // Initialize form validation when the document loads
 document.addEventListener('DOMContentLoaded', initializeFormValidation);
+</script>
+
+
+
+
+
+<script>
+
+  function confirmAction(offerId,productName){
+    Swal.fire({
+      title:'Are you Sure?',
+      text:'Please click Sure To Proceed',
+      icon:'warning',
+      showCancelButton: true,
+      cancelButtonColor: '#6c757d',
+      confirmButtonText:'Sure',
+      cancelButtonText:'Cancel',
+    }).then((result) =>{
+      if(result.isConfirmed){
+
+      
+      $.ajax({
+  url: `/admin/deleteProductOffer?id=${offerId}&productName=${encodeURIComponent(productName)}`,
+  type: "DELETE",
+  dataType: 'json',
+  contentType: 'application/json',
+  success: function(response) {
+    if (response.success) {
+      Swal.fire({
+        toast: true,
+        position: 'center',
+        icon: 'success',
+        title: 'Success',
+        text: response.message,
+        showConfirmButton: false,
+        timer: 1500,
+        customClass: 'center-toast',
+      })  
+      $('#body').load('/admin/productOffers #body')
+    }
+  },
+  error: function(xhr,response) {
+      const errorMessage = xhr.responseJSON ? xhr.responseJSON.message : 'Failed to add offer. Please try again.';
+    Swal.fire({
+      toast: true,
+      position: 'top',
+      icon: 'error',
+      title: 'Error',
+      text:errorMessage,
+      showConfirmButton: false,
+      timer: 1500,
+      customClass: 'center-toast',
+    });
+  }
+});               
+      }
+    });
+  }
 </script>

@@ -32,7 +32,7 @@ const wishlist = async(req,res) =>{
         if(productExisting){
             return res.status(400).json({
                 success: false,
-                message: "Product is alredy in the cart",
+                message: "Product is alredy in the Wishlist",
               }); 
         }else{
             userWishlistExisting.wishlist.push({
