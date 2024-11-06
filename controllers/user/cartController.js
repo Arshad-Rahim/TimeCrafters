@@ -3,6 +3,7 @@ const Product = require("../../models/productSchema");
 const Cart = require("../../models/cartSchema");
 const Address = require("../../models/addressSchema");
 const Order = require("../../models/orderScheama");
+const Coupon = require('../../models/couponSchema');
 
 const getCart = async (req, res) => {
   try {
@@ -417,6 +418,41 @@ const getOrderSuccess = async (req, res) => {
   }
 };
 
+
+
+const applyCoupon = async(req,res) =>{
+  try {
+
+    const {couponCode,totalPrice}= req.body;
+    
+    const coupon = await Coupon.findOne({code:couponCode});
+    if(!coupon){
+      return res.status(400).json({
+        success:false,
+        message:'Invalid Coupon Code',
+      })
+    }else{
+      if(totalPrice<coupon.minimumPurchased){
+        return res.status(400).json({
+          success:false,
+          message:`Coupon minimum pruchased amount not met atleast ${coupon.minimumPurchased}`
+        })
+      }
+
+      return res.status(200).json({
+        success:true,
+        message:'Coupon applied succesfully',
+        discountPercentage:coupon.discountPercentage,
+        maximumDiscount:coupon.maximumDiscount,
+      })
+
+    }
+    
+  } catch (error) {
+    console.log('Error in applyCoupon',error);
+  }
+}
+
 module.exports = {
   getCart,
   postCart,
@@ -425,4 +461,5 @@ module.exports = {
   deleteCartProduct,
   postOrderSuccess,
   getOrderSuccess,
+  applyCoupon,
 };

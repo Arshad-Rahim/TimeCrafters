@@ -139,8 +139,8 @@
                     <div class="mt-6">
                         <h3 class="text-lg font-semibold mb-2">Coupon Code</h3>
                         <div class="grid grid-cols-3 gap-2">
-                            <input type="text" placeholder="Enter coupon code" class="col-span-2 px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                            <button class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition duration-150 ease-in-out">
+                            <input id="couponCode" name="couponCode" type="text" placeholder="Enter coupon code" class="col-span-2 px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <button onclick="applyCoupon(event)" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition duration-150 ease-in-out">
                                 Apply
                             </button>
                         </div>
@@ -253,4 +253,72 @@
         
     }
 
+</script>
+
+
+
+<script>
+
+    function applyCoupon(event){
+
+        event.preventDefault();
+        const couponCode = document.getElementById('couponCode').value;
+        const totalPrice = parseInt('<%= cartCalculation.totalPrice %>');
+      $.ajax({
+  url: '/applyCoupon',
+  type: "POST",
+  dataType: 'json',
+  contentType: 'application/json',
+  data: JSON.stringify({couponCode,totalPrice}),
+
+  success: function(response) {
+    if (response.success) {
+        const discountPercentage = parseInt(response.discountPercentage);
+        const maximumDiscount = parseInt(response.maximumDiscount);
+
+        const totalPrice = parseInt('<%= cartCalculation.totalPrice %>');
+                const currentSavings = parseInt('<%= cartCalculation.savings %>');
+                let discountAmount = Math.round((totalPrice * discountPercentage) / 100);
+                if(discountAmount>maximumDiscount){
+                    discountAmount = maximumDiscount;
+                }
+        const newTotal = totalPrice - discountAmount;
+        const newSaving = currentSavings+discountAmount;
+
+
+        document.querySelector('.font-bold.text-lg').textContent = `₹${newTotal}`;
+        document.querySelector('.text-green-600').textContent = `-₹${newSaving}`;
+
+       
+
+
+      Swal.fire({
+        toast: true,
+        position: 'center',
+        icon: 'success',
+        title: 'Success',
+        text: response.message,
+        showConfirmButton: false,
+        timer: 1500,
+        customClass: 'center-toast',
+      })  
+      $('#body').load('/admin/productOffers #body')
+    }
+  },
+  error: function(xhr,response) {
+      const errorMessage = xhr.responseJSON ? xhr.responseJSON.message : 'Failed to add offer. Please try again.';
+    Swal.fire({
+      toast: true,
+      position: 'center',
+      icon: 'error',
+      title: 'Error',
+      text:errorMessage,
+      showConfirmButton: false,
+      timer: 1500,
+      customClass: 'center-toast',
+    });
+  }
+});  
+
+    }
 </script>
