@@ -16,6 +16,37 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <link href="https://cdn.jsdelivr.net/npm/@sweetalert2/theme-dark@4/dark.css" rel="stylesheet">
 
+<style>
+
+.payment-options {
+    margin-top: 20px;
+}
+
+.payment-title {
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 10px;
+}
+
+.payment-methods {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.payment-method {
+    display: flex;
+    align-items: center;
+}
+
+.payment-method input[type="radio"] {
+    margin-right: 10px;
+}
+
+.payment-method label {
+    font-size: 14px;
+}
+</style>
 </head>
 <%- include('../../views/partials/user/header') %>
 
@@ -145,7 +176,25 @@
                             </button>
                         </div>
                     </div>
-                    <button onclick="orderSuccess(event)" class="w-full mt-6 px-4 py-3 bg-green-600 text-white rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition duration-150 ease-in-out text-lg font-semibold">
+                    <div class="payment-options">
+                        <h3 class="payment-title">Payment Method</h3>
+                        <div class="payment-methods">
+                            <div class="payment-method">
+                                <input type="radio" id="upi" name="paymentMethod" value="upi" >
+                                <!-- checked -->
+                                <label for="upi">UPI</label>
+                            </div>
+                            <div class="payment-method">
+                                <input type="radio" id="paypal" name="paymentMethod" value="paypal">
+                                <label for="paypal">PayPal</label>
+                            </div>
+                            <div class="payment-method">
+                                <input type="radio" id="cashondelivery" name="paymentMethod" value="cashondelivery">
+                                <label for="cashondelivery">Cash on Delivery</label>
+                            </div>
+                        </div>
+                    </div>
+                    <button onclick="orderSuccess(event,'<%= cartCalculation.totalPrice %>')" class="w-full mt-6 px-4 py-3 bg-green-600 text-white rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition duration-150 ease-in-out text-lg font-semibold">
                         Proceed to Payment
                     </button >
                 </div>
@@ -191,7 +240,7 @@
         })
     })
 
-    function orderSuccess(event){
+    function orderSuccess(event,totalPrice){
         event.preventDefault()
         console.log(selectedAddress)
         if(!selectedAddress){
@@ -207,18 +256,37 @@
         })
         return;
         }
-        orderSuccessAjax()
+        
+        const selectedPaymentMethod = document.querySelector('input[name="paymentMethod"]:checked');
+    if (!selectedPaymentMethod) {
+        Swal.fire({
+            toast: true,
+            position: 'center',
+            icon: 'warning',
+            title: 'Warning',
+            text: 'Please select a Payment Method',
+            showConfirmButton: false,
+            timer: 1500,
+            customClass: 'center-toast',
+        });
+        return;
     }
 
-    function orderSuccessAjax(){
+    
+    orderSuccessAjax(selectedPaymentMethod.value,totalPrice);
+}
+
+    
+
+    function orderSuccessAjax(paymentMethod,totalPrice){
         $.ajax({
             type:'POST',
             url:'/orderSuccess/',
             dataType:'json',
             contentType:'application/json',
             data:JSON.stringify({
-                selectedAddress,selectedAddressDetails
-            }),
+                selectedAddress,selectedAddressDetails,paymentMethod,totalPrice     
+                   }),
             success: function (response) {
         if (response.success) {
           Swal.fire({
@@ -275,16 +343,11 @@
     if (response.success) {
         const discountPercentage = parseInt(response.discountPercentage);
         const maximumDiscount = parseInt(response.maximumDiscount);
-
-        const totalPrice = parseInt('<%= cartCalculation.totalPrice %>');
-                const currentSavings = parseInt('<%= cartCalculation.savings %>');
-                let discountAmount = Math.round((totalPrice * discountPercentage) / 100);
-                if(discountAmount>maximumDiscount){
-                    discountAmount = maximumDiscount;
-                }
-        const newTotal = totalPrice - discountAmount;
+        const newTotal = parseInt(response.newTotal);
+        const discountAmount = parseInt(response.discountAmount);
+        const currentSavings = parseInt('<%= cartCalculation.savings%>');
+     
         const newSaving = currentSavings+discountAmount;
-
 
         document.querySelector('.font-bold.text-lg').textContent = `₹${newTotal}`;
         document.querySelector('.text-green-600').textContent = `-₹${newSaving}`;

@@ -37,13 +37,19 @@ const addProductOffer = async(req,res) =>{
     try {
        
        const  {offerName,offerPercentage,endDate,selectedProduct} = req.body;
-       
+       console.log(selectedProduct)
      
      const offerNameLowerCase = offerName.trim().toLowerCase();
      const exisitingOfferName = await Offer.findOne({
         name:{ $regex: new RegExp(`^${offerNameLowerCase}$`, "i")}
      });
      const target = await Product.findOne({productName:selectedProduct});
+     if(!target){
+        return res.status(400).json({
+            success:false,
+            message:'Product with this name notfound'
+        })
+     }
      const offerPrice = (target.regularPrice)/100 * offerPercentage;
      const updatedSalePrice = target.regularPrice - offerPrice;
 

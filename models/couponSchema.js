@@ -31,7 +31,21 @@ const couponSchema = new mongoose.Schema({
     usageLimit:{
         type:Number,
         required:true,
-    }
+    },
+
+    users_applied: [
+        {
+          user: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "user",
+          },
+          used_count: {
+            type: Number,
+            default: 0,
+            min: [0, "Used count cannot be negative"],
+          },
+        },
+      ],
 
 
 },{timestamps:true});

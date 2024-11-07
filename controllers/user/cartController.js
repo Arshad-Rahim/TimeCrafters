@@ -3,7 +3,9 @@ const Product = require("../../models/productSchema");
 const Cart = require("../../models/cartSchema");
 const Address = require("../../models/addressSchema");
 const Order = require("../../models/orderScheama");
-const Coupon = require('../../models/couponSchema');
+const Coupon = require("../../models/couponSchema");
+const User = require("../../models/userSchema");
+const convertCurrency = require("../../service/currencyConversion");
 
 const getCart = async (req, res) => {
   try {
@@ -153,18 +155,16 @@ const postCart = async (req, res) => {
   }
 };
 
-const putQuantity = async (req, res) => { 
+const putQuantity = async (req, res) => {
   try {
     const userId = req.session.user;
 
     const { quantity, productId } = req.body;
 
-
-  const [cart,product] = await Promise.all([
-    Cart.findOne({ userId }),
-    Product.findById(productId),
-  ]);
-
+    const [cart, product] = await Promise.all([
+      Cart.findOne({ userId }),
+      Product.findById(productId),
+    ]);
 
     if (!quantity || quantity < 1) {
       return res.status(400).json({
@@ -204,7 +204,6 @@ const putQuantity = async (req, res) => {
         message: "Cart not found",
       });
     }
-
 
     if (!product) {
       return res.status(404).json({
@@ -299,24 +298,24 @@ const deleteCartProduct = async (req, res) => {
     // });
 
     const result = await Cart.updateOne(
-      {userId:userId},
+      { userId: userId },
       {
-        $pull:{
-          items:{productId: new mongoose.Types.ObjectId(productId)}
-        }
+        $pull: {
+          items: { productId: new mongoose.Types.ObjectId(productId) },
+        },
       }
     );
 
-    if(result.modifiedCount==0){
+    if (result.modifiedCount == 0) {
       return res.status(400).json({
-        success:false,
-        message:'Item not found in the cart',
-      })
+        success: false,
+        message: "Item not found in the cart",
+      });
     }
 
     return res.status(200).json({
       success: true,
-      message: "Product deleted from the cart"
+      message: "Product deleted from the cart",
     });
   } catch (error) {
     console.log("Error in deleteAddress", error);
@@ -327,8 +326,11 @@ const postOrderSuccess = async (req, res) => {
   try {
     const userId = req.session.user;
     const cart = await Cart.findOne({ userId });
-    const { selectedAddress, selectedAddressDetails } = req.body;
+    const { selectedAddress, selectedAddressDetails, paymentMethod,totalPrice } = req.body;
 
+    if(!req.session.newTotal){
+       req.session.newTotal = totalPrice;
+    }
     const orderItems = cart.items.map((item) => ({
       productId: item.productId,
       ProductName: item.productName,
@@ -356,7 +358,7 @@ const postOrderSuccess = async (req, res) => {
         altMobileNumber: selectedAddressDetails.altMobileNumber,
       },
       paymentInfo: {
-        method: "Cash on delivery",
+        method: paymentMethod,
       },
     });
 
@@ -373,7 +375,6 @@ const postOrderSuccess = async (req, res) => {
       switch (cartItem.color) {
         case "gold":
           colorQuantityField = "goldenQuantity";
-          // product.goldenQuantity = product.goldenQuantity - cart.item.quantity;
           break;
         case "black":
           colorQuantityField = "blackQuantity";
@@ -387,8 +388,20 @@ const postOrderSuccess = async (req, res) => {
 
       product[colorQuantityField] =
         product[colorQuantityField] - cartItem.quantity;
-      // this result the value of product object aketh array key give its resultent value
       await product.save();
+    }
+    if (paymentMethod == "paypal") {
+      console.log("paypal athi");
+      const newTotal = req.session.newTotal;
+      console.log(newTotal)
+
+      const convertAmount = await convertCurrency(newTotal);
+      req.session.convertAmount = convertAmount;
+      return res.json({
+        success: true,
+        redirectURL: "/pay",
+        convertAmount: convertAmount,
+      });
     }
 
     return res.status(200).json({
@@ -418,40 +431,116 @@ const getOrderSuccess = async (req, res) => {
   }
 };
 
-
-
-const applyCoupon = async(req,res) =>{
+const applyCoupon = async (req, res) => {
   try {
+    const { couponCode, totalPrice } = req.body;
+    const userId = req.session.user;
 
-    const {couponCode,totalPrice}= req.body;
-    
-    const coupon = await Coupon.findOne({code:couponCode});
-    if(!coupon){
+    // Find the coupon
+    const coupon = await Coupon.findOne({ code: couponCode });
+    if (!coupon) {
       return res.status(400).json({
-        success:false,
-        message:'Invalid Coupon Code',
-      })
-    }else{
-      if(totalPrice<coupon.minimumPurchased){
-        return res.status(400).json({
-          success:false,
-          message:`Coupon minimum pruchased amount not met atleast ${coupon.minimumPurchased}`
-        })
-      }
+        success: false,
+        message: "Invalid Coupon Code",
+      });
+    }
 
-      return res.status(200).json({
-        success:true,
-        message:'Coupon applied succesfully',
-        discountPercentage:coupon.discountPercentage,
-        maximumDiscount:coupon.maximumDiscount,
-      })
+    // Check if minimum purchase requirement is met
+    if (totalPrice < coupon.minimumPurchased) {
+      return res.status(400).json({
+        success: false,
+        message: `Coupon minimum purchase amount not met. Minimum required: ${coupon.minimumPurchased}`,
+      });
+    }
 
+    // Check user's coupon usage
+    const userCouponUsage = await Coupon.aggregate([
+      {
+        $match: { code: couponCode },
+      },
+      {
+        $unwind: "$users_applied",
+      },
+      {
+        $match: {
+          "users_applied.user": new mongoose.Types.ObjectId(userId),
+        },
+      },
+      {
+        $group: {
+          _id: "$users_applied.user",
+          used_count: { $sum: "$users_applied.used_count" },
+          limit: { $first: "$usageLimit" }, // Changed from limit to usageLimit to match schema
+        },
+      },
+    ]);
+
+    // Check if user has reached usage limit
+    if (
+      userCouponUsage.length > 0 &&
+      userCouponUsage[0].used_count >= userCouponUsage[0].limit
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: `You have reached the usage limit for this coupon.`,
+      });
+    }
+
+    // Update coupon usage
+    if (userCouponUsage.length > 0) {
+      // User has used this coupon before - increment count
+      await Coupon.updateOne(
+        {
+          code: couponCode,
+          "users_applied.user": new mongoose.Types.ObjectId(userId),
+        },
+        { $inc: { "users_applied.$.used_count": 1 } }
+      );
+    } else {
+      // First time user is using this coupon
+      await Coupon.updateOne(
+        { code: couponCode },
+        {
+          $push: {
+            users_applied: {
+              user: new mongoose.Types.ObjectId(userId),
+              used_count: 1,
+            },
+          },
+        }
+      );
+    }
+
+    // Calculate discount
+    const discountPercentage = coupon.discountPercentage;
+    const maximumDiscount = coupon.maximumDiscount;
+    let discountAmount = Math.round((totalPrice * discountPercentage) / 100);
+    
+    if (discountAmount > maximumDiscount) {
+      discountAmount = maximumDiscount;
     }
     
+    const newTotal = totalPrice - discountAmount;
+    
+    req.session.newTotal = newTotal;
+
+    return res.status(200).json({
+      success: true,
+      message: "Coupon applied successfully",
+      discountPercentage,
+      maximumDiscount,
+      newTotal,
+      discountAmount,
+    });
+
   } catch (error) {
-    console.log('Error in applyCoupon',error);
+    console.error("Error in applyCoupon:", error);
+    return res.status(500).json({
+      success: false,
+      message: "An error occurred while applying the coupon",
+    });
   }
-}
+};
 
 module.exports = {
   getCart,
