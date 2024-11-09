@@ -85,5 +85,8 @@ router.delete('/deleteCoupon',adminAuth,couponController.deleteCoupon);
 // salesReport
 
 router.get('/salesReport',adminAuth,salesReportController.getSalesReport);
+router.get('/salesReport/pdf',adminAuth,salesReportController.downloadSalesReportPdf);
+router.get('/salesReport/excel',adminAuth,salesReportController.downloadSalesReportExcel);
+
 
 module.exports=router;

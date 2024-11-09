@@ -177,7 +177,9 @@
               <th>Amount</th>
             </tr>
           </thead>
+          
           <% for(i=0;i<order.length;i++){ %>
+            <% if(order[i].orderTotal == 0) continue;%>
           <tbody id="sales-data">
            
             <td><%= order[i].userId.name %></td>
@@ -195,7 +197,7 @@
         </table>
 
         <div class="download-buttons">
-          <button class="download-button download-pdf">
+          <button id="download-pdf" class="download-button download-pdf">
             <svg
               width="20"
               height="20"
@@ -209,7 +211,7 @@
             </svg>
             Download as PDF
           </button>
-          <button class="download-button download-excel">
+          <button id="excel" class="download-button download-excel">
             <svg
               width="20"
               height="20"
@@ -287,16 +289,55 @@ document.addEventListener("DOMContentLoaded", function() {
     filter.charAt(0).toUpperCase() + filter.slice(1);
 });
 // Add functionality to download buttons (for demonstration purposes)
-document
-  .querySelector(".download-pdf")
-  .addEventListener("click", function () {
-    alert("Downloading PDF...");
-  });
+document.getElementById("download-pdf").addEventListener("click", function () {
+  // Get selected filter and date range from the page
+  const urlParams = new URLSearchParams(window.location.search);
+  const filter = urlParams.get('filter') || 'daily';
+  const startDate = urlParams.get('startDate');
+  const endDate = urlParams.get('endDate');
+  
+  // Build the download URL with query parameters
+  let downloadUrl = `/admin/salesReport/pdf?period=${filter}`;
+  
+  if (filter === 'custom') {
+    if (startDate && endDate) {
+      downloadUrl += `&startDate=${startDate}&endDate=${endDate}`;
+    } else {
+      alert("Please select both start and end dates for custom filter.");
+      return;
+    }
+  }
+  
+  // Redirect to the PDF download URL
+  window.location.href = downloadUrl;
+});
 
-document
-  .querySelector(".download-excel")
-  .addEventListener("click", function () {
-    alert("Downloading Excel...");
-  });
+
+
+
+
+
+document.getElementById("excel").addEventListener("click", function () {
+  // Get selected filter and date range from the page
+  const urlParams = new URLSearchParams(window.location.search);
+  const filter = urlParams.get('filter') || 'daily';
+  const startDate = urlParams.get('startDate');
+  const endDate = urlParams.get('endDate');
+  
+  // Build the download URL with query parameters
+  let downloadUrl = `/admin/salesReport/excel?period=${filter}`;
+  
+  if (filter === 'custom') {
+    if (startDate && endDate) {
+      downloadUrl += `&startDate=${startDate}&endDate=${endDate}`;
+    } else {
+      alert("Please select both start and end dates for custom filter.");
+      return;
+    }
+  }
+  
+  window.location.href = downloadUrl;
+});
+
 </script>
   <%- include("../../views/partials/admin/footer") %>
