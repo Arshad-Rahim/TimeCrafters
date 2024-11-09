@@ -52,17 +52,21 @@
 					</div>
 
 					<div class="right-top-bar flex-w h-full">
-						<a href="/userProfile" class="flex-c-m trans-04 p-lr-25">
-							Account
-						</a>
+						<select name="account" id="account-dropdown" class="flex-c-m trans-04 p-lr-25">
+						  <option value="">Account</option>
+						  <option value="/userProfile">Account Details</option>
+						  <option value="/orderList">Orders</option>
+						  <option value="/wallet">Wallet</option>
+						  <option value="/myAddress">My Address</option>
+						  <option value="/logout">Logout</option>
+						</select>
 						<a href="/login" class="flex-c-m trans-04 p-lr-25">
-							Login
+						  Login
 						</a>
 						<a href="/signup" class="flex-c-m trans-04 p-lr-25">
-							Signup
+						  Signup
 						</a>
-					</div>
-				</div>
+					  </div>
 			</div>
 
 			<div class="wrap-menu-desktop">
@@ -145,15 +149,28 @@
 
 				<li>
 					<div class="right-top-bar flex-w h-full">
-						<a href="/userProfile" class="flex-c-m trans-04 p-lr-25">
-							Account
-						</a>
-						<a href="/login" class="flex-c-m trans-04 p-lr-25">
-							Login
-						</a>
-						<a href="/signup" class="flex-c-m trans-04 p-lr-25">
-							Signup
-						</a>
+						<select name="account" id="">
+							<option value="">
+								<a href="/userProfile" class="flex-c-m trans-04 p-lr-25">
+									Account
+								</a>
+							</option>
+							<option value="">
+								<a href="/login" class="flex-c-m trans-04 p-lr-25">
+									Login
+								</a>
+							</option>
+							
+							<option value="">
+								<a href="/signup" class="flex-c-m trans-04 p-lr-25">
+									Signup
+								</a>
+							</option>
+							
+						</select>
+						
+						
+						
 					</div>
 				</li>
 			</ul>
@@ -192,3 +209,14 @@
 		</div>
 	</header>
 
+<script>
+
+	const accountDropdown = document.getElementById('account-dropdown');
+
+accountDropdown.addEventListener('change', () => {
+  const selectedOption = accountDropdown.value;
+  if (selectedOption) {
+    window.location.href = selectedOption;
+  }
+});
+</script>

@@ -10,6 +10,7 @@ const productController = require('../controllers/admin/productController');
 const orderController = require('../controllers/admin/orderController');
 const offerController = require('../controllers/admin/offerController');    
 const couponController = require('../controllers/admin/couponController');
+const salesReportController = require('../controllers/admin/salesReportController');
 
 const multer = require('multer');
 const storage = require('../helpers/multer');
@@ -62,6 +63,7 @@ router.post('/editProduct/:id',adminAuth,uploads.array('images',4),productContro
 // order Management
 router.get('/orderManagment',adminAuth,orderController.getOrderManagment);
 router.put('/updateStatus/:orderId/:productId',adminAuth,orderController.updateStatus);
+router.delete('/deleteOrderListProduct/:orderId/:productId', orderController.deleteOrderListProduct);
 
 
 // offer managment
@@ -79,5 +81,10 @@ router.get('/couponManagment',adminAuth,couponController.couponManagment);
 router.post('/addCoupon',adminAuth,couponController.addCoupon);
 router.delete('/deleteCoupon',adminAuth,couponController.deleteCoupon);
 
+
+// salesReport
+
+router.get('/salesReport',adminAuth,salesReportController.getSalesReport);
+router.get('/sales-report',adminAuth,salesReportController.getFilteredReport);
 
 module.exports=router;

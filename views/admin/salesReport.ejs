@@ -1,0 +1,287 @@
+<%- include("../../views/partials/admin/header") %>
+
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sales Report</title>
+    <style>
+      body {
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+          Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue",
+          sans-serif;
+        line-height: 1.5;
+        color: #333;
+        margin: 0;
+        padding: 20px;
+        background-color: #f4f4f5;
+      }
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+      }
+      h1,
+      h2 {
+        color: #1f2937;
+      }
+      .card {
+        background: white;
+        border-radius: 8px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      }
+      .filter-buttons {
+        display: flex;
+        gap: 0.5rem;
+        margin-bottom: 1rem;
+      }
+      .filter-button {
+        padding: 0.5rem 1rem;
+        border-radius: 9999px;
+        border: none;
+        background: #e5e7eb;
+        cursor: pointer;
+        transition: background-color 0.3s;
+      }
+      .filter-button.active {
+        background: #4f46e5;
+        color: white;
+      }
+      .date-range {
+        display: none;
+        margin-top: 1rem;
+      }
+      .date-range input,
+      .date-range button {
+        margin-right: 10px;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+      th,
+      td {
+        padding: 0.75rem;
+        text-align: left;
+        border-bottom: 1px solid #e5e7eb;
+      }
+      th {
+        background: #f9fafb;
+        font-weight: 600;
+      }
+      .total-row {
+        font-weight: 600;
+      }
+      .summary-cards {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        margin-bottom: 1rem;
+      }
+      .summary-card {
+        background: white;
+        border-radius: 8px;
+        padding: 1rem;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      }
+      .summary-card h3 {
+        margin: 0;
+        font-size: 0.875rem;
+        color: #6b7280;
+      }
+      .summary-card p {
+        margin: 0.5rem 0 0;
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: #1f2937;
+      }
+      .download-buttons {
+        display: flex;
+        gap: 1rem;
+        justify-content: flex-end;
+        margin-top: 1rem;
+      }
+      .download-button {
+        padding: 0.75rem 1.5rem;
+        border-radius: 6px;
+        border: none;
+        color: white;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+      .download-pdf {
+        background: #10b981;
+      }
+      .download-excel {
+        background: #4f46e5;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Sales Report</h1>
+
+      <div class="card">
+        <h2>Report Settings</h2>
+        <div class="filter-buttons">
+          <button class="filter-button active" data-filter="daily">
+            Daily
+          </button>
+          <button class="filter-button" data-filter="weekly">Weekly</button>
+          <button class="filter-button" data-filter="monthly">Monthly</button>
+          <button class="filter-button" data-filter="custom">Custom</button>
+        </div>
+        <div class="date-range">
+          <label for="start-date">Start Date:</label>
+          <input type="date" id="start-date" name="start-date" />
+          <label for="end-date">End Date:</label>
+          <input type="date" id="end-date" name="end-date" />
+          <button id="apply-date-range">Apply</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Sales Report - <span id="report-type">Daily</span></h2>
+
+        <div class="summary-cards">
+          <div class="summary-card">
+            <h3>Overall Sales Count</h3>
+            <p id="sales-count"><%= overallSalesCount %></p>
+          </div>
+          <div class="summary-card">
+            <h3>Overall Order Amount</h3>
+            <p id="order-amount">₹<%= overallOrderAmount %></p>
+          </div>
+          <div class="summary-card">
+            <h3>Overall Discount</h3>
+            <p id="total-discount">₹<%= overallDiscount %></p>
+          </div>
+        </div>
+
+        <table>
+          <thead>
+            <tr>
+              <th>User</th>
+              <th>Date</th>
+              <th>Payment Method</th>
+              <th>Products</th>
+              <th>Amount</th>
+            </tr>
+          </thead>
+          <% for(i=0;i<order.length;i++){ %>
+          <tbody id="sales-data">
+           
+            <td><%= order[i].userId.name %></td>
+            <td><%= order[i].createdAt.toLocaleDateString()%></td>
+            <td><%= order[i].paymentInfo.method %></td>
+            <td><%= order[i].items.length%></td>
+            <% if(order[i].offerApplied == 0){ %>
+            <td><%= order[i].orderTotal%></td>
+            <% }else{%>
+            <td><%= order[i].offerApplied%>
+            <% } %>
+          </tbody>
+          <% } %>
+
+        </table>
+
+        <div class="download-buttons">
+          <button class="download-button download-pdf">
+            <svg
+              width="20"
+              height="20"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+              />
+            </svg>
+            Download as PDF
+          </button>
+          <button class="download-button download-excel">
+            <svg
+              width="20"
+              height="20"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+              />
+            </svg>
+            Download as Excel
+          </button>
+        </div>
+      </div>
+    </div>
+</body>
+    <script>
+   document.querySelectorAll(".filter-button").forEach((button) => {
+  button.addEventListener("click", function () {
+    document.querySelector(".filter-button.active").classList.remove("active");
+    this.classList.add("active");
+    const filter = this.getAttribute("data-filter");
+
+    // Show date range inputs if "Custom" is selected
+    const dateRange = document.querySelector(".date-range");
+    if (filter === "custom") {
+      dateRange.style.display = "block";
+    } else {
+      dateRange.style.display = "none";
+    }
+
+    // Fetch sales report data based on the selected filter
+    fetchSalesReport(filter);
+  });
+});
+
+document.getElementById("apply-date-range").addEventListener("click", function () {
+  const startDate = document.getElementById("start-date").value;
+  const endDate = document.getElementById("end-date").value;
+
+  // Fetch sales report data for the selected date range
+  fetchSalesReport("custom", startDate, endDate);
+});
+
+function fetchSalesReport(filter, startDate = null, endDate = null) {
+  let url = `/admin/sales-report?filter=${filter}`;
+  if (filter === "custom") {
+    url += `&startDate=${startDate}&endDate=${endDate}`;
+  }
+
+  $.ajax({
+    url:url,
+    method:'GET',
+  })
+
+//   fetch(url, {
+//     method: "GET",
+//   })
+//     .then((response) => response.json())
+//     .then((data) => {
+//       // Update the sales report table and summary statistics
+//       updateSalesReport(data);
+//     })
+//     .catch((error) => {
+//       console.error("Error fetching sales report:", error);
+//     });
+}
+// Add functionality to download buttons (for demonstration purposes)
+document
+  .querySelector(".download-pdf")
+  .addEventListener("click", function () {
+    alert("Downloading PDF...");
+  });
+
+document
+  .querySelector(".download-excel")
+  .addEventListener("click", function () {
+    alert("Downloading Excel...");
+  });
+</script>
+  <%- include("../../views/partials/admin/footer") %>

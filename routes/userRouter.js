@@ -7,6 +7,7 @@ const productController = require('../controllers/user/productController');
 const addressController = require('../controllers/user/addressController');
 const orderController = require('../controllers/user/orderController');
 const wishlistController = require('../controllers/user/wishlistController');
+const walletController = require('../controllers/user/walletController');
 
 const {userAuth} = require('../middleware/auth');
 const passport = require("passport");
@@ -86,6 +87,11 @@ router.get(
   passport.authenticate("google", { scope: ["profile", "email"],  prompt: "select_account"  })
 );
 
+
+
+// wallet
+router.get('/wallet',userAuth,walletController.getWallet);
+router.post('/addWalletFund',userAuth,walletController.addWalletFund);
 
 
 router.get(

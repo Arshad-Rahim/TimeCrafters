@@ -74,6 +74,14 @@
                                     <button onclick="cancel(event,'<%= order._id%>','<%=item.productId._id%>')" class="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600 transition duration-300">Cancel</button>
                                     <button class="px-3 py-1 bg-gray-200 text-gray-800 rounded hover:bg-gray-300 transition duration-300">Invoice</button>
                               <% } %>
+
+
+                              <% if(item.orderStatus == 'Delivered'  && item.productId){ %>
+
+                                <button class="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600 transition duration-300">Return</button>
+                                <button class="px-3 py-1 bg-gray-200 text-gray-800 rounded hover:bg-gray-300 transition duration-300">Invoice</button>
+                          <% } %>
+                          
                               
                                 </div>
                             </div>

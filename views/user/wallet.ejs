@@ -1,0 +1,326 @@
+<%- include('../../views/partials/user/header') %>
+<head>
+
+	<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+	<link href="https://cdn.jsdelivr.net/npm/@sweetalert2/theme-dark@4/dark.css" rel="stylesheet">
+	
+  </head>
+<style>
+    body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        margin: 0;
+        background-color: #fff;
+    }
+    .full-container {
+        padding: 20px;
+        margin-top: 80px;
+    }
+    .header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 10px;
+    }
+    .header-left h1 {
+        margin: 0;
+        font-size: 24px;
+        font-weight: bold;
+    }
+    .header-left p {
+        margin: 5px 0 0 0;
+        color: #666;
+        font-size: 14px;
+    }
+    .welcome-text {
+        text-align: right;
+        font-size: 14px;
+    }
+    .welcome-name {
+        font-weight: 500;
+    }
+    .wallet-container {
+        background-color: #f5f6f7;
+        padding: 30px;
+        border-radius: 8px;
+    }
+    .wallet-section {
+        background-color: white;
+        border-radius: 8px;
+        padding: 20px;
+        margin-top: 20px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    .wallet-header {
+        font-size: 20px;
+        font-weight: bold;
+        margin-bottom: 20px;
+    }
+    .wallet-balance {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+    .balance {
+        font-size: 32px;
+        font-weight: bold;
+    }
+    .add-funds {
+        background-color: #1a2236;
+        color: white;
+        border: none;
+        padding: 8px 16px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 14px;
+    }
+    .transactions {
+        margin-top: 30px;
+    }
+    .transactions h3 {
+        font-size: 18px;
+        margin-bottom: 15px;
+    }
+    table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    th {
+        text-align: left;
+        padding: 12px;
+        border-bottom: 1px solid #eee;
+        color: #666;
+        font-weight: 500;
+        font-size: 14px;
+    }
+    td {
+        padding: 12px;
+        border-bottom: 1px solid #eee;
+        font-size: 14px;
+    }
+    .modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+    }
+    .modal-content {
+        background-color: white;
+        padding: 24px;
+        border-radius: 8px;
+        width: 90%;
+        max-width: 400px;
+        position: relative;
+    }
+    .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+    .modal-header h2 {
+        margin: 0;
+        font-size: 20px;
+        font-weight: bold;
+    }
+    .close-button {
+        font-size: 24px;
+        cursor: pointer;
+        color: #666;
+    }
+    .form-group {
+        margin-bottom: 24px;
+    }
+    .form-group label {
+        display: block;
+        margin-bottom: 8px;
+        font-size: 14px;
+        color: #666;
+    }
+    .amount-input {
+        width: 100%;
+        padding: 8px 12px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 16px;
+    }
+    .modal-footer {
+        display: flex;
+        justify-content: flex-end;
+        gap: 12px;
+    }
+    .cancel-button {
+        padding: 8px 16px;
+        border: 1px solid #ddd;
+        background-color: white;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 14px;
+    }
+    .confirm-button {
+        padding: 8px 16px;
+        background-color: #1a2236;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 14px;
+    }
+</style>
+<body>
+        <div  class="full-container">
+            <div class="header">
+                <div class="header-left">
+                    <h1>Your Wallet</h1>
+                    <p>Manage your wallet</p>
+                </div>
+                <div class="welcome-text">
+                    Welcome! <span class="welcome-name"><%=wallet.userId.name%></span>
+                </div>
+            </div>
+    
+            <div class="wallet-container">
+                <div class="wallet-header">My Wallet</div>
+                
+                <div class="wallet-section">
+                    <h3>Wallet Balance</h3>
+                    <div class="wallet-balance">
+                        <div id="balance" class="balance">₹<%= wallet.balance %></div>
+                        <button class="add-funds">Add Funds</button>
+                    </div>
+                </div>
+    
+                <div class="wallet-section">
+                    <div id="transaction" class="transactions">
+                        <h3>Recent Transactions</h3>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Type</th>
+                                    <th>Amount</th>
+                                    <th>Date</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <% for(i=0;i<wallet.transactions.length;i++) {%>
+                                    <td><%= wallet.transactions[i].transaction_type %></td>
+                                    <td>₹<%= wallet.transactions[i].amount %></td>
+                                    <td><%= wallet.transactions[i].transaction_date.toLocaleDateString() %></td>
+                                    <td><%= wallet.transactions[i].transaction_status%></td>
+                                </tr>
+                              <% } %>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+    
+            <div id="addFundsModal" class="modal" style="display: none;">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2>Add Funds to Wallet</h2>
+                        <span class="close-button">&times;</span>
+                    </div>
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <label for="amount">Amount to Add</label>
+                            <input type="number" id="amount" placeholder="Enter amount" class="amount-input">
+                        </div>
+                        <div class="modal-footer">
+                            <button class="cancel-button">Cancel</button>
+                            <button class="confirm-button">Add Funds</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+</body>
+
+    <script>
+        // Get modal elements
+        const modal = document.getElementById('addFundsModal');
+        const addFundsButton = document.querySelector('.add-funds');
+        const closeButton = document.querySelector('.close-button');
+        const cancelButton = document.querySelector('.cancel-button');
+        const confirmButton = document.querySelector('.confirm-button');
+
+        // Show modal
+        addFundsButton.addEventListener('click', () => {
+            modal.style.display = 'flex';
+        });
+
+        // Hide modal
+        function hideModal() {
+            modal.style.display = 'none';
+        }
+
+        closeButton.addEventListener('click', hideModal);
+        cancelButton.addEventListener('click', hideModal);
+
+        // Close modal when clicking outside
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                hideModal();
+            }
+        });
+
+        // Handle form submission
+        confirmButton.addEventListener('click', () => {
+            const amount = document.getElementById('amount').value;
+            // Add your form submission logic here
+
+            $.ajax({
+        url:`/addWalletFund`,
+        type:'POST',
+        dataType:'json',
+        contentType:'application/json',
+		data:JSON.stringify({amount}),
+
+        success:function(response){
+            if(response.success){
+                Swal.fire({
+                    toast:true,
+                    position:'center',
+                    icon:'success',
+                    title:response.message,
+                    showConfirmButton:false,
+                    timer:1500,
+                    customClass:'center-toast',
+
+                })
+                $('#balance').load('/wallet #balance', function() {
+                    $('#transaction').load('/wallet #transaction');
+                });
+            }
+        },
+        error:function(xhr,status,error){
+            const response = xhr.responseJSON;
+            Swal.fire({
+                toast: true,
+                position: 'center',
+                icon: 'error',
+                title: 'Error',
+                text:response.message,
+                showConfirmButton: false,
+                timer: 1500,
+                customClass: 'center-toast',
+            });
+        }
+    })
+
+            console.log('Adding funds:', amount);
+            hideModal();
+        });
+    </script>
+<%- include('../../views/partials/user/footer') %>

@@ -6,6 +6,7 @@ const Order = require("../../models/orderScheama");
 const Coupon = require("../../models/couponSchema");
 const User = require("../../models/userSchema");
 const convertCurrency = require("../../service/currencyConversion");
+const Wallet = require('../../models/walletShema');
 
 const getCart = async (req, res) => {
   try {
@@ -13,17 +14,7 @@ const getCart = async (req, res) => {
 
     const cart = await Cart.findOne({ userId }).populate("items.productId");
     if (cart) {
-      // const cartCalculation = {
-      //   basePrice: cart.items.reduce(
-      //     (total, item) => total + item.regularPrice * item.quantity,
-      //     0
-      //   ),
-      //   totalPrice: cart.items.reduce(
-      //     (total, item) => total + item.salePrice * item.quantity,
-      //     0
-      //   ),
-      // };
-
+    
       const cartCalculation = cart.items.reduce(
         (acc, item) => ({
           basePrice: acc.basePrice + item.regularPrice * item.quantity,
@@ -246,7 +237,6 @@ const getCheckOut = async (req, res) => {
   try {
     const userId = req.session.user;
 
-    // instead of multople await using promise to solve with single await
     const [address, cart] = await Promise.all([
       Address.find({ userId }),
       Cart.findOne({ userId }).populate({
@@ -278,24 +268,7 @@ const deleteCartProduct = async (req, res) => {
   try {
     const userId = req.session.user;
     const productId = req.params.id;
-    // const cart = await Cart.findOne({ userId });
-    // const foundIndex = cart.items.findIndex(
-    //   (item) => item.productId.toString() == productId.toString()
-    // );
-
-    // if (foundIndex == -1) {
-    //   return res.status(400).json({
-    //     success: false,
-    //     message: "Item is not found in cart",
-    //   });
-    // }
-    // // splice vech delete the product from the array
-    // cart.items.splice(foundIndex, 1);
-    // await cart.save();
-    // return res.status(200).json({
-    //   success: true,
-    //   message: "Product deleted From the cart",
-    // });
+   
 
     const result = await Cart.updateOne(
       { userId: userId },
@@ -328,9 +301,19 @@ const postOrderSuccess = async (req, res) => {
     const cart = await Cart.findOne({ userId });
     const { selectedAddress, selectedAddressDetails, paymentMethod,totalPrice } = req.body;
 
-    if(!req.session.newTotal){
-       req.session.newTotal = totalPrice;
+    delete req.session.newTotal;
+    delete req.session.convertAmount;
+
+    const latestOrder = await Order.findOne({ userId }).sort({ createdAt: -1 });
+
+    if (latestOrder && latestOrder.offerApplied) {
+      req.session.newTotal = latestOrder.offerApplied;
+    } else {
+      req.session.newTotal = totalPrice;
     }
+
+    
+  
     const orderItems = cart.items.map((item) => ({
       productId: item.productId,
       ProductName: item.productName,
@@ -345,6 +328,7 @@ const postOrderSuccess = async (req, res) => {
     const saveOrderList = new Order({
       userId,
       items: orderItems,
+      orderTotal: req.session.newTotal, 
       shippingAddress: {
         houseName: selectedAddressDetails.houseName,
         street: selectedAddressDetails.street,
@@ -391,11 +375,9 @@ const postOrderSuccess = async (req, res) => {
       await product.save();
     }
     if (paymentMethod == "paypal") {
-      console.log("paypal athi");
-      const newTotal = req.session.newTotal;
-      console.log(newTotal)
+      const currentTotal = req.session.newTotal;
 
-      const convertAmount = await convertCurrency(newTotal);
+      const convertAmount = await convertCurrency(currentTotal);
       req.session.convertAmount = convertAmount;
       return res.json({
         success: true,
@@ -404,6 +386,26 @@ const postOrderSuccess = async (req, res) => {
       });
     }
 
+    if(paymentMethod == "wallet"){
+     const wallet = await Wallet.findOne({userId});
+   
+     if(wallet.balance<req.session.newTotal){
+      return res.status(400).json({
+        success:false,
+        message:'Insufficient Balence in the wallet'
+      })
+     }
+     wallet.balance -= req.session.newTotal;
+     const transactions = {
+      order_id:saveOrderList._id,
+      transaction_date:Date.now(),
+      transaction_type:'debit',
+      transaction_status:'completed',
+      amount:req.session.newTotal,
+     }
+     wallet.transactions.push(transactions);
+     await wallet.save();
+    }
     return res.status(200).json({
       success: true,
       message: "Order Succesfully placed",
@@ -417,14 +419,15 @@ const postOrderSuccess = async (req, res) => {
 const getOrderSuccess = async (req, res) => {
   try {
     const userId = req.session.user;
+  
 
     const [cart, findOrder] = await Promise.all([
       Cart.findOne({ userId }),
-      Order.findOne({ userId })
+      Order.findOneAndUpdate({ userId },{$set:{orderTotal:req.session.newTotal}},{new:true})
         .sort({ createdAt: -1 })
         .populate("items.productId"),
     ]);
-
+  
     return res.render("orderSuccess", { order: findOrder, cart });
   } catch (error) {
     console.log("Error in getOrderSuccess", error);
@@ -436,7 +439,6 @@ const applyCoupon = async (req, res) => {
     const { couponCode, totalPrice } = req.body;
     const userId = req.session.user;
 
-    // Find the coupon
     const coupon = await Coupon.findOne({ code: couponCode });
     if (!coupon) {
       return res.status(400).json({
@@ -445,7 +447,6 @@ const applyCoupon = async (req, res) => {
       });
     }
 
-    // Check if minimum purchase requirement is met
     if (totalPrice < coupon.minimumPurchased) {
       return res.status(400).json({
         success: false,
@@ -453,7 +454,6 @@ const applyCoupon = async (req, res) => {
       });
     }
 
-    // Check user's coupon usage
     const userCouponUsage = await Coupon.aggregate([
       {
         $match: { code: couponCode },
@@ -470,12 +470,11 @@ const applyCoupon = async (req, res) => {
         $group: {
           _id: "$users_applied.user",
           used_count: { $sum: "$users_applied.used_count" },
-          limit: { $first: "$usageLimit" }, // Changed from limit to usageLimit to match schema
+          limit: { $first: "$usageLimit" }, 
         },
       },
     ]);
 
-    // Check if user has reached usage limit
     if (
       userCouponUsage.length > 0 &&
       userCouponUsage[0].used_count >= userCouponUsage[0].limit
@@ -486,9 +485,7 @@ const applyCoupon = async (req, res) => {
       });
     }
 
-    // Update coupon usage
     if (userCouponUsage.length > 0) {
-      // User has used this coupon before - increment count
       await Coupon.updateOne(
         {
           code: couponCode,
@@ -497,7 +494,6 @@ const applyCoupon = async (req, res) => {
         { $inc: { "users_applied.$.used_count": 1 } }
       );
     } else {
-      // First time user is using this coupon
       await Coupon.updateOne(
         { code: couponCode },
         {
@@ -511,7 +507,6 @@ const applyCoupon = async (req, res) => {
       );
     }
 
-    // Calculate discount
     const discountPercentage = coupon.discountPercentage;
     const maximumDiscount = coupon.maximumDiscount;
     let discountAmount = Math.round((totalPrice * discountPercentage) / 100);
@@ -521,7 +516,11 @@ const applyCoupon = async (req, res) => {
     }
     
     const newTotal = totalPrice - discountAmount;
-    
+    const order = await Order.findOne({ userId }).sort({ createdAt: -1 });
+    if(order){
+    order.offerApplied= newTotal;
+    await order.save();
+    }
     req.session.newTotal = newTotal;
 
     return res.status(200).json({
