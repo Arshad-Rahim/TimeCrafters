@@ -1,145 +1,115 @@
 const Order = require("../../models/orderScheama");
 const User = require("../../models/userSchema");
 
+
+
 const getSalesReport = async (req, res) => {
   try {
-    const order = await Order.find({}).populate("userId");
+    // Get filter type and dates from query parameters
+    const { filter, startDate, endDate } = req.query;
+    let queryStartDate, queryEndDate;
 
-    const result = await Order.aggregate([
-        { $match: { "items.orderStatus": { $ne: 'Canceled' } } },
-        {
-          $group: {
-            _id: null,
-            totalOrders: { $sum: 1 },
-            totalOrderAmount: {
-              $sum: {
-                $cond: [
-                  { $eq: ["$offerApplied", 0] },
-                  "$orderTotal",
-                  { $subtract: ["$orderTotal", "$offerApplied"] }
-                ]
-              }
-            },
-            totalDiscount: {
-              $sum: {
-                $cond: [
-                  { $eq: ["$offerApplied", 0] },
-                  {
-                    $sum: {
-                      $multiply: [
-                        { $subtract: ["$regularPrice", "$salePrice"] },
-                        "$quantity"
-                      ]
-                    }
-                  },
-                  "$offerApplied"
-                ]
-              }
+    // Calculate date range based on filter
+    if (filter) {
+      switch (filter) {
+        case 'daily':
+          queryStartDate = new Date();
+          queryStartDate.setHours(0, 0, 0, 0);
+          queryEndDate = new Date();
+          queryEndDate.setHours(23, 59, 59, 999);
+          break;
+        case 'weekly':
+          queryEndDate = new Date();
+          queryStartDate = new Date(queryEndDate.getTime() - 6 * 24 * 60 * 60 * 1000);
+          queryStartDate.setHours(0, 0, 0, 0);
+          break;
+        case 'monthly':
+          queryEndDate = new Date();
+          queryStartDate = new Date(queryEndDate.getFullYear(), queryEndDate.getMonth(), 1);
+          queryStartDate.setHours(0, 0, 0, 0);
+          break;
+        case 'custom':
+          queryStartDate = new Date(startDate);
+          queryEndDate = new Date(endDate);
+          queryStartDate.setHours(0, 0, 0, 0);
+          queryEndDate.setHours(23, 59, 59, 999);
+          break;
+      }
+    }
+
+    // Build query object
+    const query = queryStartDate && queryEndDate 
+      ? { 
+          createdAt: { 
+            $gte: queryStartDate, 
+            $lte: queryEndDate 
+          }
+        } 
+      : {};
+
+    // Fetch orders with date filter if present
+    const order = await Order.find(query).populate("userId");
+
+    // Aggregate pipeline for statistics
+    const aggregatePipeline = [
+      ...(queryStartDate && queryEndDate ? [{
+        $match: {
+          createdAt: { $gte: queryStartDate, $lte: queryEndDate }
+        }
+      }] : []),
+      { $match: { "items.orderStatus": { $ne: 'Canceled' } } },
+      {
+        $group: {
+          _id: null,
+          totalOrders: { $sum: 1 },
+          totalOrderAmount: {
+            $sum: {
+              $cond: [
+                { $eq: ["$offerApplied", 0] },
+                "$orderTotal", 
+                "$offerApplied"  
+              ]
+            }
+          },
+          totalDiscount: {
+            $sum: {
+              $cond: [
+                { $eq: ["$offerApplied", 0] },
+                0,  
+                { $subtract: ["$orderTotal", "$offerApplied"] }  
+              ]
             }
           }
         }
-      ]);
-  
-      const overallSalesCount = result.length > 0 ? result[0].totalOrders : 0;
-      const overallOrderAmount = result.length > 0 ? result[0].totalOrderAmount : 0;
-      const overallDiscount = result.length > 0 ? result[0].totalDiscount : 0;
+      }
+    ];
 
+    const result = await Order.aggregate(aggregatePipeline);
 
+    const overallSalesCount = result.length > 0 ? result[0].totalOrders : 0;
+    const overallOrderAmount = result.length > 0 ? result[0].totalOrderAmount : 0;
+    const overallDiscount = result.length > 0 ? result[0].totalDiscount : 0;
 
-    return res.render("salesReport", { order, overallSalesCount,overallOrderAmount,overallDiscount });
+    // Render the page with all necessary data
+    return res.render("salesReport", { 
+      order, 
+      overallSalesCount,
+      overallOrderAmount,
+      overallDiscount,
+      activeFilter: filter || 'daily',
+      startDate: startDate || '',
+      endDate: endDate || ''
+    });
   } catch (error) {
     console.log("Error in getSalesReport", error);
+    res.status(500).render('error', { message: 'Error generating sales report' });
   }
 };
 
 
 
 
-const getFilteredReport = async (req, res) => {
-    try {
-      const { filter } = req.query;
-      let startDate, endDate;
-  
-      switch (filter) {
-        case 'daily':
-          startDate = new Date();
-          startDate.setHours(0, 0, 0, 0);
-          endDate = new Date();
-          endDate.setHours(23, 59, 59, 999);
-          break;
-        case 'weekly':
-          endDate = new Date();
-          startDate = new Date(endDate.getTime() - 6 * 24 * 60 * 60 * 1000); // Last 7 days
-          startDate.setHours(0, 0, 0, 0);
-          break;
-        case 'monthly':
-          endDate = new Date();
-          startDate = new Date(endDate.getFullYear(), endDate.getMonth(), 1);
-          startDate.setHours(0, 0, 0, 0);
-          break;
-        case 'custom':
-          startDate = new Date(req.query.startDate);
-          endDate = new Date(req.query.endDate);
-          startDate.setHours(0, 0, 0, 0);
-          endDate.setHours(23, 59, 59, 999);
-          break;
-        default:
-          return res.status(400).json({ error: 'Invalid filter option' });
-      }
-  
-      const orders = await Order.find({
-        createdAt: { $gte: startDate, $lte: endDate },
-      }).populate('userId');
-  
-      const result = await Order.aggregate([
-        { $match: { createdAt: { $gte: startDate, $lte: endDate } } },
-        { $match: { "items.orderStatus": { $ne: 'Canceled' } } },
-        {
-          $group: {
-            _id: null,
-            totalOrders: { $sum: 1 },
-            totalOrderAmount: {
-              $sum: {
-                $cond: [
-                  { $eq: ['$offerApplied', 0] },
-                  '$orderTotal',
-                  { $subtract: ['$orderTotal', '$offerApplied'] },
-                ],
-              },
-            },
-            totalDiscount: {
-              $sum: {
-                $cond: [
-                  { $eq: ['$offerApplied', 0] },
-                  {
-                    $sum: {
-                      $multiply: [{ $subtract: ['$regularPrice', '$salePrice'] }, '$quantity'],
-                    },
-                  },
-                  '$offerApplied',
-                ],
-              },
-            },
-          },
-        },
-      ]);
-  
-      const overallSalesCount = result.length > 0 ? result[0].totalOrders : 0;
-      const overallOrderAmount = result.length > 0 ? result[0].totalOrderAmount : 0;
-      const overallDiscount = result.length > 0 ? result[0].totalDiscount : 0;
-  
-      return res.json({
-        orders: orders,
-        overallSalesCount,
-        overallOrderAmount,
-        overallDiscount,
-      });
-    } catch (error) {
-      console.error('Error in getFilteredReport', error);
-      return res.status(500).json({ error: 'Error getting sales report' });
-    }
-  };
+
 module.exports = {
   getSalesReport,
-  getFilteredReport,
 };
