@@ -165,7 +165,7 @@
                                     <% cart.items.forEach(item =>{ %>
                                     <tr class="table_row">
                                         <td class="column-1">
-                                            <button type="button" class="delete-cart-item" data-product-id="<%= item.productId._id%>">
+                                            <button type="button" class="delete-cart-item" data-product-id="<%= item.productId._id%>" data-color="<%= item.color%>">
                                             <div class="how-itemcart1">
                                                
                                                 <img src='uploads/re-image/<%=item.productImage%>' alt="IMG">
@@ -347,11 +347,14 @@ $(document).ready(function() {
     $(document).on('click', '.delete-cart-item', function(event) {
         event.preventDefault();
         const productId = $(this).data('product-id');
-        deleteCartProduct(event, productId);
+        const color = $(this).data('color');
+        console.log(color);
+        console.log('ivde athento')
+        deleteCartProduct(event, productId,color);
     });
 });
 
-function deleteCartProduct(event,productId){
+function deleteCartProduct(event,productId,color){
     
 
     Swal.fire({
@@ -365,18 +368,20 @@ function deleteCartProduct(event,productId){
 
     }).then((result) =>{
         if(result.isConfirmed){
-            deleteCartProductAjax(productId)
+            deleteCartProductAjax(productId,color)
         }
     })
 }
 
 
-function deleteCartProductAjax(productId){
+function deleteCartProductAjax(productId,color){
     $.ajax({
         url:`/deleteCartProduct/${productId}`,
         type:'DELETE',
         dataType:'json',
         contentType:'application/json',
+        data:JSON.stringify({color}),
+
 
         success:function(response){
             if(response.success){

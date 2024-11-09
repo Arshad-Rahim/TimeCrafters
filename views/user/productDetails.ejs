@@ -259,15 +259,17 @@ body {
     </div>
 							
 
-							<div class="flex-w flex-r-m p-b-10">
-								<div class="size-204 flex-w flex-m respon6-next">
-									
-
-									<button style="margin-top: 15px;" class="flex-c-m stext-101 cl0 size-101 bg1 bor1 hov-btn1 p-lr-15 trans-04" onclick="addToCart(event,'<%= productDetails.id%>','<%= productDetails.blackQuantity%>','<%= productDetails.silverQuantity%>','<%= productDetails.goldenQuantity%>')">
-										Add to cart
-									</button>
-								</div>
-							</div>	
+	<div class="flex-w flex-r-m p-b-10">
+		<div class="size-204 flex-w flex-m respon6-next">
+		  <button 
+			style="margin-top: 15px;" 
+			class="flex-c-m stext-101 cl0 size-101 bg1 bor1 hov-btn1 p-lr-15 trans-04" 
+			id="cartButton"
+			onclick="handleCartAction(event,'<%= productDetails.id%>','<%= productDetails.blackQuantity%>','<%= productDetails.silverQuantity%>','<%= productDetails.goldenQuantity%>')">
+			Add to cart
+		  </button>
+		</div>
+	  </div>
 						</div>
 
 						<!--  -->
@@ -501,25 +503,6 @@ body {
 	<script src="/frontend/vendor/jquery/jquery-3.2.1.min.js"></script>
 	<script src='/hover-extended-magnify/extm.min.js'></script>
 	<script>
-// 		$('.zoomImg').extm({
-//     zoomElement: false,
-//     squareOverlay: true,
-//     imageSrc: $(this).attr('src'),
-//     lazy: true,
-//     zoomLevel: 1,
-// 	position:'right',
-//     zoomSize: 1000,
-// });
-
-// $('.zoomImg').extm({
-//   zoomElement: false,
-//   squareOverlay: true,
-//   imageSrc: $('#mainProductImage').attr('src'),
-//   lazy: true,
-//   zoomLevel: 1,
-//   position: 'right',
-//   zoomSize: 1000,
-// });
 
 
 
@@ -537,9 +520,28 @@ body {
 		// radio button finout
 let selectedColor;
 let colorStock;
+const cartColorsForProduct = JSON.parse('<%- JSON.stringify(cartColorsForProduct) %>');
+console.log('ivde athiyo')
+console.log(cartColorsForProduct)
+
+// Update button text based on color selection
+function updateButtonText(color) {
+  const button = document.getElementById('cartButton');
+  if (!color) return;
+  if (cartColorsForProduct.includes(color)) {
+    button.textContent = 'Go to Cart';
+    button.classList.add('in-cart');
+  } else {
+    button.textContent = 'Add to Cart';
+    button.classList.remove('in-cart');
+  }
+}
+
+
 		document.querySelectorAll('input[name="productColor"]').forEach(radio =>{
 		radio.addEventListener('change', async(event)=>{
 			 selectedColor = event.target.value;
+			 updateButtonText(selectedColor);
 			
 		})
 	})
@@ -547,9 +549,7 @@ let colorStock;
 
 
 
-
-
-		function addToCart(event,productId,black,silver,golden){
+		function handleCartAction(event,productId,black,silver,golden){
 			
 			event.preventDefault();
 
@@ -566,6 +566,11 @@ let colorStock;
 				})
 				return;
 			}
+			if (cartColorsForProduct.includes(selectedColor)) {
+    window.location.href = '/cart';
+    return;
+  }
+
 			
 			addToCartAjax(productId,selectedColor,black,silver,golden)
 		}

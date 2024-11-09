@@ -2,6 +2,8 @@ const Product = require("../../models/productSchema");
 const User = require("../../models/userSchema");
 const Category = require("../../models/categorySchema");
 const Brand = require("../../models/brandSchema");
+const mongoose = require('mongoose');
+const Cart = require('../../models/cartSchema');
 
 const getProductList = async (req, res) => {
   try {
@@ -177,10 +179,29 @@ const getProductDetails = async (req, res) => {
         .sort({ createdAt: -1 }),
     ]);
 
-    const user = req.session.user;
+    const userId = req.session.user;
+    let cartColorsForProduct = [];
 
-    if (user) {
-      const userData = await User.findOne({ _id: user._id });
+    if (userId) {
+      const userData = await User.findOne({ _id: userId });
+
+      const productObjectId = new mongoose.Types.ObjectId(id);
+
+      const cartData = await Cart.findOne({
+        userId: userData._id,
+        'items.productId': productObjectId
+      });
+
+      // Extract colors from cart items for this product
+      if (cartData) {
+        cartColorsForProduct = cartData.items
+          .filter(item => item.productId.toString() === id)
+          .map(item => item.color);
+      }
+
+
+    // Run the aggregation
+
 
       return res.render("productDetails", {
         user: userData,
@@ -188,6 +209,7 @@ const getProductDetails = async (req, res) => {
         cat: categories,
         id,
         productDetails,
+        cartColorsForProduct,
       });
     } else {
       return res.render("productDetails", {
@@ -195,6 +217,7 @@ const getProductDetails = async (req, res) => {
         cat: categories,
         id,
         productDetails,
+        cartColorsForProduct:[]
       });
     }
   } catch (error) {

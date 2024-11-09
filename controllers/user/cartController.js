@@ -41,7 +41,6 @@ const postCart = async (req, res) => {
 
     const { id } = req.params;
     const { color, colorStock } = req.body;
-
     const product = await Product.findOne({ _id: id });
 
     if (!userId) {
@@ -61,14 +60,16 @@ const postCart = async (req, res) => {
     let userCartExisting = await Cart.findOne({ userId });
 
     if (userCartExisting) {
-      const productExisting = await Cart.findOne({
-        userId,
-        "items.productId": product._id,
-      });
-      if (productExisting) {
+      const productWithSameColor = userCartExisting.items.find(
+        item => 
+          item.productId.toString() === product._id.toString() && 
+          item.color === color
+      );
+
+      if (productWithSameColor) {
         return res.status(400).json({
           success: false,
-          message: "Product is alredy in the cart",
+          message: "Product with this color is already in the cart",
         });
       } else {
       }
@@ -268,13 +269,15 @@ const deleteCartProduct = async (req, res) => {
   try {
     const userId = req.session.user;
     const productId = req.params.id;
-   
-
+  const  {color} = req.body;
     const result = await Cart.updateOne(
       { userId: userId },
       {
         $pull: {
-          items: { productId: new mongoose.Types.ObjectId(productId) },
+          items: { 
+            productId: new mongoose.Types.ObjectId(productId),
+            color:color,
+           },
         },
       }
     );
