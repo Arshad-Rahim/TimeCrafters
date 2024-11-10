@@ -117,6 +117,21 @@
       .download-excel {
         background: #4f46e5;
       }
+      .no-data-message {
+        text-align: center;
+        padding: 2rem;
+        background: #f9fafb;
+        border-radius: 8px;
+        color: #6b7280;
+        font-size: 1.1rem;
+        margin: 1rem 0;
+      }
+
+      .no-data-icon {
+        font-size: 2.5rem;
+        margin-bottom: 1rem;
+        color: #9ca3af;
+      }
     </style>
   </head>
   <body>
@@ -155,46 +170,53 @@
         <div class="summary-cards">
           <div class="summary-card">
             <h3>Overall Sales Count</h3>
-            <p id="sales-count"><%= overallSalesCount %></p>
+            <p id="sales-count"><%= overallSalesCount || 0 %></p>
           </div>
           <div class="summary-card">
             <h3>Overall Order Amount</h3>
-            <p id="order-amount">₹<%= overallOrderAmount %></p>
+            <p id="order-amount">₹<%= overallOrderAmount || 0 %></p>
           </div>
           <div class="summary-card">
             <h3>Overall Discount</h3>
-            <p id="total-discount">₹<%= overallDiscount %></p>
+            <p id="total-discount">₹<%= overallDiscount || 0 %></p>
           </div>
         </div>
+       
+        <% if (!order || order.length === 0 || !order.some(o => o.orderTotal > 0)) { %>
+          <div class="no-data-message">
+            <div class="no-data-icon">📊</div>
+            <p>No sales data available for the selected period.</p>
+            <p>Try selecting a different date range or check back later.</p>
+          </div>
+        <% } else { %>
 
-        <table>
-          <thead>
-            <tr>
-              <th>User</th>
-              <th>Date</th>
-              <th>Payment Method</th>
-              <th>Products</th>
-              <th>Amount</th>
-            </tr>
-          </thead>
-          
-          <% for(i=0;i<order.length;i++){ %>
-            <% if(order[i].orderTotal == 0) continue;%>
-          <tbody id="sales-data">
-           
-            <td><%= order[i].userId.name %></td>
-            <td><%= order[i].createdAt.toLocaleDateString()%></td>
-            <td><%= order[i].paymentInfo.method %></td>
-            <td><%= order[i].items.length%></td>
-            <% if(order[i].offerApplied == 0){ %>
-            <td><%= order[i].orderTotal%></td>
-            <% }else{%>
-            <td><%= order[i].offerApplied%>
-            <% } %>
-          </tbody>
-          <% } %>
-
-        </table>
+          <table>
+            <thead>
+              <tr>
+                <th>User</th>
+                <th>Date</th>
+                <th>Payment Method</th>
+                <th>Products</th>
+                <th>Amount</th>
+              </tr>
+            </thead>
+            <tbody id="sales-data">
+              <% for(let i = 0; i < order.length; i++) { %>
+                <% if(order[i] && order[i].orderTotal > 0) { %>
+                  <tr>
+                    <td><%= (order[i].userId && order[i].userId.name) ? order[i].userId.name : 'Deleted User' %></td>
+                    <td><%= order[i].createdAt ? order[i].createdAt.toLocaleDateString() : 'N/A' %></td>
+                    <td><%= (order[i].paymentInfo && order[i].paymentInfo.method) ? order[i].paymentInfo.method : 'N/A' %></td>
+                    <td><%= order[i].items ? order[i].items.length : 0 %></td>
+                    <td>
+                      <%= order[i].offerApplied === 0 ? order[i].orderTotal : order[i].offerApplied %>
+                    </td>
+                  </tr>
+                <% } %>
+              <% } %>
+            </tbody>
+          </table>
+        <% } %>
 
         <div class="download-buttons">
           <button id="download-pdf" class="download-button download-pdf">

@@ -151,13 +151,13 @@ const putQuantity = async (req, res) => {
   try {
     const userId = req.session.user;
 
-    const { quantity, productId } = req.body;
+    const { quantity, productId,color } = req.body;
 
     const [cart, product] = await Promise.all([
       Cart.findOne({ userId }),
       Product.findById(productId),
     ]);
-
+  
     if (!quantity || quantity < 1) {
       return res.status(400).json({
         success: false,
@@ -172,6 +172,42 @@ const putQuantity = async (req, res) => {
       });
     }
 
+
+    for (const cartItem of cart.items) {
+      const product = await Product.findOne({ _id: cartItem.productId });
+      console.log(product)
+      if (!product) {
+        console.log("Product not found in PostOrderSuccess");
+      }
+
+      let colorQuantityField;
+
+      switch (cartItem.color) {
+        case "gold":
+          colorQuantityField = "goldenQuantity";
+          break;
+        case "black":
+          colorQuantityField = "blackQuantity";
+          break;
+        case "silver":
+          colorQuantityField = "silverQuantity";
+          break;
+        default:
+          console.log("unsupported color");
+      }
+     
+    
+
+    if(product[colorQuantityField]<quantity){
+      return res.status(400).json({
+        success:false,
+        message:'Selected Color Product is Out of Stock'
+      })
+    }
+
+  }
+
+
     const foundItem = cart.items.find(
       (item) => item.productId.toString() == productId.toString()
     );
@@ -182,7 +218,7 @@ const putQuantity = async (req, res) => {
         message: "Product is not Found in the cart",
       });
     }
-
+console.log(foundItem.colorStock)
     if (quantity > foundItem.colorStock) {
       return res.status(400).json({
         success: false,
@@ -315,6 +351,44 @@ const postOrderSuccess = async (req, res) => {
       req.session.newTotal = totalPrice;
     }
 
+    for (const cartItem of cart.items) {
+      const product = await Product.findOne({ _id: cartItem.productId });
+     
+      if (!product) {
+        console.log("Product not found in PostOrderSuccess");
+      }
+
+      let colorQuantityField;
+
+      switch (cartItem.color) {
+        case "gold":
+          colorQuantityField = "goldenQuantity";
+          break;
+        case "black":
+          colorQuantityField = "blackQuantity";
+          break;
+        case "silver":
+          colorQuantityField = "silverQuantity";
+          break;
+        default:
+          console.log("unsupported color");
+      }
+
+
+    if(product[colorQuantityField]<cartItem.quantity){
+      return res.status(400).json({
+        success:false,
+        message:'Selected Product is Out of Stock'
+      })
+    }
+
+
+      product[colorQuantityField] =
+        product[colorQuantityField] - cartItem.quantity;
+      await product.save();
+    }
+
+
     
   
     const orderItems = cart.items.map((item) => ({
@@ -351,32 +425,7 @@ const postOrderSuccess = async (req, res) => {
 
     await saveOrderList.save();
 
-    for (const cartItem of cart.items) {
-      const product = await Product.findOne({ _id: cartItem.productId });
-      if (!product) {
-        console.log("Product not found in PostOrderSuccess");
-      }
-
-      let colorQuantityField;
-
-      switch (cartItem.color) {
-        case "gold":
-          colorQuantityField = "goldenQuantity";
-          break;
-        case "black":
-          colorQuantityField = "blackQuantity";
-          break;
-        case "silver":
-          colorQuantityField = "silverQuantity";
-          break;
-        default:
-          console.log("unsupported color");
-      }
-
-      product[colorQuantityField] =
-        product[colorQuantityField] - cartItem.quantity;
-      await product.save();
-    }
+   
     if (paymentMethod == "paypal") {
       const currentTotal = req.session.newTotal;
 
@@ -517,6 +566,8 @@ const applyCoupon = async (req, res) => {
     if (discountAmount > maximumDiscount) {
       discountAmount = maximumDiscount;
     }
+  
+
     
     const newTotal = totalPrice - discountAmount;
     const order = await Order.findOne({ userId }).sort({ createdAt: -1 });

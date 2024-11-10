@@ -179,12 +179,13 @@
                                         <td class="column-3"><span class="indian-rupee"></span><%= item.salePrice %></td>
                                         <td class="column-4">
                                             <div  class="wrap-num-product flex-w m-l-auto m-r-0">
-                                                <div class="btn-num-product-down cl8 hov-btn3 trans-04 flex-c-m" onclick="decrement(`<%= item.productId._id%>`,`<%= item.quantity%>`)">
+                                                <div class="btn-num-product-down cl8 hov-btn3 trans-04 flex-c-m" onclick="decrement(`<%= item.productId._id%>`,`<%= item.quantity%>`,`<%= item.color%>`)">
                                                     <i class="fs-16 zmdi zmdi-minus"></i>
                                                 </div>
+                                                <!-- itm.color passs cheyth athinte quantity kandpidich check cheythal problem theerum -->
     
                                                 <input class="mtext-104 cl3 txt-center num-product" type="number" name="num-product2" value='<%= item.quantity %>'    disabled>
-                                                <div class="btn-num-product-up cl8 hov-btn3 trans-04 flex-c-m" onclick="increment(`<%= item.productId._id%>`,`<%= item.quantity %>`)">
+                                                <div class="btn-num-product-up cl8 hov-btn3 trans-04 flex-c-m" onclick="increment(`<%= item.productId._id%>`,`<%= item.quantity %>`,`<%= item.color%>`)">
                                                     <i class="fs-16 zmdi zmdi-plus"></i>
                                                 </div>
                                             </div>
@@ -290,21 +291,21 @@
 
 
 
-function increment(productId,quantity){
+function increment(productId,quantity,color){
   
     quantity++;
-    submitAjax(quantity,productId);
+    submitAjax(quantity,productId,color);
 }
 
-function decrement(productId,quantity){
+function decrement(productId,quantity,color){
     if(quantity>=1){
         quantity--;
-       submitAjax(quantity,productId);
+       submitAjax(quantity,productId,color);
     }
 }
 
 
-function submitAjax(quantity,productId){
+function submitAjax(quantity,productId,color){
    
    
 
@@ -314,7 +315,7 @@ function submitAjax(quantity,productId){
         type:'PUT',
         dataType:'json',
         contentType:'application/json',
-        data:JSON.stringify({quantity,productId}),
+        data:JSON.stringify({quantity,productId,color}),
 
         success:function(response){
             if(response.success){
@@ -337,6 +338,8 @@ function submitAjax(quantity,productId){
                 timer:1500,
                 customClass:'center-toast',
             })
+            $('#body').load('/cart #body')
+
         }
     })
 }

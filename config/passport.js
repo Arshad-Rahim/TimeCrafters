@@ -2,6 +2,8 @@ const passport = require("passport");
 const GoogleStrategy = require("passport-google-oauth20").Strategy;
 const User = require("../models/userSchema");
 const env = require("dotenv").config();
+const handleUserBonus = require('../service/welcomeBonus');
+
 
 passport.use(
   new GoogleStrategy(
@@ -23,6 +25,8 @@ passport.use(
             googleId: profile.id,
           });
           await user.save();
+    
+          await handleUserBonus(user._id, 'welcome');
           return done(null, user);
         }
       } catch (err) {

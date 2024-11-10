@@ -10,6 +10,8 @@ const mongoose = require("mongoose");
 const ObjectId = mongoose.Types.ObjectId;
 const Order = require("../../models/orderScheama");
 const Cart = require("../../models/cartSchema");
+const Wallet = require('../../models/walletShema');
+const handleUserBonus = require('../../service/welcomeBonus');
 
 const pageNotFound = async (req, res) => {
   try {
@@ -200,6 +202,9 @@ const verifyOtpSignup = async (req, res) => {
 
       await saveUserData.save();
       req.session.user = saveUserData._id;
+
+      await handleUserBonus(saveUserData._id, 'welcome');
+
       res.json({ success: true, redirectUrl: "/" });
     } else {
       res

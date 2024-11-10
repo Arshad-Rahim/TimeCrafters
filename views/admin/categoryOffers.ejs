@@ -229,8 +229,8 @@ function handleCategoryFormSubmit(event) {
       isValid = false;
     } else {
       const percentageValue = parseFloat(offerPercentage.value);
-      if (isNaN(percentageValue) || percentageValue <= 0 || percentageValue > 100) {
-        showFieldError(offerPercentage, 'Offer percentage must be between 0 and 100');
+      if (isNaN(percentageValue) || percentageValue <= 0 || percentageValue > 99) {
+        showFieldError(offerPercentage, 'Offer percentage must be between 0 and 99');
         isValid = false;
       }
     }
@@ -321,8 +321,8 @@ function validateField(field) {
         showFieldError(field, 'Offer percentage is required');
       } else {
         const percentageValue = parseFloat(field.value);
-        if (isNaN(percentageValue) || percentageValue <= 0 || percentageValue > 100) {
-          showFieldError(field, 'Offer percentage must be between 0 and 100');
+        if (isNaN(percentageValue) || percentageValue <= 0 || percentageValue > 99) {
+          showFieldError(field, 'Offer percentage must be between 0 and 99');
         }
       }
       break;
