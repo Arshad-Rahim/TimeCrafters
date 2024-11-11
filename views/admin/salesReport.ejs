@@ -198,6 +198,8 @@
                 <th>Payment Method</th>
                 <th>Products</th>
                 <th>Amount</th>
+                <th>Discount Amount</th>
+                <th>Coupon Offer</th>
               </tr>
             </thead>
             <tbody id="sales-data">
@@ -209,7 +211,13 @@
                     <td><%= (order[i].paymentInfo && order[i].paymentInfo.method) ? order[i].paymentInfo.method : 'N/A' %></td>
                     <td><%= order[i].items ? order[i].items.length : 0 %></td>
                     <td>
-                      <%= order[i].offerApplied === 0 ? order[i].orderTotal : order[i].offerApplied %>
+                      <%= order[i].orderTotal ? order[i].orderTotal : 'N/A'  %>
+                    </td>
+                    <td>
+                      <%= order[i].offerApplied === 0 ? 0 : order[i].offerApplied - order[i].couponDiscount %>
+                    </td>
+                    <td>
+                      <%= order[i].couponDiscount%>
                     </td>
                   </tr>
                 <% } %>

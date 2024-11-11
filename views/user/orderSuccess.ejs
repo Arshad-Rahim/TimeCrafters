@@ -83,12 +83,16 @@
                         <span><span class="indian-rupee"></span><%= order.orderTotal %></span>
                     </div>
                     <div class="flex justify-between mb-2">
+                        <span>Coupon Discount:</span>
+                        <span>-<span class="indian-rupee"></span><%= order.couponDiscount %></span>
+                    </div>
+                    <div class="flex justify-between mb-2">
                         <span>Delivery Charge:</span>
                         <span><span class="indian-rupee"></span>0</span>
                     </div>
                     <div class="flex justify-between font-semibold text-lg mt-4 pt-4 border-t border-gray-700">
                         <span>Grand Total:</span>
-                        <span><span class="indian-rupee"></span><%= order.orderTotal + 0 %></span>
+                        <span><span class="indian-rupee"></span><%= order.paymentInfo.paidAmount%></span>
                     </div>
                 </div>
             </div>

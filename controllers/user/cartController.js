@@ -6,7 +6,7 @@ const Order = require("../../models/orderScheama");
 const Coupon = require("../../models/couponSchema");
 const User = require("../../models/userSchema");
 const convertCurrency = require("../../service/currencyConversion");
-const Wallet = require('../../models/walletShema');
+const Wallet = require("../../models/walletShema");
 
 const getCart = async (req, res) => {
   try {
@@ -14,7 +14,6 @@ const getCart = async (req, res) => {
 
     const cart = await Cart.findOne({ userId }).populate("items.productId");
     if (cart) {
-    
       const cartCalculation = cart.items.reduce(
         (acc, item) => ({
           basePrice: acc.basePrice + item.regularPrice * item.quantity,
@@ -61,8 +60,8 @@ const postCart = async (req, res) => {
 
     if (userCartExisting) {
       const productWithSameColor = userCartExisting.items.find(
-        item => 
-          item.productId.toString() === product._id.toString() && 
+        (item) =>
+          item.productId.toString() === product._id.toString() &&
           item.color === color
       );
 
@@ -151,13 +150,13 @@ const putQuantity = async (req, res) => {
   try {
     const userId = req.session.user;
 
-    const { quantity, productId,color } = req.body;
+    const { quantity, productId, color } = req.body;
 
     const [cart, product] = await Promise.all([
       Cart.findOne({ userId }),
       Product.findById(productId),
     ]);
-  
+
     if (!quantity || quantity < 1) {
       return res.status(400).json({
         success: false,
@@ -172,10 +171,9 @@ const putQuantity = async (req, res) => {
       });
     }
 
-
     for (const cartItem of cart.items) {
       const product = await Product.findOne({ _id: cartItem.productId });
-      console.log(product)
+      console.log(product);
       if (!product) {
         console.log("Product not found in PostOrderSuccess");
       }
@@ -195,18 +193,14 @@ const putQuantity = async (req, res) => {
         default:
           console.log("unsupported color");
       }
-     
-    
 
-    if(product[colorQuantityField]<quantity){
-      return res.status(400).json({
-        success:false,
-        message:'Selected Color Product is Out of Stock'
-      })
+      if (product[colorQuantityField] < quantity) {
+        return res.status(400).json({
+          success: false,
+          message: "Selected Color Product is Out of Stock",
+        });
+      }
     }
-
-  }
-
 
     const foundItem = cart.items.find(
       (item) => item.productId.toString() == productId.toString()
@@ -218,7 +212,7 @@ const putQuantity = async (req, res) => {
         message: "Product is not Found in the cart",
       });
     }
-console.log(foundItem.colorStock)
+    console.log(foundItem.colorStock);
     if (quantity > foundItem.colorStock) {
       return res.status(400).json({
         success: false,
@@ -305,15 +299,15 @@ const deleteCartProduct = async (req, res) => {
   try {
     const userId = req.session.user;
     const productId = req.params.id;
-  const  {color} = req.body;
+    const { color } = req.body;
     const result = await Cart.updateOne(
       { userId: userId },
       {
         $pull: {
-          items: { 
+          items: {
             productId: new mongoose.Types.ObjectId(productId),
-            color:color,
-           },
+            color: color,
+          },
         },
       }
     );
@@ -338,22 +332,35 @@ const postOrderSuccess = async (req, res) => {
   try {
     const userId = req.session.user;
     const cart = await Cart.findOne({ userId });
-    const { selectedAddress, selectedAddressDetails, paymentMethod,totalPrice } = req.body;
+    const {
+      selectedAddress,
+      selectedAddressDetails,
+      paymentMethod,
+      totalPrice,
+    } = req.body;
 
     delete req.session.newTotal;
     delete req.session.convertAmount;
 
     const latestOrder = await Order.findOne({ userId }).sort({ createdAt: -1 });
 
-    if (latestOrder && latestOrder.offerApplied) {
-      req.session.newTotal = latestOrder.offerApplied;
+    const originalTotal = cart.items.reduce((total, item) => {
+      return total + (item.regularPrice * item.quantity);
+    }, 0);
+
+    const couponDiscount = req.session.couponDiscount || 0;
+    const finalTotal = totalPrice - couponDiscount; 
+    const totalOfferAmount = originalTotal - finalTotal;
+
+    if (latestOrder && latestOrder.offerApplied) { 
+      req.session.newTotal = finalTotal;
     } else {
       req.session.newTotal = totalPrice;
     }
 
     for (const cartItem of cart.items) {
       const product = await Product.findOne({ _id: cartItem.productId });
-     
+
       if (!product) {
         console.log("Product not found in PostOrderSuccess");
       }
@@ -374,30 +381,25 @@ const postOrderSuccess = async (req, res) => {
           console.log("unsupported color");
       }
 
-
-    if(product[colorQuantityField]<cartItem.quantity){
-      return res.status(400).json({
-        success:false,
-        message:'Selected Product is Out of Stock'
-      })
-    }
-
+      if (product[colorQuantityField] < cartItem.quantity) {
+        return res.status(400).json({
+          success: false,
+          message: "Selected Product is Out of Stock",
+        });
+      }
 
       product[colorQuantityField] =
         product[colorQuantityField] - cartItem.quantity;
       await product.save();
     }
 
-
-    
-  
     const orderItems = cart.items.map((item) => ({
       productId: item.productId,
       ProductName: item.productName,
       quantity: item.quantity,
       salePrice: item.salePrice,
       regularPrice: item.regularPrice,
-      ProductTotal: item.productAmount,
+      ProductTotal: item.salePrice * item.quantity,
       color: item.color,
       productImage: item.productImage,
     }));
@@ -405,7 +407,9 @@ const postOrderSuccess = async (req, res) => {
     const saveOrderList = new Order({
       userId,
       items: orderItems,
-      orderTotal: req.session.newTotal, 
+      orderTotal: originalTotal,
+      offerApplied: totalOfferAmount,
+      couponDiscount: couponDiscount,
       shippingAddress: {
         houseName: selectedAddressDetails.houseName,
         street: selectedAddressDetails.street,
@@ -420,14 +424,14 @@ const postOrderSuccess = async (req, res) => {
       },
       paymentInfo: {
         method: paymentMethod,
+        paidAmount: finalTotal
       },
     });
 
     await saveOrderList.save();
-
-   
+    delete req.session.couponDiscount;
     if (paymentMethod == "paypal") {
-      const currentTotal = req.session.newTotal;
+      const currentTotal = finalTotal;
 
       const convertAmount = await convertCurrency(currentTotal);
       req.session.convertAmount = convertAmount;
@@ -438,25 +442,25 @@ const postOrderSuccess = async (req, res) => {
       });
     }
 
-    if(paymentMethod == "wallet"){
-     const wallet = await Wallet.findOne({userId});
-   
-     if(wallet.balance<req.session.newTotal){
-      return res.status(400).json({
-        success:false,
-        message:'Insufficient Balence in the wallet'
-      })
-     }
-     wallet.balance -= req.session.newTotal;
-     const transactions = {
-      order_id:saveOrderList._id,
-      transaction_date:Date.now(),
-      transaction_type:'debit',
-      transaction_status:'completed',
-      amount:req.session.newTotal,
-     }
-     wallet.transactions.push(transactions);
-     await wallet.save();
+    if (paymentMethod == "wallet") {
+      const wallet = await Wallet.findOne({ userId });
+
+      if (wallet.balance < finalTotal) {
+        return res.status(400).json({
+          success: false,
+          message: "Insufficient Balence in the wallet",
+        });
+      }
+      wallet.balance -= finalTotal;
+      const transactions = {
+        order_id: saveOrderList._id,
+        transaction_date: Date.now(),
+        transaction_type: "debit",
+        transaction_status: "completed",
+        amount: finalTotal,
+      };
+      wallet.transactions.push(transactions);
+      await wallet.save();
     }
     return res.status(200).json({
       success: true,
@@ -471,15 +475,15 @@ const postOrderSuccess = async (req, res) => {
 const getOrderSuccess = async (req, res) => {
   try {
     const userId = req.session.user;
-  
 
     const [cart, findOrder] = await Promise.all([
       Cart.findOne({ userId }),
-      Order.findOneAndUpdate({ userId },{$set:{orderTotal:req.session.newTotal}},{new:true})
+      Order.findOne({ userId })
         .sort({ createdAt: -1 })
         .populate("items.productId"),
     ]);
-  
+
+
     return res.render("orderSuccess", { order: findOrder, cart });
   } catch (error) {
     console.log("Error in getOrderSuccess", error);
@@ -522,7 +526,7 @@ const applyCoupon = async (req, res) => {
         $group: {
           _id: "$users_applied.user",
           used_count: { $sum: "$users_applied.used_count" },
-          limit: { $first: "$usageLimit" }, 
+          limit: { $first: "$usageLimit" },
         },
       },
     ]);
@@ -562,18 +566,17 @@ const applyCoupon = async (req, res) => {
     const discountPercentage = coupon.discountPercentage;
     const maximumDiscount = coupon.maximumDiscount;
     let discountAmount = Math.round((totalPrice * discountPercentage) / 100);
-    
+
     if (discountAmount > maximumDiscount) {
       discountAmount = maximumDiscount;
     }
-  
-
-    
+    req.session.couponDiscount = discountAmount;
     const newTotal = totalPrice - discountAmount;
     const order = await Order.findOne({ userId }).sort({ createdAt: -1 });
-    if(order){
-    order.offerApplied= newTotal;
-    await order.save();
+    if (order) {
+      order.offerApplied = newTotal;
+      order.couponDiscount = discountAmount;
+      await order.save();
     }
     req.session.newTotal = newTotal;
 
@@ -585,7 +588,6 @@ const applyCoupon = async (req, res) => {
       newTotal,
       discountAmount,
     });
-
   } catch (error) {
     console.error("Error in applyCoupon:", error);
     return res.status(500).json({
