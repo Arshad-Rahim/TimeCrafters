@@ -150,6 +150,9 @@
           <button class="filter-button <%= activeFilter === 'monthly' ? 'active' : '' %>" data-filter="monthly">
             Monthly
           </button>
+          <button class="filter-button <%= activeFilter === 'yearly' ? 'active' : '' %>" data-filter="yearly">
+            Yearly
+          </button>
           <button class="filter-button <%= activeFilter === 'custom' ? 'active' : '' %>" data-filter="custom">
             Custom
           </button>
@@ -262,29 +265,24 @@
     <script>
 document.querySelectorAll(".filter-button").forEach((button) => {
   button.addEventListener("click", function() {
-    // Remove active class from all buttons
     document.querySelectorAll(".filter-button").forEach(btn => {
       btn.classList.remove("active");
     });
     
-    // Add active class to clicked button
     this.classList.add("active");
     
     const filter = this.getAttribute("data-filter");
     const dateRange = document.querySelector(".date-range");
     
-    // Show/hide date range inputs
     if (filter === "custom") {
       dateRange.style.display = "block";
     } else {
       dateRange.style.display = "none";
-      // For non-custom filters, submit the form immediately
       window.location.href = `/admin/salesReport?filter=${filter}`;
     }
   });
 });
 
-// Handle custom date range submission
 document.getElementById("apply-date-range").addEventListener("click", function() {
   const startDate = document.getElementById("start-date").value;
   const endDate = document.getElementById("end-date").value;
@@ -297,36 +295,29 @@ document.getElementById("apply-date-range").addEventListener("click", function()
   window.location.href = `/admin/salesReport?filter=custom&startDate=${startDate}&endDate=${endDate}`;
 });
 
-// Set active filter and date range values on page load
 document.addEventListener("DOMContentLoaded", function() {
   const urlParams = new URLSearchParams(window.location.search);
   const filter = urlParams.get('filter') || 'daily';
   const startDate = urlParams.get('startDate');
   const endDate = urlParams.get('endDate');
   
-  // Set active filter button
   document.querySelector(`.filter-button[data-filter="${filter}"]`)?.classList.add('active');
   
-  // Set date range values if they exist
   if (startDate && endDate) {
     document.getElementById("start-date").value = startDate;
     document.getElementById("end-date").value = endDate;
     document.querySelector(".date-range").style.display = "block";
   }
   
-  // Update report type text
   document.getElementById("report-type").textContent = 
     filter.charAt(0).toUpperCase() + filter.slice(1);
 });
-// Add functionality to download buttons (for demonstration purposes)
 document.getElementById("download-pdf").addEventListener("click", function () {
-  // Get selected filter and date range from the page
   const urlParams = new URLSearchParams(window.location.search);
   const filter = urlParams.get('filter') || 'daily';
   const startDate = urlParams.get('startDate');
   const endDate = urlParams.get('endDate');
   
-  // Build the download URL with query parameters
   let downloadUrl = `/admin/salesReport/pdf?period=${filter}`;
   
   if (filter === 'custom') {
@@ -338,7 +329,6 @@ document.getElementById("download-pdf").addEventListener("click", function () {
     }
   }
   
-  // Redirect to the PDF download URL
   window.location.href = downloadUrl;
 });
 
@@ -348,13 +338,11 @@ document.getElementById("download-pdf").addEventListener("click", function () {
 
 
 document.getElementById("excel").addEventListener("click", function () {
-  // Get selected filter and date range from the page
   const urlParams = new URLSearchParams(window.location.search);
   const filter = urlParams.get('filter') || 'daily';
   const startDate = urlParams.get('startDate');
   const endDate = urlParams.get('endDate');
   
-  // Build the download URL with query parameters
   let downloadUrl = `/admin/salesReport/excel?period=${filter}`;
   
   if (filter === 'custom') {

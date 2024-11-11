@@ -32,6 +32,11 @@ const getSalesReport = async (req, res) => {
           );
           queryStartDate.setHours(0, 0, 0, 0);
           break;
+        case "yearly": 
+          queryEndDate = new Date();
+          queryStartDate = new Date(queryEndDate.getFullYear(), 0, 1);  
+          queryStartDate.setHours(0, 0, 0, 0);
+          break;
         case "custom":
           queryStartDate = new Date(startDate);
           queryEndDate = new Date(endDate);
@@ -121,7 +126,13 @@ const downloadSalesReportPdf = async (req, res) => {
         $gte: new Date(startDate),
         $lte: new Date(endDate),
       };
-    } else if (period === "daily") {
+    }else if (period === "yearly") {
+      const startOfYear = new Date();
+      startOfYear.setMonth(0, 1); 
+      startOfYear.setHours(0, 0, 0, 0);
+      query.createdAt = { $gte: startOfYear };
+    }
+     else if (period === "daily") {
       const today = new Date();
       today.setHours(0, 0, 0, 0);
       query.createdAt = { $gte: today };
@@ -253,8 +264,7 @@ const downloadSalesReportPdf = async (req, res) => {
     pdfDoc.fontSize(10).font("Helvetica");
 
 
-   
-
+    
  
 
     for (const order of orders) {
@@ -331,7 +341,14 @@ const downloadSalesReportExcel = async (req, res) => {
         $gte: new Date(startDate),
         $lte: new Date(endDate),
       };
-    } else if (period === "daily") {
+    }else if (period === "yearly") {
+      const startOfYear = new Date();
+      startOfYear.setMonth(0, 1); 
+      startOfYear.setHours(0, 0, 0, 0);
+      query.createdAt = { $gte: startOfYear };
+    }
+
+     else if (period === "daily") {
       const today = new Date();
       today.setHours(0, 0, 0, 0);
       query.createdAt = { $gte: today };
