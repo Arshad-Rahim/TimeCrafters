@@ -151,7 +151,7 @@ const putQuantity = async (req, res) => {
     const userId = req.session.user;
 
     const { quantity, productId, color } = req.body;
-
+console.log(quantity)
     const [cart, product] = await Promise.all([
       Cart.findOne({ userId }),
       Product.findById(productId),
@@ -173,14 +173,12 @@ const putQuantity = async (req, res) => {
 
     for (const cartItem of cart.items) {
       const product = await Product.findOne({ _id: cartItem.productId });
-      console.log(product);
       if (!product) {
         console.log("Product not found in PostOrderSuccess");
       }
 
-      let colorQuantityField;
-
-      switch (cartItem.color) {
+    let colorQuantityField;
+      switch (color) {
         case "gold":
           colorQuantityField = "goldenQuantity";
           break;
@@ -193,7 +191,7 @@ const putQuantity = async (req, res) => {
         default:
           console.log("unsupported color");
       }
-
+      console.log(colorQuantityField)
       if (product[colorQuantityField] < quantity) {
         return res.status(400).json({
           success: false,
@@ -203,16 +201,17 @@ const putQuantity = async (req, res) => {
     }
 
     const foundItem = cart.items.find(
-      (item) => item.productId.toString() == productId.toString()
+      (item) => 
+        item.productId.toString() === productId.toString() && 
+        item.color === color  
     );
-
     if (!foundItem) {
       return res.status(400).json({
         success: false,
         message: "Product is not Found in the cart",
       });
     }
-    console.log(foundItem.colorStock);
+    
     if (quantity > foundItem.colorStock) {
       return res.status(400).json({
         success: false,
@@ -235,9 +234,10 @@ const putQuantity = async (req, res) => {
     }
 
     const foundIndex = cart.items.findIndex(
-      (item) => item.productId.toString() == productId.toString()
+      (item) => 
+        item.productId.toString() === productId.toString() && 
+        item.color === color  
     );
-
     if (foundIndex == -1) {
       return res.status(400).json({
         success: false,

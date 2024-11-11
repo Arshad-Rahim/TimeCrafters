@@ -45,13 +45,13 @@ const wishlist = async(req,res) =>{
         if(userWishlistExisting){
             return res.status(200).json({
                 success: true,
-                message: "Added to Cart",
-                redirectURL: "/cart",
+                message: "Added to Wishlist",
+                // redirectURL: "/cart",
               });
         }else{
             return res.status(400).json({
                 success: false,
-                message: "Failed to Add to Cart",
+                message: "Failed to Add to Wishlist",
               });  
         }
        }else{
