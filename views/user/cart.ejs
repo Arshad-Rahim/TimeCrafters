@@ -115,6 +115,10 @@
     }
 }
 
+.disabled-button {
+    opacity: 0.6;
+    pointer-events: none;
+}
     
 </style>
 
@@ -271,9 +275,15 @@
                                 </div>
                             </div>
     
-                            <a href="/checkOut" class="flex-c-m stext-101 cl0 size-116 bg3 bor14 hov-btn3 p-lr-15 trans-04 pointer">
-                                Proceed to Checkout
-                            </a>
+                            <% if(cart && cart.items && cart.items.length > 0) { %>
+                                <a href="/checkOut" class="flex-c-m stext-101 cl0 size-116 bg3 bor14 hov-btn3 p-lr-15 trans-04 pointer">
+                                    Proceed to Checkout
+                                </a>
+                            <% } else { %>
+                                <button disabled class="flex-c-m stext-101 cl0 size-116 bor14 p-lr-15 disabled-button" style="background-color: #cccccc; cursor: not-allowed;">
+                                    Proceed to Checkout
+                                </button>
+                            <% } %>
                         </div>
                     </div>
                 </div>

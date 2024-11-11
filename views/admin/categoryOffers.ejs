@@ -214,7 +214,6 @@ function handleCategoryFormSubmit(event) {
     const selectedCategory = document.getElementsByName('selectedCategory')[0];
     let isValid = true;
 
-    // Validate offer name
     if (!offerName.value.trim()) {
       showFieldError(offerName, 'Offer name is required');
       isValid = false;
@@ -223,7 +222,6 @@ function handleCategoryFormSubmit(event) {
       isValid = false;
     }
 
-    // Validate percentage
     if (!offerPercentage.value.trim()) {
       showFieldError(offerPercentage, 'Offer percentage is required');
       isValid = false;
@@ -235,7 +233,6 @@ function handleCategoryFormSubmit(event) {
       }
     }
 
-    // Validate end date
     if (!endDate.value) {
       showFieldError(endDate, 'End date is required');
       isValid = false;
@@ -249,7 +246,6 @@ function handleCategoryFormSubmit(event) {
       }
     }
 
-    // Validate category selection
     if (!selectedCategory.value) {
       showFieldError(selectedCategory, 'Category selection is required');
       isValid = false;
@@ -348,7 +344,6 @@ function validateField(field) {
   }
 }
 
-// Initialize form validation when the document loads
 document.addEventListener('DOMContentLoaded', initializeFormValidation);
 </script>
 

@@ -173,7 +173,6 @@ async function signup(req, res) {
     console.log(`OTP sent ${otp}`);
   } catch (error) {
     console.error("Error for signup", error);
-    // res.redirect('/pageNotFound');
   }
 }
 
@@ -328,7 +327,6 @@ async function postForgetPasswordEmail(req, res) {
   }
 }
 
-// otp verification for foget password
 
 const verifyOtpForgetPassword = async (req, res) => {
   try {
@@ -381,7 +379,6 @@ const postPasswordEnter = async (req, res) => {
   }
 };
 
-// userProfile
 
 const getUserProfile = async (req, res) => {
   try {

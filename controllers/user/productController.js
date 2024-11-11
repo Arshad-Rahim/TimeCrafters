@@ -192,7 +192,6 @@ const getProductDetails = async (req, res) => {
         'items.productId': productObjectId
       });
 
-      // Extract colors from cart items for this product
       if (cartData) {
         cartColorsForProduct = cartData.items
           .filter(item => item.productId.toString() === id)
@@ -200,7 +199,6 @@ const getProductDetails = async (req, res) => {
       }
 
 
-    // Run the aggregation
 
 
       return res.render("productDetails", {

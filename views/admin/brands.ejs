@@ -99,7 +99,7 @@
 }
 
 .pagination li {
-  display: inline-block; /* Ensure list items are inline */
+  display: inline-block;
 }
 
 .page-link {
@@ -190,12 +190,10 @@
                     <% if(brand.isBlocked==false){ %>   
                     <button class="btn btn-danger" onclick="confirmAction('<%= brand._id%>','block')">
                       Block
-                      <!-- <a href="/admin/blockBrand?id=<%= brand._id%>">Block</a> -->
                     </button>
                     <% }else { %>
                     <button class="btn btn-success" onclick="confirmAction('<%= brand._id %>','unBlock')">
                       Unblock
-                      <!-- <a href="/admin/unBlockBrand?id=<%= brand._id %>">Unblock</a> -->
                     </button>
                     <% } %>
                     <button class="btn btn-danger"
@@ -203,7 +201,6 @@
                       <a href="/admin/deleteBrand?id=<%= brand._id%>">Delete</a>
                     </button>
                   </td>
-                  <!-- Edit Button Column -->
                   <td>
                     <button class="btn btn-edit">
                       <a href="/admin/editBrand?id=<%= brand._id%>">Edit</a>

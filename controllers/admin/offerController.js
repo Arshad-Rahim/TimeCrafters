@@ -91,7 +91,6 @@ const addCategoryOffer = async(req,res) =>{
     try {
         
         const {offerName,offerPercentage,endDate,selectedCategory} = req.body;
-        // selected category is passing in here
 
         const offerNameLowerCase = offerName.trim().toLowerCase();
      const exisitingOfferName = await Offer.findOne({

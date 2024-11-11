@@ -26,7 +26,6 @@ const getOrderDetails = async (req, res) => {
     const userId = req.session.user;
     const { id } = req.params;
 
-    // let promise = Promise.all()
     const [cart, findOrder] = await Promise.all([
       Cart.findOne({ userId }),
       Order.findOne({ _id: id })

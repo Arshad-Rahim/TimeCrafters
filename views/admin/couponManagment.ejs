@@ -169,46 +169,13 @@
     margin-top: 4px;
 }
 
-/* .form-group input:invalid {
-    border-color: #ff0000;
-} */
+
 
 .form-group input:focus {
     border-color: #4285f4;
     outline: none;
 }
 
-        /* .checkbox-group {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    padding: 16px;
-    border-radius: 8px;
-    background-color: #f5f5f5;
-}
-
-.checkbox-group label {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    cursor: pointer;
-    padding: 8px;
-    border-radius: 4px;
-    transition: background-color 0.2s;
-}
-
-.checkbox-group label:hover {
-    background-color: #e0e0e0;
-}
-
-.checkbox-group input[type="checkbox"] {
-    margin: 0;
-    cursor: pointer;
-    width: 16px;
-    height: 16px;
-}
-
-/* Custom checkbox styling */
 
     </style>
 </head>
@@ -269,13 +236,7 @@
                     </div>
                 </div>
                 <div class="form-row">
-                    <!-- <div class="form-group">
-                        <label for="discountType">Discount Type</label>
-                        <select id="discountType" name="discountType" required>
-                            <option value="percentage">Percentage</option>
-                            <option value="fixed">Fixed Amount</option>
-                        </select>
-                    </div> -->
+                 
                     <div class="form-group">
                         <label for="discountValue">Discount Percentage</label>
                         <input type="number" id="discountValue" name="discountValue" required>
@@ -301,36 +262,7 @@
                         <input type="number" id="usageLimit" name="usageLimit" required>
                     </div>
                 </div>
-                <!-- <div class="form-group">
-                    <label>Eligible Categories</label>
-                    
-<div class="checkbox-group">
-    <label>
-        <input type="checkbox" name="categories" value="flagship">
-        Flagship Phones
-    </label>
-    <label>
-        <input type="checkbox" name="categories" value="sub-flagship">
-        Sub-Flagship Phones
-    </label>
-    <label>
-        <input type="checkbox" name="categories" value="budget">
-        Budget Phones
-    </label>
-    <label>
-        <input type="checkbox" name="categories" value="gaming">
-        Gaming Phones
-    </label>
-    <label>
-        <input type="checkbox" name="categories" value="camera">
-        Camera Phones
-    </label>
-    <label>
-        <input type="checkbox" name="categories" value="rugged">
-        Rugged Phones
-    </label>
-</div>
-                </div> -->
+              
                 <div class="modal-footer">
                     <button type="submit" class="btn btn-primary">Add Coupon</button>
                     <button type="button" class="btn btn-secondary" onclick="hideModal()">Cancel</button>
@@ -357,10 +289,8 @@
         document.getElementById('addCouponForm').onsubmit = function(e) {
     e.preventDefault();
     
-    // Clear previous error messages
     document.querySelectorAll('.error-message').forEach(el => el.remove());
     
-    // Get form values
     const code = document.getElementById('code').value;
     const description = document.getElementById('description').value;
     const discount = document.getElementById('discountValue').value;
@@ -371,47 +301,40 @@
 
     let hasError = false;
 
-    // Validate Coupon Code (only capital letters and numbers)
     if (!code.match(/^[A-Z0-9]{5,15}$/)) {
         showError('code', 'Code must be 5-15 characters long and contain only capital letters and numbers');
         hasError = true;
     }
 
-    // Validate Description
     if (description.length < 10) {
         showError('description', 'Description must be at least 10 characters long');
         hasError = true;
     }
 
-    // Validate Discount (1-80%)
     const discountNum = Number(discount);
     if (isNaN(discountNum) || discountNum < 1 || discountNum > 80) {
         showError('discountValue', 'Discount must be between 1% and 80%');
         hasError = true;
     }
 
-    // Validate Minimum Purchase (at least ₹1)
     const minPurchaseNum = Number(minPurchase);
     if (isNaN(minPurchaseNum) || minPurchaseNum < 1) {
         showError('minPurchase', 'Minimum purchase amount must be at least ₹1');
         hasError = true;
     }
 
-    // Validate Maximum Discount
     const maxDiscountNum = Number(maxDiscount);
     if (isNaN(maxDiscountNum) || maxDiscountNum < 1) {
         showError('maxDiscount', 'Maximum discount must be at least ₹1');
         hasError = true;
     }
 
-    // Validate Maximum Discount against Minimum Purchase
     const calculatedMaxDiscount = (minPurchaseNum * discountNum) / 100;
     if (maxDiscountNum > calculatedMaxDiscount) {
         showError('maxDiscount', 'Maximum discount cannot exceed the calculated discount amount');
         hasError = true;
     }
 
-    // Validate Expiration Date (must be future date)
     const selectedDate = new Date(expirationDate);
     const today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -420,14 +343,12 @@
         hasError = true;
     }
 
-    // Validate Usage Limit (at least 1)
     const usageLimitNum = Number(usageLimit);
     if (isNaN(usageLimitNum) || usageLimitNum < 1) {
         showError('usageLimit', 'Usage limit must be at least 1');
         hasError = true;
     }
 
-    // If no errors, submit the form
     if (!hasError) {
     const code = document.getElementById('code').value;
     const description = document.getElementById('description').value;
@@ -475,7 +396,6 @@
     }
 };
 
-// Helper function to show error messages
 function showError(fieldId, message) {
     const input = document.getElementById(fieldId);
     const errorDiv = document.createElement('div');
@@ -484,16 +404,13 @@ function showError(fieldId, message) {
     input.parentNode.appendChild(errorDiv);
 }
 
-// Add simple input validation on typing
 document.querySelectorAll('#addCouponForm input').forEach(input => {
     input.addEventListener('input', function() {
-        // Remove error message when user starts typing
         const errorMessage = this.parentNode.querySelector('.error-message');
         if (errorMessage) {
             errorMessage.remove();
         }
 
-        // For coupon code, convert to uppercase automatically
         if (this.id === 'code') {
             this.value = this.value.toUpperCase();
         }
@@ -516,7 +433,6 @@ document.querySelectorAll('#addCouponForm input').forEach(input => {
       }).then((result) =>{
         if(result.isConfirmed){
 
-        //   window.location.href=`/admin/deleteCoupon?id=${couponId}`
         
         $.ajax({
     url: `/admin/deleteCoupon?id=${couponId}`,
