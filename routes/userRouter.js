@@ -76,6 +76,8 @@ router.delete('/deleteWishlistProduct/:id',wishlistController.deleteWishlistProd
 // checkOut
 router.get('/checkOut',userAuth,cartController.getCheckOut);
 router.post('/applyCoupon',userAuth,cartController.applyCoupon);
+router.post('/removeCoupon',userAuth,cartController.removeCoupon);
+
 
 
 // orderSuccess

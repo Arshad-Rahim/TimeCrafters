@@ -48,7 +48,7 @@
 }
 </style>
 </head>
-<%- include('../../views/partials/user/header'.{user}) %>
+<%- include('../../views/partials/user/header',{user}) %>
 
 <body class="bg-gray-100">
    
@@ -153,7 +153,11 @@
                         </div>
                         <div class="flex justify-between">
                             <span class="text-gray-600">Savings</span>
-                            <span class="font-medium text-green-600">-₹<%= cartCalculation.savings %></span>
+                            <span class="font-medium text-green-600">-₹<%= cartCalculation.totalSavings %></span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Coupon Discount</span>
+                            <span id="coupon" class="font-medium text-green-600">-₹<%= cartCalculation.totalCoupon %></span>
                         </div>
                         <!-- <div class="flex justify-between">
                             <span class="text-gray-600">Delivery charge</span>
@@ -167,12 +171,25 @@
                         </div>
                     </div>
 
-                    <div class="mt-6">
+                    <!-- <div class="mt-6">
                         <h3 class="text-lg font-semibold mb-2">Coupon Code</h3>
                         <div class="grid grid-cols-3 gap-2">
                             <input id="couponCode" name="couponCode" type="text" placeholder="Enter coupon code" class="col-span-2 px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
                             <button onclick="applyCoupon(event)" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition duration-150 ease-in-out">
                                 Apply
+                            </button>
+                        </div>
+                    </div> -->
+
+                    <div class="mt-6">
+                        <h3 class="text-lg font-semibold mb-2">Coupon Code</h3>
+                        <div class="grid grid-cols-2 gap-2">
+                            <input id="couponCode" name="couponCode" type="text" placeholder="Enter coupon code" class="col-span-2 px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <button onclick="applyCoupon(event)" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition duration-150 ease-in-out">
+                                Apply
+                            </button>
+                            <button onclick="removeCoupon(event)" class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition duration-150 ease-in-out">
+                                Remove
                             </button>
                         </div>
                     </div>
@@ -279,13 +296,14 @@
     
 
     function orderSuccessAjax(paymentMethod,totalPrice){
+        const couponCode = document.getElementById('couponCode').value;
         $.ajax({
             type:'POST',
             url:'/orderSuccess/',
             dataType:'json',
             contentType:'application/json',
             data:JSON.stringify({
-                selectedAddress,selectedAddressDetails,paymentMethod,totalPrice     
+                selectedAddress,selectedAddressDetails,paymentMethod,totalPrice,couponCode
                    }),
             success: function (response) {
         if (response.success) {
@@ -345,13 +363,73 @@
         const maximumDiscount = parseInt(response.maximumDiscount);
         const newTotal = parseInt(response.newTotal);
         const discountAmount = parseInt(response.discountAmount);
-        const currentSavings = parseInt('<%= cartCalculation.savings%>');
+        const currentSavings = parseInt('<%= cartCalculation.totalSavings%>');
      
-        const newSaving = currentSavings+discountAmount;
 
         document.querySelector('.font-bold.text-lg').textContent = `₹${newTotal}`;
-        document.querySelector('.text-green-600').textContent = `-₹${newSaving}`;
+        document.getElementById('coupon').textContent = `-₹${discountAmount}`
+       
 
+
+      Swal.fire({
+        toast: true,
+        position: 'center',
+        icon: 'success',
+        title: 'Success',
+        text: response.message,
+        showConfirmButton: false,
+        timer: 1500,
+        customClass: 'center-toast',
+      })  
+      $('#body').load('/admin/productOffers #body')
+    }
+  },
+  error: function(xhr,response) {
+      const errorMessage = xhr.responseJSON ? xhr.responseJSON.message : 'Failed to add offer. Please try again.';
+    Swal.fire({
+      toast: true,
+      position: 'center',
+      icon: 'error',
+      title: 'Error',
+      text:errorMessage,
+      showConfirmButton: false,
+      timer: 1500,
+      customClass: 'center-toast',
+    });
+  }
+});  
+
+    }
+</script>
+
+
+
+
+<script>
+
+    function removeCoupon(event){
+
+        event.preventDefault();
+        const couponCode = document.getElementById('couponCode').value;
+        const totalPrice = parseInt('<%= cartCalculation.totalPrice %>');
+      $.ajax({
+  url: '/removeCoupon',
+  type: "POST",
+  dataType: 'json',
+  contentType: 'application/json',
+  data: JSON.stringify({couponCode,totalPrice}),
+
+  success: function(response) {
+    if (response.success) {
+        const discountPercentage = parseInt(response.discountPercentage);
+        const maximumDiscount = parseInt(response.maximumDiscount);
+        const newTotal = parseInt(response.newTotal);
+        const discountAmount = parseInt(response.discountAmount);
+        const currentSavings = parseInt('<%= cartCalculation.totalSavings%>');
+     
+
+        document.querySelector('.font-bold.text-lg').textContent = `₹${newTotal}`;
+        document.getElementById('coupon').textContent = `-₹0`
        
 
 

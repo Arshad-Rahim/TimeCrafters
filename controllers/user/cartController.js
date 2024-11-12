@@ -281,15 +281,21 @@ const getCheckOut = async (req, res) => {
         (total, item) => total + item.regularPrice * item.quantity,
         0
       ),
-      totalPrice: cart.items.reduce(
+      priceAfterOffer: cart.items.reduce(
         (total, item) => total + item.salePrice * item.quantity,
         0
       ),
+      offerSavings: cart.items.reduce(
+        (total, item) => total + (item.regularPrice - item.salePrice) * item.quantity,
+        0
+      ),
+      couponDiscount: cart.couponDiscount || 0,
     };
 
-    cartCalculation.savings =
-      cartCalculation.basePrice - cartCalculation.totalPrice;
-    return res.render("checkOut", { cart, cartCalculation, address });
+    cartCalculation.totalPrice = cartCalculation.priceAfterOffer - cartCalculation.couponDiscount;
+    cartCalculation.totalSavings = cartCalculation.offerSavings ;
+    cartCalculation.totalCoupon = cartCalculation.couponDiscount; 
+    return res.render("checkOut", { cart, cartCalculation, address ,user:true});
   } catch (error) {
     console.log("Error in getCheckOut", error);
   }
@@ -337,8 +343,13 @@ const postOrderSuccess = async (req, res) => {
       selectedAddressDetails,
       paymentMethod,
       totalPrice,
+      couponCode
     } = req.body;
 
+    console.log(couponCode)
+    const coupon = await Coupon.findOne({ code: couponCode });
+
+ 
     delete req.session.newTotal;
     delete req.session.convertAmount;
 
@@ -391,6 +402,58 @@ const postOrderSuccess = async (req, res) => {
       product[colorQuantityField] =
         product[colorQuantityField] - cartItem.quantity;
       await product.save();
+    }
+    const userCouponUsage = await Coupon.aggregate([
+      {
+        $match: { code: couponCode },
+      },
+      {
+        $unwind: "$users_applied",
+      },
+      {
+        $match: {
+          "users_applied.user": new mongoose.Types.ObjectId(userId),
+        },
+      },
+      {
+        $group: {
+          _id: "$users_applied.user",
+          used_count: { $sum: "$users_applied.used_count" },
+          limit: { $first: "$usageLimit" },
+        },
+      },
+    ]);
+
+    if (
+      userCouponUsage.length > 0 &&
+      userCouponUsage[0].used_count >= userCouponUsage[0].limit
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: `You have reached the usage limit for this coupon.`,
+      });
+    }
+
+    if (userCouponUsage.length > 0) {
+      await Coupon.updateOne(
+        {
+          code: couponCode,
+          "users_applied.user": new mongoose.Types.ObjectId(userId),
+        },
+        { $inc: { "users_applied.$.used_count": 1 } }
+      );
+    } else {
+      await Coupon.updateOne(
+        { code: couponCode },
+        {
+          $push: {
+            users_applied: {
+              user: new mongoose.Types.ObjectId(userId),
+              used_count: 1,
+            },
+          },
+        }
+      );
     }
 
     const orderItems = cart.items.map((item) => ({
@@ -484,7 +547,7 @@ const getOrderSuccess = async (req, res) => {
     ]);
 
 
-    return res.render("orderSuccess", { order: findOrder, cart });
+    return res.render("orderSuccess", { order: findOrder, cart,user:true });
   } catch (error) {
     console.log("Error in getOrderSuccess", error);
   }
@@ -541,27 +604,6 @@ const applyCoupon = async (req, res) => {
       });
     }
 
-    if (userCouponUsage.length > 0) {
-      await Coupon.updateOne(
-        {
-          code: couponCode,
-          "users_applied.user": new mongoose.Types.ObjectId(userId),
-        },
-        { $inc: { "users_applied.$.used_count": 1 } }
-      );
-    } else {
-      await Coupon.updateOne(
-        { code: couponCode },
-        {
-          $push: {
-            users_applied: {
-              user: new mongoose.Types.ObjectId(userId),
-              used_count: 1,
-            },
-          },
-        }
-      );
-    }
 
     const discountPercentage = coupon.discountPercentage;
     const maximumDiscount = coupon.maximumDiscount;
@@ -597,6 +639,89 @@ const applyCoupon = async (req, res) => {
   }
 };
 
+
+
+const removeCoupon = async(req,res) =>{
+  try {
+    const { couponCode, totalPrice } = req.body;
+    const userId = req.session.user;
+
+    const coupon = await Coupon.findOne({ code: couponCode });
+    if (!coupon) {
+      return res.status(400).json({
+        success: false,
+        message: "Coupon is not Applied",
+      });
+    }
+
+ 
+    const userCouponUsage = await Coupon.aggregate([
+      {
+        $match: { code: couponCode },
+      },
+      {
+        $unwind: "$users_applied",
+      },
+      {
+        $match: {
+          "users_applied.user": new mongoose.Types.ObjectId(userId),
+        },
+      },
+      {
+        $group: {
+          _id: "$users_applied.user",
+          used_count: { $sum: "$users_applied.used_count" },
+          limit: { $first: "$usageLimit" },
+        },
+      },
+    ]);
+
+    if (
+      userCouponUsage.length > 0 &&
+      userCouponUsage[0].used_count >= userCouponUsage[0].limit
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: `You have reached the usage limit for this coupon.`,
+      });
+    }
+
+
+
+    const discountPercentage = coupon.discountPercentage;
+    const maximumDiscount = coupon.maximumDiscount;
+    let discountAmount = Math.round((totalPrice * discountPercentage) / 100);
+
+    if (discountAmount > maximumDiscount) {
+      discountAmount = maximumDiscount;
+    }
+    req.session.couponDiscount = 0;
+    const newTotal = totalPrice + discountAmount;
+    const order = await Order.findOne({ userId }).sort({ createdAt: -1 });
+    if (order) {
+      order.offerApplied = newTotal;
+      order.couponDiscount = 0;
+      await order.save();
+    }
+    req.session.newTotal = newTotal;
+
+    return res.status(200).json({
+      success: true,
+      message: "Coupon removed successfully",
+      discountPercentage,
+      maximumDiscount,
+      newTotal,
+      discountAmount,
+    });
+  } catch (error) {
+    console.error("Error in applyCoupon:", error);
+    return res.status(500).json({
+      success: false,
+      message: "An error occurred while applying the coupon",
+    });
+  }
+}
+
 module.exports = {
   getCart,
   postCart,
@@ -606,4 +731,5 @@ module.exports = {
   postOrderSuccess,
   getOrderSuccess,
   applyCoupon,
+  removeCoupon,
 };
