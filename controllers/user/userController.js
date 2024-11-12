@@ -67,7 +67,7 @@ const categories = await  Category.find({ isListed: true });
         });
       }
     } else {
-      return res.render("home", { product: productData });
+      return res.render("home", { product: productData ,user:null});
     }
   } catch (error) {
     console.log("Home page  not found");

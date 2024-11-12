@@ -52,6 +52,7 @@
 					</div>
 
 					<div class="right-top-bar flex-w h-full">
+						<% if(user) {%>
 						<select name="account" id="account-dropdown" class="flex-c-m trans-04 p-lr-25">
 						  <option value="">Account</option>
 						  <option value="/userProfile">Account Details</option>
@@ -60,12 +61,16 @@
 						  <option value="/myAddress">My Address</option>
 						  <option value="/logout">Logout</option>
 						</select>
+						<% } %>
+						<% if(!user){ %>
+
 						<a href="/login" class="flex-c-m trans-04 p-lr-25">
 						  Login
 						</a>
 						<a href="/signup" class="flex-c-m trans-04 p-lr-25">
 						  Signup
 						</a>
+						<% } %>
 					  </div>
 			</div>
 
@@ -155,7 +160,9 @@
 									Account
 								</a>
 							</option>
+							<% if(!user){ %>
 							<option value="">
+								
 								<a href="/login" class="flex-c-m trans-04 p-lr-25">
 									Login
 								</a>
@@ -166,7 +173,7 @@
 									Signup
 								</a>
 							</option>
-							
+							<% } %>
 						</select>
 						
 						

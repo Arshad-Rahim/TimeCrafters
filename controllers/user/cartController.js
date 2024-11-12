@@ -24,10 +24,10 @@ const getCart = async (req, res) => {
 
       cartCalculation.savings =
         cartCalculation.basePrice - cartCalculation.totalPrice;
-      return res.render("cart", { cart, cartCalculation });
+      return res.render("cart", { cart, cartCalculation ,user:true});
     } else {
       const cartCalculation = 0;
-      return res.render("cart", { cart, cartCalculation });
+      return res.render("cart", { cart, cartCalculation ,user:true});
     }
   } catch (error) {
     console.log("Error in get cart", error);

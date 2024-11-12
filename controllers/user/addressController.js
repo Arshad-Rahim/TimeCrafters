@@ -7,7 +7,7 @@ const getMyAddress = async (req, res) => {
 
     const address = await Address.find({ userId: id });
 
-    return res.render("myAddress", { address });
+    return res.render("myAddress", { address ,user:true});
   } catch (error) {
     console.log("Error in getMyAddress", error);
   }

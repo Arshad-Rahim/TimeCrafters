@@ -99,7 +99,7 @@ const getWishlist = async(req,res) =>{
         const wishlist = await Wishlist.findOne({userId}).populate('wishlist.productId');
         
 
-        return res.render('wishlist',{wishlist});
+        return res.render('wishlist',{wishlist,user:true});
         
     } catch (error) {
         console.log('Error in the getWishList',error);

@@ -7,7 +7,7 @@ const getWallet = async(req,res) =>{
         const userId = req.session.user;
         const wallet = await Wallet.findOne({userId}).populate("userId");
 
-        return res.render('wallet',{wallet});
+        return res.render('wallet',{wallet,user:true});
         
     } catch (error) {
         console.log('Error in getWallet',error);

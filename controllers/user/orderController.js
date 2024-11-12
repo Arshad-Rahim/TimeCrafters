@@ -15,7 +15,7 @@ const getOrderList = async (req, res) => {
         .populate("items.productId"),
     ]);
 
-    return res.render("orderList", { orders: orders, cart });
+    return res.render("orderList", { orders: orders, cart,user:true });
   } catch (error) {
     console.log("Error in getOrderList", error);
   }
