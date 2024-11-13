@@ -46,7 +46,8 @@
   </style>
 </head>
 <body class="bg-gray-100">
-    <div class="container mx-auto px-4 py-8">
+    <div id="refresh" >
+    <div  class="container mx-auto px-4 py-8">
         <h1 class="text-3xl font-bold mb-6">Order Management</h1>
         
         <div class="bg-white shadow-md rounded-lg overflow-hidden">
@@ -96,10 +97,21 @@
                         <option value="Delivered" <%= item.orderStatus === 'Delivered' ? 'selected' : '' %>>Delivered</option>
                         <option value="Canceled" <%= item.orderStatus === 'Canceled' ? 'selected' : '' %>>Canceled</option>
                                     </select>
+                                <% if(item.returnStatus == false && item.orderStatus != 'Delivered' ){ %>
                                     <button onclick="cancel(event,'<%= order._id%>','<%=item.productId._id%>')"  class="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 transition duration-300">Cancel</button>
+                                <% } %>
                                 </div>
+                                   <% if(item.returnStatus === true && item.returnRequest == "Pending"){ %>
+                                    <p class="text-sm text-red-600 font-medium">User requested return option</p>
+                                 <% } %>
+                                 <% if(item.returnRequest === 'Approved'){ %>
+                                    <p class="text-sm text-green-600 font-medium">Return Request Approved</p>
+                                <% } if(item.returnRequest === 'Rejected'){ %>
+                                    <p class="text-sm text-red-600 font-medium">Return Request Rejected</p>
+                                <% } %>
                                 <% } %>
                             </div>
+
                             <% }) %>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap"><%= order.createdAt.toLocaleDateString() %></td>
@@ -120,7 +132,7 @@
     <!-- Order Details Modal -->
     <% order.forEach(order =>{ %> 
         <div id="orderDetailsModal-<%= order._id %>" class="modal">
-            <div class="modal-content rounded-lg">
+            <div  class="modal-content rounded-lg">
                 <div class="flex justify-between items-center mb-4">
                     <div>
                         <h2 class="text-xl font-semibold">Order# <%= order._id %></h2>
@@ -188,20 +200,35 @@
                                      <% if(item.orderStatus =="Shipped"){ %>
                                         <p class="text-sm text-yellow-600 font-medium">Status: <%= item.orderStatus %></p>
                                      <% } %>
+                                   
 
                             </div>
                         </div>
-                        <% if(item.orderStatus != 'Canceled') { %>
+                        <% if(item.orderStatus != 'Canceled' && item.orderStatus != "Delivered" ) { %>
                         <button onclick="cancel(event,'<%= order._id%>','<%=item.productId._id%>')" class="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition duration-300">Cancel</button>
                         <% } %>
                     </div>
                 </div>
+                <% if(item.returnStatus === true && item.returnRequest == "Pending" ){ %>
+                    <div class="mt-4 flex items-center space-x-2">
+                        <button onclick="handleReturnAction('<%= order._id %>', '<%= item.productId._id %>', 'Approved')" class="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition duration-300">
+                            Approve Return
+                        </button>
+                        <button onclick="handleReturnAction('<%= order._id %>', '<%= item.productId._id %>', 'Rejected')" class="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition duration-300">
+                            Reject Return
+                        </button>
+                    </div>
+                <% } if(item.returnRequest === 'Approved'){ %>
+                    <p class="text-sm text-green-600 font-medium">Return Approved</p>
+                <% } if(item.returnRequest === 'Rejected'){ %>
+                    <p class="text-sm text-red-600 font-medium">Return Rejected</p>
+                <% } %>
                 <% }) %>
             </div>
         </div>
     <% }) %>
  
-
+    </div>
     
 </body>
 <%- include("../../views/partials/admin/footer") %>
@@ -229,6 +256,8 @@
             customClass: "center-toast",
             showConfirmButton:false,
           })
+            $('#refresh').load('/admin/orderManagment #refresh');
+
         }
       },
 
@@ -260,15 +289,17 @@
     }
 
     // Add click handlers for all close buttons
-    document.querySelectorAll('.close').forEach(closeBtn => {
-        closeBtn.onclick = function() {
-            const modalId = this.getAttribute('data-modal-id');
-            const modal = document.getElementById(`orderDetailsModal-${modalId}`);
-            if (modal) {
-                modal.style.display = "none";
-            }
+    document.addEventListener('click', function(event) {
+    // Check if clicked element is a close button
+    if (event.target.classList.contains('close')) {
+        // Get the parent modal directly instead of using data attribute
+        const modal = event.target.closest('.modal');
+        if (modal) {
+            modal.style.display = "none";
         }
-    });
+    }
+});
+
 
     // Close modal when clicking outside
     window.onclick = function(event) {
@@ -329,7 +360,7 @@ $.ajax({
             customClass:'center-toast',
 
         })
-        $('#refresh').load('/orderList #refresh');
+        $('#refresh').load('/admin/orderManagment #refresh');
     }
 },
 
@@ -348,5 +379,48 @@ error:function(xhr,status,error){
 }
 
 })
+}
+</script>
+
+<script>
+
+function handleReturnAction(orderId, productId, action) {
+    console.log(`Return ${action}ed for order ${orderId}, product ${productId}`);
+    
+    $.ajax({
+        url: `/admin/handleReturn/${orderId}/${productId}`,
+        type: 'POST',
+        dataType: 'json',
+        contentType: 'application/json',
+        data: JSON.stringify({ action }),
+        success: function(response) {
+            if (response.success) {
+                Swal.fire({
+                    toast: true,
+                    position: 'center',
+                    icon: 'success',
+                    title: 'Success',
+                    text: response.message,
+                    showConfirmButton: false,
+                    timer: 1500,
+                    customClass: 'center-toast',
+                });
+                $('#refresh').load('/admin/orderManagment #refresh');
+          
+            }
+        },
+        error: function(xhr, status, error) {
+            Swal.fire({
+                toast: true,
+                position: 'center',
+                icon: 'error',
+                title: 'Error',
+                text: xhr.responseJSON ? xhr.responseJSON.error : 'An error occurred',
+                showConfirmButton: false,
+                timer: 1500,
+                customClass: 'center-toast',
+            });
+        }
+    });
 }
 </script>

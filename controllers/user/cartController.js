@@ -346,7 +346,6 @@ const postOrderSuccess = async (req, res) => {
       couponCode
     } = req.body;
 
-    console.log(couponCode)
     const coupon = await Coupon.findOne({ code: couponCode });
 
  

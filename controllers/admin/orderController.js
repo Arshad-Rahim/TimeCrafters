@@ -136,9 +136,63 @@ const initialOrderTotal = order.orderTotal;
   }
 };
 
+
+
+const handleReturn = async(req,res) =>{
+  try {
+    const { orderId, productId } = req.params;
+    const {action} = req.body;
+
+    const order = await Order.findOne({ _id: orderId });
+
+    const itemIndex = order.items.findIndex(
+      (item) => item.productId.toString() == productId
+    );
+
+    if (itemIndex == -1) {
+      return res.status(400).json({
+        success: false,
+        message: "item not found in the order",
+      });
+    }
+
+    order.items[itemIndex].returnRequest = action;
+    await order.save();
+
+    if(action == 'Approved'){
+    const userId = order.userId;
+    const wallet = await Wallet.findOne({userId});
+    const differenceAmount = order.paymentInfo.paidAmount;
+
+    wallet.balance+= differenceAmount;
+    const transactions ={
+      order_id:orderId,
+      transaction_date:Date.now(),
+      transaction_type:'credit',
+      transaction_status:'completed',
+      amount:differenceAmount,
+    }
+    wallet.transactions.push(transactions);
+    await wallet.save();
+    return res.status(200).json({
+      success:true,
+      message:'Request accepted succesfully',
+    })
+  }else{
+    return res.status(200).json({
+      success:true,
+      message:'Request Rejected succefully',
+    })
+  }
+  } catch (error) {
+    console.log('Error in handleReturn',error);
+  }
+}
+
 module.exports = {
   getOrderManagment,
   updateStatus,
   getPopUpOrderDetails,
   deleteOrderListProduct,
+  handleReturn,
 };

@@ -64,6 +64,7 @@ router.post('/editProduct/:id',adminAuth,uploads.array('images',4),productContro
 router.get('/orderManagment',adminAuth,orderController.getOrderManagment);
 router.put('/updateStatus/:orderId/:productId',adminAuth,orderController.updateStatus);
 router.delete('/deleteOrderListProduct/:orderId/:productId', orderController.deleteOrderListProduct);
+router.post('/handleReturn/:orderId/:productId',adminAuth,orderController.handleReturn);
 
 
 // offer managment

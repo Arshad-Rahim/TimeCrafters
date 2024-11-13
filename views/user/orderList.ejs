@@ -18,7 +18,7 @@
 	<link href="https://cdn.jsdelivr.net/npm/@sweetalert2/theme-dark@4/dark.css" rel="stylesheet">
 </head>
 <body class="bg-gray-100"></body>
-    <div style="margin-top: 55px;" class="container mx-auto px-4 py-8">
+    <div  style="margin-top: 55px;" class="container mx-auto px-4 py-8">
         <h1 class="text-3xl font-bold mb-8">Your Orders</h1>
 
         <div id="refresh" class="space-y-6">
@@ -66,7 +66,15 @@
                                         <% if(item.orderStatus == 'Shipped') {%>
                                             <span class="px-2 py-1 bg-orange-100 text-orange-800 rounded-full text-sm">Shipped</span>
                                             <% } %>
-                                            <% if(item.orderStatus == 'Delivered') {%>
+                                            <% if(item.returnRequest =="Approved") {%>
+                                                <span class="px-2 py-1 bg-green-100 text-green-800 rounded-full text-sm">Return Request Accepted</span>
+                                                <% } else if(item.returnRequest =="Rejected"){%>
+                                                    <span class="px-2 py-1 bg-red-100 text-red-800 rounded-full text-sm">Return Request Rejected</span>
+                                                    
+                                            <% }else if(item.returnStatus == true) {%>
+                                                <span class="px-2 py-1 bg-orange-100 text-orange-800 rounded-full text-sm">Return request sended</span>
+                                                <% } else if(item.orderStatus == 'Delivered')  {%> 
+                                                    <!--  -->
                                                 <span class="px-2 py-1 bg-green-100 text-green-800 rounded-full text-sm">Delivered</span>
                                                 <% } %>
                                     <% if(item.orderStatus !== 'Canceled' && item.orderStatus !== 'Delivered'  && item.productId){ %>
@@ -77,12 +85,13 @@
 
 
                               <% if(item.orderStatus == 'Delivered'  && item.productId){ %>
-
-                                <button class="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600 transition duration-300">Return</button>
+                                    <% if(item.returnStatus == false){ %>
+                                <button onclick="returnProduct(event,'<%= order._id%>','<%=item.productId._id%>')" class="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600 transition duration-300">Return</button>
+                                <% } %>
                                 <button class="px-3 py-1 bg-gray-200 text-gray-800 rounded hover:bg-gray-300 transition duration-300">Invoice</button>
                           <% } %>
                           
-                              
+                               
                                 </div>
                             </div>
                         <% }) %>
@@ -128,6 +137,73 @@
         $.ajax({
             url:`/deleteOrderListProduct/${orderId}/${productId}`,
             type:'DELETE',
+            dataType:'json',
+            contentType:'application/json',
+
+            success:function(response){
+            if(response.success){
+                Swal.fire({
+                    toast:true,
+                    position:'center',
+                    icon:'success',
+                    title:response.message,
+                    showConfirmButton:false,
+                    timer:1500,
+                    customClass:'center-toast',
+
+                })
+                $('#refresh').load('/orderList #refresh');
+            }
+        },
+
+        error:function(xhr,status,error){
+            const response = xhr.responseJSON;
+            Swal.fire({
+                toast: true,
+                position: 'center',
+                icon: 'error',
+                title: 'Error',
+                text:response.message,
+                showConfirmButton: false,
+                timer: 1500,
+                customClass: 'center-toast',
+            });
+        }
+
+        })
+    }
+</script>
+
+
+<script>
+
+    function returnProduct(event,orderId,productId){
+        event.preventDefault();
+
+        
+        Swal.fire({
+            title:'Are you sure?',
+        text:'to return the product',
+        icon:'warning',
+        showConfirmButton:true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText:'Yes, remove it',
+
+        }).then((result) =>{
+            if(result.isConfirmed){{
+                returnProductAjax(orderId,productId);
+            }}
+        })
+
+    }
+
+
+    function returnProductAjax(orderId,productId){
+
+        $.ajax({
+            url:`/returnOrderListProduct/${orderId}/${productId}`,
+            type:'POST',
             dataType:'json',
             contentType:'application/json',
 

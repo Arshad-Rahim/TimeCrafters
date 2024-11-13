@@ -33,7 +33,7 @@ const getOrderDetails = async (req, res) => {
         .populate("items.productId"),
     ]);
 
-    return res.render("orderDetails", { order: findOrder, cart });
+    return res.render("orderDetails", { order: findOrder, cart,user:true });
   } catch (error) {
     console.log("Error in getOrderDetails", error);
   }
@@ -63,9 +63,9 @@ const initialOrderTotal = order.orderTotal;
       .filter((item) => item.orderStatus !== "Canceled")
       .reduce((acc, curr) => acc + curr.ProductTotal, 0);
     await order.save();
-    const resultOrderTotal = order.orderTotal;
-    const differenceAmount = initialOrderTotal - resultOrderTotal;
-
+    // const resultOrderTotal = order.paymentInfo.paidAmount;
+    // const differenceAmount = initialOrderTotal - resultOrderTotal;
+    const differenceAmount = order.paymentInfo.paidAmount;
     const colorQuantityMap = {
       gold: "goldenQuantity",
       black: "blackQuantity",
@@ -91,7 +91,7 @@ const initialOrderTotal = order.orderTotal;
     const wallet = await Wallet.findOne({userId});
 
     console.log(order.paymentInfo.method)
-    if(order.paymentInfo.method == 'wallet' || 'paypal' ){
+    if(order.paymentInfo.method == 'wallet' || order.paymentInfo.method == 'paypal' ){
       wallet.userId = userId;
       wallet.balance+= differenceAmount;
       const transactions ={
@@ -116,8 +116,40 @@ const initialOrderTotal = order.orderTotal;
   }
 };
 
+
+const returnProduct = async(req,res) =>{
+  try {
+    const { orderId, productId } = req.params;
+    const userId = req.session.user;
+
+    const order = await Order.findOne({ _id: orderId });
+
+    const itemIndex = order.items.findIndex(
+      (item) => item.productId.toString() == productId
+    );
+
+    if (itemIndex == -1) {
+      return res.status(400).json({
+        success: false,
+        message: "item not found in the order",
+      });
+    }
+    order.items[itemIndex].returnStatus = true;
+    await order.save();
+    console.log(order.items[itemIndex].returnStatus)
+    return res.status(200).json({
+      success: true,
+      message: "product request Sended successfully",
+    })
+    
+  } catch (error) {
+    console.log('Error in returnProduct',error);
+  }
+}
+
 module.exports = {
   getOrderList,
   getOrderDetails,
   deleteOrderListProduct,
+  returnProduct,
 };
