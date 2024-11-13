@@ -8,7 +8,7 @@ const addressController = require('../controllers/user/addressController');
 const orderController = require('../controllers/user/orderController');
 const wishlistController = require('../controllers/user/wishlistController');
 const walletController = require('../controllers/user/walletController');
-
+const referalController = require('../controllers/user/referalController');
 const {userAuth} = require('../middleware/auth');
 const passport = require("passport");
 
@@ -99,6 +99,9 @@ router.get(
 router.get('/wallet',userAuth,walletController.getWallet);
 router.post('/addWalletFund',userAuth,walletController.addWalletFund);
 
+
+// referal offer
+router.post('/applyReferral',userAuth,referalController.referralOffer);
 
 router.get(
   "/auth/google/callback",

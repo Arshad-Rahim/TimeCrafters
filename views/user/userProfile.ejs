@@ -232,7 +232,13 @@
                   <span><%= user.email %></span>
                 </div>
               </div>
-              <button type="submit" id="save" class="btn btn-success">
+              <div class="mb-4"></div>
+                <label class="form-label">Referal Code</label>
+                <div class="border p-3 rounded" style="background-color: var(--input-bg)">
+                  <span><%= user.referalCode %></span>
+                </div>
+              </div>
+              <button style="margin: 30px;" type="submit" id="save" class="btn btn-success">
                 Save
               </button>
             </form>

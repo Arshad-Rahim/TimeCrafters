@@ -28,6 +28,74 @@
   font-weight: bold;
 }	
 
+  /* Updated modal styles to match the design */
+  .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .modal-content {
+        background: white;
+        padding: 24px;
+        border-radius: 16px;
+        width: 90%;
+        max-width: 400px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    }
+
+    .modal-content h2 {
+        font-size: 24px;
+        font-weight: bold;
+        margin: 0 0 20px 0;
+        color: #000;
+    }
+
+    .modal-input {
+        width: 100%;
+        padding: 12px;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        font-size: 16px;
+    }
+
+    .modal-input::placeholder {
+        color: #a0aec0;
+    }
+
+    .modal-buttons {
+        display: flex;
+        justify-content: flex-end;
+        gap: 12px;
+    }
+
+    .modal-button {
+        padding: 8px 16px;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: 500;
+        cursor: pointer;
+        border: none;
+    }
+
+    .skip-button {
+        background-color: #f7fafc;
+        color: #4a5568;
+    }
+
+    .apply-button {
+        background-color: #000;
+        color: white;
+    }
 
 		</style>
 
@@ -247,6 +315,21 @@
 				<% } %>
 			</div>
 
+<% if(user){ %>
+	<% if(!user.appliedReferalCode){ %>
+			<div id="referralModal" class="modal">
+				<div class="modal-content">
+					<h2>Enter Referral Code</h2>
+					<input type="text" id="referralCode" class="modal-input" placeholder="Enter your referral code">
+					<div class="modal-buttons">
+						<button id="skipReferral" class="modal-button skip-button">Skip</button>
+						<button id="applyReferral" class="modal-button apply-button">Apply</button>
+					</div>
+				</div>
+			</div>
+
+		<% } } %>	
+
 			<!-- Load more -->
 			<!-- <div class="flex-c-m flex-w w-full p-t-45">
 				<a href="#" class="flex-c-m stext-101 cl5 size-103 bg2 bor1 hov-btn1 p-lr-15 trans-04">
@@ -301,3 +384,100 @@
     })
 		}
 	</script>
+
+
+
+
+
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const modal = document.getElementById("referralModal");
+        const applyButton = document.getElementById("applyReferral");
+        const skipButton = document.getElementById("skipReferral");
+        const referralInput = document.getElementById("referralCode");
+
+        // Show modal when page loads
+        modal.style.display = "flex";
+
+        // Function to hide modal
+        function hideModal() {
+            modal.style.display = "none";
+            referralInput.value = '';
+        }
+
+        // Skip button handler
+        skipButton.addEventListener('click', function() {
+            hideModal();
+        });
+
+        // Close modal if clicked outside
+        window.onclick = function(event) {
+            if (event.target == modal) {
+                hideModal();
+            }
+        }
+
+        // Apply referral code handler
+        applyButton.addEventListener('click', function() {
+            const referralCode = referralInput.value.trim();
+            
+            // Validate referral code
+            if (!referralCode) {
+                Swal.fire({
+                    toast: true,
+                    position: 'center',
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Please enter a referral code',
+                    showConfirmButton: false,
+                    timer: 1500,
+                    customClass: 'center-toast',
+                });
+                return;
+            }
+
+            // Send AJAX request
+            $.ajax({
+                url: '/applyReferral',
+                type: 'POST',
+                dataType: 'json',
+                contentType: 'application/json',
+                data: JSON.stringify({ referralCode }),
+                success: function(response) {
+                    if (response.success) {
+                        Swal.fire({
+                            toast: true,
+                            position: 'center',
+                            icon: 'success',
+                            title: response.message,
+                            showConfirmButton: false,
+                            timer: 1500,
+                            customClass: 'center-toast',
+                        });
+                        hideModal();
+                    }
+                },
+                error: function(xhr, status, error) {
+                    const response = xhr.responseJSON;
+                    Swal.fire({
+                        toast: true,
+                        position: 'center',
+                        icon: 'error',
+                        title: 'Error',
+                        text: response.message,
+                        showConfirmButton: false,
+                        timer: 1500,
+                        customClass: 'center-toast',
+                    });
+                }
+            });
+        });
+
+        // Optional: Basic input validation
+        referralInput.addEventListener('input', function() {
+            // Remove spaces and convert to uppercase
+            this.value = this.value.replace(/\s/g, '').toUpperCase();
+        });
+    });
+</script>

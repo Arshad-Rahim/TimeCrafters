@@ -12,6 +12,7 @@ const Order = require("../../models/orderScheama");
 const Cart = require("../../models/cartSchema");
 const Wallet = require('../../models/walletShema');
 const handleUserBonus = require('../../service/welcomeBonus');
+const crypto = require('crypto');
 
 const pageNotFound = async (req, res) => {
   try {
@@ -189,6 +190,25 @@ const verifyOtpSignup = async (req, res) => {
   try {
     const { otp } = req.body;
 
+   function generateCode(length = 8) {
+      const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+      let code = '';
+      
+      // Generate first part using timestamp (first 4 chars)
+      const timestamp = Date.now().toString(36).slice(-4).toUpperCase();
+      code += timestamp;
+      
+      // Generate remaining random characters
+      const remainingLength = length - timestamp.length;
+      for (let i = 0; i < remainingLength; i++) {
+          const randomIndex = crypto.randomInt(0, characters.length);
+          code += characters[randomIndex];
+      }
+      
+      return code;
+  }
+    const referalCode = generateCode();
+console.log(referalCode)
     if (otp == req.session.userOtp) {
       const user = req.session.userData;
       const passwordHash = await securePassword(user.password);
@@ -197,6 +217,7 @@ const verifyOtpSignup = async (req, res) => {
         name: user.name,
         email: user.email,
         password: passwordHash,
+        referalCode:referalCode,
       });
 
       await saveUserData.save();
