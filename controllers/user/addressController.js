@@ -16,8 +16,9 @@ const getMyAddress = async (req, res) => {
 const getAddAddress = async (req, res) => {
   try {
     const userId = req.session.user;
+    const user = await User.findOne({_id:userId});
 
-    return res.render("addAddress", { userId });
+    return res.render("addAddress", { userId ,user});
   } catch (error) {
     console.log("Error in getAddAddress", error);
   }
@@ -25,6 +26,7 @@ const getAddAddress = async (req, res) => {
 
 const postAddAddress = async (req, res) => {
   try {
+    console.log(req.body)
     const {
       userId,
       houseName,

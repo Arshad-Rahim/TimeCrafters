@@ -80,7 +80,7 @@
                                     <% if(item.orderStatus !== 'Canceled' && item.orderStatus !== 'Delivered'  && item.productId){ %>
 
                                     <button onclick="cancel(event,'<%= order._id%>','<%=item.productId._id%>')" class="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600 transition duration-300">Cancel</button>
-                                    <button class="px-3 py-1 bg-gray-200 text-gray-800 rounded hover:bg-gray-300 transition duration-300">Invoice</button>
+                                    <button onclick="Invoice(event,'<%= order._id%>','<%=item.productId._id%>')" id="Invoice" class="px-3 py-1 bg-gray-200 text-gray-800 rounded hover:bg-gray-300 transition duration-300">Invoice</button>
                               <% } %>
 
 
@@ -88,7 +88,7 @@
                                     <% if(item.returnStatus == false){ %>
                                 <button onclick="returnProduct(event,'<%= order._id%>','<%=item.productId._id%>')" class="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600 transition duration-300">Return</button>
                                 <% } %>
-                                <button class="px-3 py-1 bg-gray-200 text-gray-800 rounded hover:bg-gray-300 transition duration-300">Invoice</button>
+                                <button onclick="Invoice(event,'<%= order._id%>','<%=item.productId._id%>')"  id="invoice" class="px-3 py-1 bg-gray-200 text-gray-800 rounded hover:bg-gray-300 transition duration-300">Invoice</button>
                           <% } %>
                           
                                
@@ -239,4 +239,92 @@
 
         })
     }
+</script>
+
+
+<script>
+
+function Invoice(event, orderId, productId) {
+    event.preventDefault();
+    
+    // Show loading state
+    Swal.fire({
+        title: 'Generating Invoice...',
+        allowOutsideClick: false,
+        didOpen: () => {
+            Swal.showLoading();
+        }
+    });
+
+    // Create a hidden form to handle the download
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = `/invoiceDownload/${orderId}/${productId}`;
+    
+    // Append CSRF token if needed
+    // const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+    // const csrfInput = document.createElement('input');
+    // csrfInput.type = 'hidden';
+    // csrfInput.name = '_csrf';
+    // csrfInput.value = csrfToken;
+    // form.appendChild(csrfInput);
+
+    document.body.appendChild(form);
+
+    // Submit form and handle response
+    fetch(form.action, {
+        method: 'POST',
+        headers: {
+            'Accept': 'application/pdf'
+        }
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        return response.blob();
+    })
+    .then(blob => {
+        // Create download link
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.style.display = 'none';
+        a.href = url;
+        a.download = `invoice_${orderId}.pdf`;
+        
+        // Trigger download
+        document.body.appendChild(a);
+        a.click();
+        
+        // Cleanup
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+        document.body.removeChild(form);
+        
+        // Show success message
+        Swal.fire({
+            toast: true,
+            position: 'center',
+            icon: 'success',
+            title: 'Invoice downloaded successfully',
+            showConfirmButton: false,
+            timer: 1500,
+            customClass: 'center-toast'
+        });
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        Swal.fire({
+            toast: true,
+            position: 'center',
+            icon: 'error',
+            title: 'Error',
+            text: 'Failed to download invoice. Please try again.',
+            showConfirmButton: false,
+            timer: 1500,
+            customClass: 'center-toast'
+        });
+    });
+}
+
 </script>

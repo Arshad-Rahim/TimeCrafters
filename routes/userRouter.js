@@ -43,34 +43,34 @@ router.post('/setNewPassword',userController.postPasswordEnter);
 // userProfile
 
 router.get('/userProfile',userAuth,userController.getUserProfile);
-router.post('/userProfile',userController.postUserProfile);
+router.post('/userProfile',userAuth,userController.postUserProfile);
 
 
 
-router.get('/myAddress',addressController.getMyAddress);
-router.get('/addAddress',addressController.getAddAddress);
-router.post('/addAddress',addressController.postAddAddress);
-router.get('/editAddress/:id',addressController.getEditAddress);
-router.put('/editAddress/:id',addressController.putEditAddress);
-router.delete('/deleteAddress/:id',addressController.deleteAddress);
+router.get('/myAddress',userAuth,addressController.getMyAddress);
+router.get('/addAddress',userAuth,addressController.getAddAddress);
+router.post('/addAddress',userAuth,addressController.postAddAddress);
+router.get('/editAddress/:id',userAuth,addressController.getEditAddress);
+router.put('/editAddress/:id',userAuth,addressController.putEditAddress);
+router.delete('/deleteAddress/:id',userAuth,addressController.deleteAddress);
 
 
 router.get('/orderList',userAuth,orderController.getOrderList);
 router.get('/orderDetails/:id',userAuth,orderController.getOrderDetails);
-router.delete('/deleteOrderListProduct/:orderId/:productId', orderController.deleteOrderListProduct);
+router.delete('/deleteOrderListProduct/:orderId/:productId',userAuth, orderController.deleteOrderListProduct);
 
 
 // cart
 router.get('/cart',userAuth,cartController.getCart);
-router.post('/cart/:id',cartController.postCart);
-router.put('/cart',cartController.putQuantity);
-router.delete('/deleteCartProduct/:id',cartController.deleteCartProduct);
+router.post('/cart/:id',userAuth,cartController.postCart);
+router.put('/cart',userAuth,cartController.putQuantity);
+router.delete('/deleteCartProduct/:id',userAuth,cartController.deleteCartProduct);
 
 
 // wishlist
-router.post('/wishlist/:productId',wishlistController.wishlist);
+router.post('/wishlist/:productId',userAuth,wishlistController.wishlist);
 router.get('/wishlist',userAuth,wishlistController.getWishlist);
-router.delete('/deleteWishlistProduct/:id',wishlistController.deleteWishlistProduct);
+router.delete('/deleteWishlistProduct/:id',userAuth,wishlistController.deleteWishlistProduct);
 
 
 // checkOut
@@ -84,9 +84,11 @@ router.post('/removeCoupon',userAuth,cartController.removeCoupon);
 router.post('/orderSuccess',userAuth,cartController.postOrderSuccess);
 router.get('/orderSuccess',userAuth,cartController.getOrderSuccess)
 
-
 // return order
 router.post('/returnOrderListProduct/:orderId/:productId',userAuth,orderController.returnProduct);
+router.post('/invoiceDownload/:orderId/:productId',userAuth,orderController.invoiceDownload);
+
+
 // passport
 router.get(
   "/auth/google",
