@@ -46,6 +46,31 @@
 .payment-method label {
     font-size: 14px;
 }
+.payment-method {
+  display: flex;
+  align-items: center;
+}
+
+.payment-method input[type="radio"] {
+  margin-right: 8px;
+}
+
+.payment-method label.disabled {
+  color: #aaa;
+  cursor: not-allowed;
+}
+
+.payment-method .disabled-icon {
+  margin-right: 4px;
+  font-size: 14px;
+  vertical-align: middle;
+}
+
+.cod-disabled-message {
+  margin-top: 8px;
+  font-size: 14px;
+  color: #666;
+}
 </style>
 </head>
 <%- include('../../views/partials/user/header',{user}) %>
@@ -205,11 +230,19 @@
                                 <input type="radio" id="paypal" name="paymentMethod" value="paypal">
                                 <label for="paypal">PayPal</label>
                             </div>
+                            <!-- disable COD -->
                             <div class="payment-method">
-                                <input type="radio" id="cashondelivery" name="paymentMethod" value="cashondelivery">
-                                <label for="cashondelivery">Cash on Delivery</label>
-                            </div>
-                        </div>
+                                <% if(cartCalculation.totalPrice < 10000){ %>
+                                  <input type="radio" id="cashondelivery" name="paymentMethod" value="cashondelivery">
+                                  <label for="cashondelivery">Cash on Delivery</label>
+                                <% }else{ %>
+                                  <input type="radio" id="cashondelivery" name="paymentMethod" value="cashondelivery" disabled>
+                                  <label for="cashondelivery" class="disabled">
+                                    Cash on Delivery
+                                  </label>
+                                  <!-- <p class="cod-disabled-message">COD is available for products below 10,000 only.</p> -->
+                                <% } %>
+                              </div>
                     </div>
                     <button onclick="orderSuccess(event,'<%= cartCalculation.totalPrice %>')" class="w-full mt-6 px-4 py-3 bg-green-600 text-white rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition duration-150 ease-in-out text-lg font-semibold">
                         Proceed to Payment

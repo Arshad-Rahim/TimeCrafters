@@ -12,6 +12,27 @@
 
 
         }
+
+        .retry-payment-btn {
+    background-color: #dc2626;
+    color: white;
+    font-weight: bold;
+    padding: 8px 16px;
+    border-radius: 4px;
+    border: none;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    transition: background-color 0.3s;
+  }
+
+  .retry-payment-btn:hover {
+    background-color: #b91c1c;
+  }
+
+  .retry-payment-btn svg {
+    margin-right: 8px;
+  }
     </style>
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 	<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -96,6 +117,25 @@
                             </div>
                         <% }) %>
                     </div>
+
+
+
+                    <% if( order.paymentInfo.status == "Failed"){ %>
+                        <p style="margin:10px">payment stauts: <span class="px-2 py-1 bg-red-100 text-red-800 rounded-full text-sm"><%= order.paymentInfo.status %></span></p>
+                       <% }else if(order.paymentInfo.status =="Paid"){ %>
+                        <p style="margin:10px">payment stauts: <span class="px-2 py-1 bg-green-100 text-green-800 rounded-full text-sm"><%= order.paymentInfo.status %></span></p>
+                        <% } %>
+                        <% if(order.paymentInfo.status == "Failed") {%>
+
+                            <button onclick="retry(event,'<%= order.paymentInfo.paidAmount%>')" style="margin: 10px;" id="retryPaymentBtn" class="retry-payment-btn">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                  <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.3"/>
+                                </svg>
+                                <span>Retry Payment</span>
+                              </button>
+                            <% } %>
+
+
                 <% }) %>
             <% } else { %>
                 <div class="bg-white shadow-md rounded-lg p-6 text-center">
@@ -327,4 +367,55 @@ function Invoice(event, orderId, productId) {
     });
 }
 
+</script>
+
+
+
+
+
+<script>
+
+    function retry(event,totalPrice){
+        $.ajax({
+            type:'POST',
+            url:'/retryPayment/',
+            dataType:'json',
+            contentType:'application/json',
+            data:JSON.stringify({
+               totalPrice
+                   }),
+            success: function (response) {
+        if (response.success) {
+          Swal.fire({
+            toast: true,
+            position: "center",
+            icon: "success",
+            title: "Success",
+            text: response.message,
+            timer: 1500,
+            customClass: "center-toast",
+          }).then(() =>{
+                    window.location.href=response.redirectURL;
+                });
+        }
+      },
+
+      error: function (xhr, status, error) {
+        const response = xhr.responseJSON;
+        Swal.fire({
+          toast: true,
+          position: "center",
+          icon: "error",
+          title: "Error",
+          text: response.message,
+          showConfirmButton: false,
+          timer: 1500,
+          customClass: "center-toast",
+        });
+      },
+            
+        })
+        
+    
+    }
 </script>

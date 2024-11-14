@@ -14,6 +14,7 @@
       const userRouter = require("./routes/userRouter");
       const adminRouter = require('./routes/adminRouter');
 
+      const Order = require('/home/arshad-rahim/first project/models/orderScheama');
       paypal.configure({
         'mode': 'sandbox', //sandbox or live
         'client_id': process.env.PAYPAL_CLIENT_ID,
@@ -69,7 +70,7 @@
 
 
 
-app.get('/pay', (req, res) => {
+app.get('/pay',  (req, res) => {
   const amount = req.session.convertAmount || "0.00";
   const create_payment_json = {
     "intent": "sale",
@@ -111,12 +112,19 @@ app.get('/success', (req, res) => {
     }]
   };
 
-  paypal.payment.execute(paymentId, execute_payment_json, function (error, payment) {
+   paypal.payment.execute (paymentId, execute_payment_json, function (error, payment) {
     if (error) {
         console.log(error.response);
         throw error;
     } else {
-        console.log(JSON.stringify(payment));
+        // console.log(JSON.stringify(payment));
+        (async ()=>{
+          const order = await Order.findOne({ userId: req.session.user }).sort({ createdAt: -1 });
+          order.paymentInfo.status = "Paid"
+          await order.save();
+          // console.log(order)
+        })();
+
         res.redirect('/orderSuccess');
     }
 });
@@ -134,7 +142,7 @@ app.get('/success', (req, res) => {
     });
     
     });
-app.get('/cancel', (req, res) => res.send('Cancelled'));
+// app.get('/cancel', (req, res) => res.send('Cancelled'));
 
 
       app.listen(3000, () => console.log("Server is running"));

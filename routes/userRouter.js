@@ -9,6 +9,8 @@ const orderController = require('../controllers/user/orderController');
 const wishlistController = require('../controllers/user/wishlistController');
 const walletController = require('../controllers/user/walletController');
 const referalController = require('../controllers/user/referalController');
+const paypalController = require('../controllers/user/paypalController');
+
 const {userAuth} = require('../middleware/auth');
 const passport = require("passport");
 
@@ -115,6 +117,10 @@ router.get(
 );
 
 
+
+// payment paypal cancel
+router.get('/cancel',userAuth,paypalController.cancelPaypal);
+router.post('/retryPayment',userAuth,paypalController.retryPayment);
 
 
 
