@@ -62,6 +62,7 @@ const getProductList = async (req, res) => {
     if (categories && brand) {
       if (user) {
         const userData = await User.findOne({ _id: user._id });
+      
 
         return res.render("userProductList", {
           user: userData,
@@ -75,6 +76,7 @@ const getProductList = async (req, res) => {
         });
       } else {
         return res.render("userProductList", {
+          user:true,
           product: productData,
           cat: categories,
           currentPage: page,
@@ -153,6 +155,7 @@ const getSearchProduct = async (req, res) => {
         brand: brand,
         search: search,
         currentFilter: filter,
+        user:true,
       });
     } else {
       return res
@@ -211,6 +214,7 @@ const getProductDetails = async (req, res) => {
       });
     } else {
       return res.render("productDetails", {
+        user:true,
         product: productData,
         cat: categories,
         id,
@@ -285,6 +289,7 @@ const getFilteredCategory = async (req, res) => {
       totalProducts: totalProducts,
       search: search,
       currentFilter: filter,
+      user:true,
     });
   } catch (error) {
     console.log("Error in GetFilterCategory", error);

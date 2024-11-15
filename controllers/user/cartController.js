@@ -268,12 +268,13 @@ const getCheckOut = async (req, res) => {
   try {
     const userId = req.session.user;
 
-    const [address, cart] = await Promise.all([
+    const [address, cart,wallet] = await Promise.all([
       Address.find({ userId }),
       Cart.findOne({ userId }).populate({
         path: "items.productId",
         select: "productName salePrice productImage",
       }),
+      Wallet.findOne({userId})
     ]);
 
     const cartCalculation = {
@@ -295,7 +296,7 @@ const getCheckOut = async (req, res) => {
     cartCalculation.totalPrice = cartCalculation.priceAfterOffer - cartCalculation.couponDiscount;
     cartCalculation.totalSavings = cartCalculation.offerSavings ;
     cartCalculation.totalCoupon = cartCalculation.couponDiscount; 
-    return res.render("checkOut", { cart, cartCalculation, address ,user:true});
+    return res.render("checkOut", { cart, cartCalculation, address ,user:true,wallet});
   } catch (error) {
     console.log("Error in getCheckOut", error);
   }
@@ -398,9 +399,7 @@ const postOrderSuccess = async (req, res) => {
         });
       }
 
-      product[colorQuantityField] =
-        product[colorQuantityField] - cartItem.quantity;
-      await product.save();
+   
     }
     const userCouponUsage = await Coupon.aggregate([
       {
@@ -455,6 +454,27 @@ const postOrderSuccess = async (req, res) => {
       );
     }
 
+    if (paymentMethod == "wallet") {
+      const wallet = await Wallet.findOne({ userId });
+
+      if (wallet.balance < finalTotal) {
+        return res.status(400).json({
+          success: false,
+          message: "Insufficient Balence in the wallet",
+        });
+      }
+      wallet.balance -= finalTotal;
+      const transactions = {
+        order_id: saveOrderList._id,
+        transaction_date: Date.now(),
+        transaction_type: "debit",
+        transaction_status: "completed",
+        amount: finalTotal,
+      };
+      wallet.transactions.push(transactions);
+      await wallet.save();
+    }
+
     const orderItems = cart.items.map((item) => ({
       productId: item.productId,
       ProductName: item.productName,
@@ -503,27 +523,11 @@ const postOrderSuccess = async (req, res) => {
         convertAmount: convertAmount,
       });
     }
+    product[colorQuantityField] =
+    product[colorQuantityField] - cartItem.quantity;
+  await product.save();
 
-    if (paymentMethod == "wallet") {
-      const wallet = await Wallet.findOne({ userId });
-
-      if (wallet.balance < finalTotal) {
-        return res.status(400).json({
-          success: false,
-          message: "Insufficient Balence in the wallet",
-        });
-      }
-      wallet.balance -= finalTotal;
-      const transactions = {
-        order_id: saveOrderList._id,
-        transaction_date: Date.now(),
-        transaction_type: "debit",
-        transaction_status: "completed",
-        amount: finalTotal,
-      };
-      wallet.transactions.push(transactions);
-      await wallet.save();
-    }
+    
     return res.status(200).json({
       success: true,
       message: "Order Succesfully placed",

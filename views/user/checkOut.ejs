@@ -10,6 +10,11 @@
         body {
             font-family: 'Poppins', sans-serif;
         }
+        .wallet-balance {
+    margin-left: 10px;
+    font-size: 0.9em;
+    color: #43a927;
+}
     </style>
 
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
@@ -225,6 +230,7 @@
                                 <input type="radio" id="wallet" name="paymentMethod" value="wallet" >
                                 <!-- checked -->
                                 <label for="wallet">Wallet</label>
+                                <span class="wallet-balance">(Balance: ₹<%= wallet.balance %>)</span>
                             </div>
                             <div class="payment-method">
                                 <input type="radio" id="paypal" name="paymentMethod" value="paypal">

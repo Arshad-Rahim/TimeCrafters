@@ -2,6 +2,8 @@ const User = require("../../models/userSchema");
 const mongoose = require("mongoose");
 const bcrypt = require("bcrypt");
 const Order = require("../../models/orderScheama");
+const Category = require("../../models/categorySchema");
+const Brand = require("../../models/brandSchema");
 const session = require("express-session");
 
 const pageError = async (req, res) => {
@@ -57,6 +59,86 @@ const loadDashboard = async (req, res) => {
     const totalDiscount = order.reduce((total, order) => {
       return total + (order.offerApplied || 0) + (order.couponDiscount || 0);
     }, 0);
+
+
+    const topProducts = await Order.aggregate([
+      { $unwind: '$items' },
+      {
+        $group: {
+          _id: '$items.productId',
+          productName: { $first: '$items.ProductName' },
+          totalSold: { $sum: '$items.quantity' },
+          productImage: { $first: '$items.productImage' },
+        },
+      },
+      { $sort: { totalSold: -1 } },
+      { $limit: 10 },
+    ]);
+
+
+    const topCategories = await Category.aggregate([
+      {
+        $lookup: {
+          from: "products",
+          localField: "_id",
+          foreignField: "category",
+          as: "products"
+        }
+      },
+      {
+        $addFields: {
+          productCount: { $size: "$products" }
+        }
+      },
+      {
+        $sort: {
+          productCount: -1
+        }
+      },
+      {
+        $limit: 10
+      },
+      {
+        $project: {
+          _id: 1,
+          name: 1,
+          description: 1,
+          productCount: 1
+        }
+      }
+    ]);
+
+    const topBrands = await Brand.aggregate([
+      {
+        $lookup: {
+          from: "products",
+          localField: "_id",
+          foreignField: "brand",
+          as: "products"
+        }
+      },
+      {
+        $addFields: {
+          productCount: { $size: "$products" }
+        }
+      },
+      {
+        $sort: {
+          productCount: -1
+        }
+      },
+      {
+        $limit: 10
+      },
+      {
+        $project: {
+          _id: 1,
+          brandName: 1,
+          brandImage: 1,
+          productCount: 1
+        }
+      }
+    ]);
 
     // Step 2: Prepare data with different time ranges
     const prepareTimeRangeData = (orders, range) => {
@@ -124,7 +206,10 @@ const loadDashboard = async (req, res) => {
       order,
       totalRevenue,
       totalDiscount,
-      chartData: JSON.stringify(chartData)
+      chartData: JSON.stringify(chartData),
+      topProducts,
+      topCategories,
+      topBrands,
     });
   } catch (error) {
     console.log("Error to load Dashboard", error);
