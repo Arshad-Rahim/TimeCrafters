@@ -12,8 +12,21 @@ const getCart = async (req, res) => {
   try {
     const userId = req.session.user;
 
-    const cart = await Cart.findOne({ userId }).populate("items.productId");
+    const cart = await Cart.findOne({ userId }).populate({
+      path: "items.productId",
+      populate: {
+        path: "category", 
+      },
+    });
+
     if (cart) {
+      cart.items = cart.items.filter(item => {
+        const product = item.productId; 
+        return product && !product.isBlocked && product.category.isListed; 
+      });
+
+    
+      
       const cartCalculation = cart.items.reduce(
         (acc, item) => ({
           basePrice: acc.basePrice + item.regularPrice * item.quantity,
@@ -272,10 +285,18 @@ const getCheckOut = async (req, res) => {
       Address.find({ userId }),
       Cart.findOne({ userId }).populate({
         path: "items.productId",
-        select: "productName salePrice productImage",
+        populate: {
+          path: "category", 
+        },
       }),
       Wallet.findOne({userId})
     ]);
+    if (cart && cart.items) {
+      cart.items = cart.items.filter(item => {
+        const product = item.productId; 
+        return product && !product.isBlocked && product.category.isListed; 
+      });
+  }
 
     const cartCalculation = {
       basePrice: cart.items.reduce(
@@ -338,7 +359,13 @@ const deleteCartProduct = async (req, res) => {
 const postOrderSuccess = async (req, res) => {
   try {
     const userId = req.session.user;
-    const cart = await Cart.findOne({ userId });
+    const cart = await Cart.findOne({ userId }).populate({
+      path: "items.productId",
+      populate: {
+        path: "category", 
+      },
+    });
+    
     const {
       selectedAddress,
       selectedAddressDetails,
@@ -347,6 +374,30 @@ const postOrderSuccess = async (req, res) => {
       couponCode
     } = req.body;
 
+  const blockedItems = cart.items.filter(item => item.productId.isBlocked);
+  const blockedCategoryItems = cart.items.filter(item => item.productId.category && item.productId.category.isListed === false);
+
+    if (cart && cart.items) {
+      cart.items = cart.items.filter(item => {
+        const product = item.productId; 
+        return product && !product.isBlocked && product.category.isListed; 
+      });
+  }
+
+    
+  if (blockedItems.length ||blockedCategoryItems.length  > 0) {
+    return res.status(400).json({
+      success: false,
+      message: "Some products are blocked. Please refresh the page to proceed.",
+    });
+  }
+
+  if (cart && cart.items.length === 0) {
+    return res.status(400).json({
+      success: false,
+      message: "All selected products are blocked.",
+    });
+  }
     const coupon = await Coupon.findOne({ code: couponCode });
 
  
@@ -369,38 +420,7 @@ const postOrderSuccess = async (req, res) => {
       req.session.newTotal = totalPrice;
     }
 
-    for (const cartItem of cart.items) {
-      const product = await Product.findOne({ _id: cartItem.productId });
-
-      if (!product) {
-        console.log("Product not found in PostOrderSuccess");
-      }
-
-      let colorQuantityField;
-
-      switch (cartItem.color) {
-        case "gold":
-          colorQuantityField = "goldenQuantity";
-          break;
-        case "black":
-          colorQuantityField = "blackQuantity";
-          break;
-        case "silver":
-          colorQuantityField = "silverQuantity";
-          break;
-        default:
-          console.log("unsupported color");
-      }
-
-      if (product[colorQuantityField] < cartItem.quantity) {
-        return res.status(400).json({
-          success: false,
-          message: "Selected Product is Out of Stock",
-        });
-      }
-
    
-    }
     const userCouponUsage = await Coupon.aggregate([
       {
         $match: { code: couponCode },
@@ -454,26 +474,6 @@ const postOrderSuccess = async (req, res) => {
       );
     }
 
-    if (paymentMethod == "wallet") {
-      const wallet = await Wallet.findOne({ userId });
-
-      if (wallet.balance < finalTotal) {
-        return res.status(400).json({
-          success: false,
-          message: "Insufficient Balence in the wallet",
-        });
-      }
-      wallet.balance -= finalTotal;
-      const transactions = {
-        order_id: saveOrderList._id,
-        transaction_date: Date.now(),
-        transaction_type: "debit",
-        transaction_status: "completed",
-        amount: finalTotal,
-      };
-      wallet.transactions.push(transactions);
-      await wallet.save();
-    }
 
     const orderItems = cart.items.map((item) => ({
       productId: item.productId,
@@ -510,6 +510,30 @@ const postOrderSuccess = async (req, res) => {
       },
     });
 
+
+    if (paymentMethod == "wallet") {
+      const wallet = await Wallet.findOne({ userId });
+
+      if (wallet.balance < finalTotal) {
+        return res.status(400).json({
+          success: false,
+          message: "Insufficient Balence in the wallet",
+        });
+      }
+      wallet.balance -= finalTotal;
+      const transactions = {
+        order_id: saveOrderList._id,
+        transaction_date: Date.now(),
+        transaction_type: "debit",
+        transaction_status: "completed",
+        amount: finalTotal,
+      };
+      wallet.transactions.push(transactions);
+      await wallet.save();
+    }
+
+ 
+   
     await saveOrderList.save();
     delete req.session.couponDiscount;
     if (paymentMethod == "paypal") {
@@ -523,9 +547,41 @@ const postOrderSuccess = async (req, res) => {
         convertAmount: convertAmount,
       });
     }
-    product[colorQuantityField] =
-    product[colorQuantityField] - cartItem.quantity;
-  await product.save();
+    for (const cartItem of cart.items) {
+      const product = await Product.findOne({ _id: cartItem.productId });
+
+      if (!product) {
+        console.log("Product not found in PostOrderSuccess");
+      }
+
+      let colorQuantityField;
+
+      switch (cartItem.color) {
+        case "gold":
+          colorQuantityField = "goldenQuantity";
+          break;
+        case "black":
+          colorQuantityField = "blackQuantity";
+          break;
+        case "silver":
+          colorQuantityField = "silverQuantity";
+          break;
+        default:
+          console.log("unsupported color");
+      }
+
+      if (product[colorQuantityField] < cartItem.quantity) {
+        return res.status(400).json({
+          success: false,
+          message: "Selected Product is Out of Stock",
+        });
+      }
+      product[colorQuantityField] =
+      product[colorQuantityField] - cartItem.quantity;
+    await product.save();
+   
+    }
+   
 
     
     return res.status(200).json({
@@ -543,11 +599,23 @@ const getOrderSuccess = async (req, res) => {
     const userId = req.session.user;
 
     const [cart, findOrder] = await Promise.all([
-      Cart.findOne({ userId }),
+      Cart.findOne({ userId }).populate({
+        path: "items.productId",
+        populate: {
+          path: "category", 
+        },
+      }),
       Order.findOne({ userId })
         .sort({ createdAt: -1 })
         .populate("items.productId"),
     ]);
+    if (cart && cart.items) {
+      cart.items = cart.items.filter(item => {
+        const product = item.productId; 
+        return product && !product.isBlocked && product.category.isListed; 
+      });
+  }
+
 
 
     return res.render("orderSuccess", { order: findOrder, cart,user:true });

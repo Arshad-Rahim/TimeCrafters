@@ -61,7 +61,7 @@ const getProductList = async (req, res) => {
     const user = req.session.user;
     if (categories && brand) {
       if (user) {
-        const userData = await User.findOne({ _id: user._id });
+        const userData = await User.findOne({ _id: user });
       
 
         return res.render("userProductList", {
@@ -261,9 +261,15 @@ const getFilteredCategory = async (req, res) => {
       ],
     };
 
-    if (categoryId !== "All") {
+    if (categoryId === "All") {
+      const listedCategories = await Category.find({ isListed: true }).select('_id');
+      const listedCategoryIds = listedCategories.map(cat => cat._id);
+
+      query.category = { $in: listedCategoryIds };
+    }else{
       query.category = categoryId;
     }
+   
 
     const categories = await Category.find({ isListed: true });
 

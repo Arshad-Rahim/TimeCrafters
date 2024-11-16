@@ -80,7 +80,7 @@ const getEditAddress = async (req, res) => {
       Address.findOne({ _id: id }),
     ])
 
-    return res.render("editAddress", { userData, address });
+    return res.render("editAddress", { userData, address,user:true });
   } catch (error) {
     console.log("Error in getEditAddress", error);
   }

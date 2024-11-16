@@ -408,6 +408,14 @@
 
         // Skip button handler
         skipButton.addEventListener('click', function() {
+			const referralCode = 'skip';
+			$.ajax({
+                url: '/applyReferral',
+                type: 'POST',
+                dataType: 'json',
+                contentType: 'application/json',
+                data: JSON.stringify({ referralCode }),
+			})
             hideModal();
         });
 

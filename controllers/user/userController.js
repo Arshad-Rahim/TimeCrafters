@@ -208,7 +208,7 @@ const verifyOtpSignup = async (req, res) => {
       return code;
   }
     const referalCode = generateCode();
-console.log(referalCode)
+
     if (otp == req.session.userOtp) {
       const user = req.session.userData;
       const passwordHash = await securePassword(user.password);

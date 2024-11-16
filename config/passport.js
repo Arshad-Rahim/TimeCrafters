@@ -2,7 +2,8 @@ const passport = require("passport");
 const GoogleStrategy = require("passport-google-oauth20").Strategy;
 const User = require("../models/userSchema");
 const env = require("dotenv").config();
-const handleUserBonus = require('../service/welcomeBonus');
+const handleUserBonus = require("../service/welcomeBonus");
+const crypto = require('crypto');
 
 
 passport.use(
@@ -19,14 +20,34 @@ passport.use(
         if (user) {
           return done(null, user);
         } else {
+          function generateCode(length = 8) {
+            const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+            let code = "";
+
+            // Generate first part using timestamp (first 4 chars)
+            const timestamp = Date.now().toString(36).slice(-4).toUpperCase();
+            code += timestamp;
+
+            // Generate remaining random characters
+            const remainingLength = length - timestamp.length;
+            for (let i = 0; i < remainingLength; i++) {
+              const randomIndex = crypto.randomInt(0, characters.length);
+              code += characters[randomIndex];
+            }
+
+            return code;
+          }
+          const referalCode = generateCode();
+
           user = new User({
             name: profile.displayName,
             email: profile.emails[0].value,
             googleId: profile.id,
+            referalCode: referalCode,
           });
           await user.save();
-    
-          await handleUserBonus(user._id, 'welcome');
+
+          await handleUserBonus(user._id, "welcome");
           return done(null, user);
         }
       } catch (err) {

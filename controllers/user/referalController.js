@@ -5,6 +5,13 @@ const Wallet = require('../../models/walletShema');
 const referralOffer = async(req,res) =>{
     try {
        const {referralCode} = req.body;
+       if(referralCode == "skip"){
+       const currentuserId = req.session.user;
+       const currentUser = await User.findOne({_id:currentuserId});
+       currentUser.appliedReferalCode = true;
+       await currentUser.save();
+        return
+       }
        const user = await User.findOne({referalCode:referralCode});
        if(!user){
         return res.status(400).json({
