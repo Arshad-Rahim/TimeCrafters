@@ -37,19 +37,31 @@ const addProductOffer = async(req,res) =>{
     try {
        
        const  {offerName,offerPercentage,endDate,selectedProduct} = req.body;
-       console.log(selectedProduct)
+     
      
      const offerNameLowerCase = offerName.trim().toLowerCase();
      const exisitingOfferName = await Offer.findOne({
         name:{ $regex: new RegExp(`^${offerNameLowerCase}$`, "i")}
      });
-     const target = await Product.findOne({productName:selectedProduct});
+     const existingSelectedProduct = await Offer.findOne({targetName:selectedProduct});
+     if(existingSelectedProduct){
+        return res.status(400).json({
+            success:false,
+            message:'Alredy there is offer existing in this product',
+        })
+     }
+
+
+
+     const target = await Product.findOne({productName:selectedProduct}).populate('category');
      if(!target){
         return res.status(400).json({
             success:false,
             message:'Product with this name notfound'
         })
      }
+
+     
      const offerPrice = (target.regularPrice)/100 * offerPercentage;
      const updatedSalePrice = target.regularPrice - offerPrice;
 
@@ -73,6 +85,28 @@ const addProductOffer = async(req,res) =>{
         })
 
         await newOffer.save();
+
+     const existingProductOffer = await Offer.findOne({ targetId: target._id, type: 'product'});
+     const categoryOffer = await Offer.findOne({ targetId: target.category._id, type: 'category' });
+
+
+       let totalOfferPercentage = 0; 
+
+       if (existingProductOffer) {
+         totalOfferPercentage += existingProductOffer.percentage;
+       }
+ 
+       if (categoryOffer) {
+         totalOfferPercentage += categoryOffer.percentage;
+       }
+ 
+       const totalOfferAmount = (target.regularPrice / 100) * totalOfferPercentage;
+       const finalUpdatedSalePrice = target.regularPrice - totalOfferAmount;
+ 
+       target.salePrice = finalUpdatedSalePrice;
+       target.productOffer = totalOfferPercentage; 
+       await target.save();
+
         return res.status(200).json({
             success:true,
             message:'Offer added succesfully',
@@ -97,12 +131,27 @@ const addCategoryOffer = async(req,res) =>{
         name:{ $regex: new RegExp(`^${offerNameLowerCase}$`, "i")}
      });
 
+    
+
      const targetCategory = await Category.findById(selectedCategory);
+
+
      if(!targetCategory) {
        return res.status(400).json({
          success: false,
          message: 'Selected category not found'
        });
+     }
+     const category = await Category.findOne({_id:selectedCategory});
+     const existingCategory = await Offer.findOne({
+        targetName:category.name,
+     })
+
+     if(existingCategory){
+        return res.status(400).json({
+            success:false,
+            message:'Alredy an offer exist for that category',
+        })
      }
 
 
@@ -142,6 +191,35 @@ if(exisitingOfferName){
 
       await newOffer.save();
 
+
+
+
+
+
+        const productsInCategory = await Product.find({ category: targetCategory._id });
+
+        for (const product of productsInCategory) {
+            const existingProductOffer = await Offer.findOne({ 
+                targetId: product._id, 
+                type: 'product'
+            });
+
+            let totalOfferPercentage = Number(offerPercentage); 
+
+            if (existingProductOffer) {
+                totalOfferPercentage += +existingProductOffer.percentage;
+            }
+
+            const totalOfferAmount = (product.regularPrice / 100) * totalOfferPercentage;
+            const finalUpdatedSalePrice = product.regularPrice - totalOfferAmount;
+
+            product.salePrice = finalUpdatedSalePrice;
+            product.productOffer = totalOfferPercentage;
+            await product.save();
+        }
+
+
+
       return res.status(200).json({
         success: true,
         message: "Offer added to the Category successfully",
@@ -169,9 +247,30 @@ const deleteProductOffer = async(req,res) =>{
         }else{
              await Offer.deleteOne({_id:offerId});
 
-             const product = await Product.findOne({productName:productName});
-             product.salePrice = product.regularPrice;
+             const product = await Product.findOne({productName:productName}).populate('category');
+             if(!product){
+                return res.status(400).json({
+                    success:fasle,
+                    message:"Product not found",
+                })
+             }
+
+             const categoryOffer = await Offer.findOne({
+                targetId: product.category._id,
+                type: 'category',
+              });
+
+              if (categoryOffer) {
+                const totalOfferAmount = (product.regularPrice / 100) * categoryOffer.percentage;
+                product.salePrice = product.regularPrice - totalOfferAmount;
+                product.productOffer = categoryOffer.percentage; 
+              } else {
+                product.salePrice = product.regularPrice;
+                product.productOffer = 0;
+              }
+
              await product.save();
+            
              return res.status(200).json({
                 success:true,
                 message:'Offer deleted Succesfully',
@@ -200,16 +299,34 @@ const deleteCategoryOffer = async(req,res) =>{
              await Offer.deleteOne({_id:offerId});
              
              const category = await Category.findOne({ name: categoryName });
-             await Product.updateMany(
-                { category: category._id },
-                [
-                    {
-                        $set: {
-                            salePrice: "$regularPrice"
-                        }
-                    }
-                ]
-            );
+             if (!category) {
+                return res.status(404).json({
+                  success: false,
+                  message: 'Category not found',
+                });
+              }
+            
+          const productsInCategory = await Product.find({ category: category._id });
+
+      for (const product of productsInCategory) {
+        const existingProductOffer = await Offer.findOne({
+          targetId: product._id,
+          type: 'product'
+        });
+
+        if (existingProductOffer) {
+          const totalOfferAmount = (product.regularPrice / 100) * existingProductOffer.percentage;
+          product.salePrice = product.regularPrice - totalOfferAmount;
+          product.productOffer = existingProductOffer.percentage;
+        } else {
+          product.salePrice = product.regularPrice;
+          product.productOffer = 0; 
+        }
+
+        await product.save();
+      }
+
+
              return res.status(200).json({
                 success:true,
                 message:'Offer deleted Succesfully',
