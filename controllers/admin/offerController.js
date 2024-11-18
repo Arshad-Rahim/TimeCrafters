@@ -2,6 +2,8 @@
 const Offer = require('../../models/offerSchema');
 const Product = require('../../models/productSchema');
 const Category = require('../../models/categorySchema');
+const { updateCartPricesAfterOffer } = require('../user/cartController'); // Add this import
+
 
 const productOffers = async(req,res)=>{
     try {
@@ -109,6 +111,8 @@ const addProductOffer = async(req,res) =>{
        target.salePrice = finalUpdatedSalePrice;
        target.productOffer = totalOfferPercentage; 
        await target.save();
+
+       await updateCartPricesAfterOffer(target._id);
 
         return res.status(200).json({
             success:true,
@@ -225,6 +229,7 @@ if(exisitingOfferName){
             await product.save();
         }
 
+        await updateCartPricesAfterOffer(null, targetCategory._id);
 
 
       return res.status(200).json({
@@ -277,6 +282,7 @@ const deleteProductOffer = async(req,res) =>{
               }
 
              await product.save();
+             await updateCartPricesAfterOffer(product._id);
             
              return res.status(200).json({
                 success:true,
@@ -332,7 +338,7 @@ const deleteCategoryOffer = async(req,res) =>{
 
         await product.save();
       }
-
+      await updateCartPricesAfterOffer(null, category._id);
 
              return res.status(200).json({
                 success:true,

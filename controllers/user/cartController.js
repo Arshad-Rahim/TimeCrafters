@@ -8,6 +8,56 @@ const User = require("../../models/userSchema");
 const convertCurrency = require("../../service/currencyConversion");
 const Wallet = require("../../models/walletShema");
 
+
+
+const updateCartPricesAfterOffer = async (productId = null, categoryId = null) => {
+  try {
+    let cartQuery = {};
+    
+    if (productId) {
+      cartQuery = { "items.productId": productId };
+    }
+    else if (categoryId) {
+      const productsInCategory = await Product.find({ category: categoryId });
+      const productIds = productsInCategory.map(p => p._id);
+      cartQuery = { "items.productId": { $in: productIds } };
+    }
+
+    const carts = await Cart.find(cartQuery);
+
+    for (const cart of carts) {
+      let modified = false;
+      
+      for (const item of cart.items) {
+        const product = await Product.findById(item.productId);
+        
+        if (!product) continue;
+
+        if ((productId && product._id.equals(productId)) || 
+            (categoryId && product.category.equals(categoryId))) {
+          
+          item.regularPrice = product.regularPrice;
+          item.salePrice = product.salePrice;
+          item.productAmount = product.salePrice * item.quantity;
+          modified = true;
+        }
+      }
+
+      if (modified) {
+        cart.totalPrice = cart.items.reduce(
+          (total, item) => total + item.salePrice * item.quantity,
+          0
+        );
+        await cart.save();
+      }
+    }
+  } catch (error) {
+    console.error('Error updating cart prices after offer:', error);
+    throw error;
+  }
+};
+
+
 const getCart = async (req, res) => {
   try {
     const userId = req.session.user;
@@ -172,7 +222,6 @@ const putQuantity = async (req, res) => {
     const userId = req.session.user;
 
     const { quantity, productId, color } = req.body;
-console.log(quantity)
     const [cart, product] = await Promise.all([
       Cart.findOne({ userId }),
       Product.findById(productId),
@@ -191,12 +240,35 @@ console.log(quantity)
         message: "Maximum quantity is 5",
       });
     }
+    if (!cart) {
+      return res.status(404).json({
+        success: false,
+        message: "Cart not found",
+      });
+    }
 
-    for (const cartItem of cart.items) {
-      const product = await Product.findOne({ _id: cartItem.productId });
-      if (!product) {
-        console.log("Product not found in PostOrderSuccess");
-      }
+    if (!product) {
+      return res.status(404).json({
+        success: false,
+        message: "Product not found",
+      });
+    }
+
+
+
+
+    const foundItem = cart.items.find(
+      (item) => 
+        item.productId.toString() === productId.toString() && 
+        item.color === color  
+    );
+    if (!foundItem) {
+      return res.status(400).json({
+        success: false,
+        message: "Product is not Found in the cart",
+      });
+    }
+    
 
     let colorQuantityField;
       switch (color) {
@@ -213,26 +285,14 @@ console.log(quantity)
           console.log("unsupported color");
       }
       console.log(colorQuantityField)
+      console.log(product[colorQuantityField])
       if (product[colorQuantityField] < quantity) {
         return res.status(400).json({
           success: false,
           message: "Selected Color Product is Out of Stock",
         });
       }
-    }
 
-    const foundItem = cart.items.find(
-      (item) => 
-        item.productId.toString() === productId.toString() && 
-        item.color === color  
-    );
-    if (!foundItem) {
-      return res.status(400).json({
-        success: false,
-        message: "Product is not Found in the cart",
-      });
-    }
-    
     if (quantity > foundItem.colorStock) {
       return res.status(400).json({
         success: false,
@@ -240,19 +300,7 @@ console.log(quantity)
       });
     }
 
-    if (!cart) {
-      return res.status(404).json({
-        success: false,
-        message: "Cart not found",
-      });
-    }
 
-    if (!product) {
-      return res.status(404).json({
-        success: false,
-        message: "Product not found",
-      });
-    }
 
     const foundIndex = cart.items.findIndex(
       (item) => 
@@ -787,4 +835,5 @@ module.exports = {
   getOrderSuccess,
   applyCoupon,
   removeCoupon,
+  updateCartPricesAfterOffer,
 };

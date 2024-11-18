@@ -72,6 +72,12 @@
 
 app.get('/pay',  (req, res) => {
   const amount = req.session.convertAmount || "0.00";
+  if (!amount || isNaN(parseFloat(amount)) || parseFloat(amount) <= 0) {
+    throw new Error('Invalid payment amount');
+  }
+
+  const formattedAmount = parseFloat(amount).toFixed(2);
+
   const create_payment_json = {
     "intent": "sale",
     "payer": {
@@ -86,14 +92,14 @@ app.get('/pay',  (req, res) => {
             "items": [{
                 "name": "Red Sox Hat",
                 "sku": "001",
-                "price": amount.toString(),
+                "price": formattedAmount.toString(),
                 "currency": "USD",
                 "quantity": 1
             }]
         },
         "amount": {
             "currency": "USD",
-            "total": amount.toString(),
+            "total": formattedAmount.toString(),
         },
         "description": "Dynamic Price Purchased"
     }]
@@ -107,7 +113,7 @@ app.get('/success', (req, res) => {
     "transactions": [{
         "amount": {
             "currency": "USD",
-            "total": amount.toString(),
+            "total": formattedAmount.toString(),
         }
     }]
   };
