@@ -65,7 +65,7 @@ const addProductOffer = async(req,res) =>{
      const offerPrice = (target.regularPrice)/100 * offerPercentage;
      const updatedSalePrice = target.regularPrice - offerPrice;
 
-   target.salePrice = updatedSalePrice;
+   target.salePrice = Math.round(updatedSalePrice) ;
    await target.save();
 
      const targetId = target._id;
@@ -104,7 +104,7 @@ const addProductOffer = async(req,res) =>{
        }
  
        const totalOfferAmount = (target.regularPrice / 100) * totalOfferPercentage;
-       const finalUpdatedSalePrice = target.regularPrice - totalOfferAmount;
+       const finalUpdatedSalePrice = target.regularPrice - Math.round(totalOfferAmount) ;
  
        target.salePrice = finalUpdatedSalePrice;
        target.productOffer = totalOfferPercentage; 
@@ -218,7 +218,7 @@ if(exisitingOfferName){
              }
 
             const totalOfferAmount = (product.regularPrice / 100) * totalOfferPercentage;
-            const finalUpdatedSalePrice = product.regularPrice - totalOfferAmount;
+            const finalUpdatedSalePrice = product.regularPrice - Math.round(totalOfferAmount) ;
 
             product.salePrice = finalUpdatedSalePrice;
             product.productOffer = totalOfferPercentage;

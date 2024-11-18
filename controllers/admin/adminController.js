@@ -280,13 +280,8 @@ const loadDashboard = async (req, res) => {
 
 const logout = async (req, res) => {
   try {
-    req.session.destroy((err) => {
-      if (err) {
-        console.log("error in destroying adminSession");
-      } else {
-        return res.redirect("/admin/adminLogin");
-      }
-    });
+    delete req.session.admin;
+    return res.redirect("/admin/adminlogin");
   } catch (err) {
     console.log("unexpected error during the logout", err);
   }

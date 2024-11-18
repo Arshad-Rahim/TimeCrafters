@@ -64,7 +64,7 @@ router.delete('/deleteOrderListProduct/:orderId/:productId',userAuth, orderContr
 
 // cart
 router.get('/cart',userAuth,cartController.getCart);
-router.post('/cart/:id',userAuth,cartController.postCart);
+router.post('/cart/:id',cartController.postCart);
 router.put('/cart',userAuth,cartController.putQuantity);
 router.delete('/deleteCartProduct/:id',userAuth,cartController.deleteCartProduct);
 
