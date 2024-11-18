@@ -70,3 +70,6 @@ const productSchema = new mongoose.Schema({
 
 const Product = mongoose.model('Product',productSchema);
 module.exports=Product;
+
+productSchema.index({ brand: 1, category: 1 });
+productSchema.index({ createdAt: -1 });

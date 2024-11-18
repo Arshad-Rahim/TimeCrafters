@@ -116,8 +116,7 @@
               </div>
 
               
-        </section> <!-- content-main end// -->
-    
+        </section> 
         <body style="margin-bottom: 80px;">
 
             <div class="container">
@@ -128,6 +127,8 @@
                         <% topProducts.forEach(product => { %>
                             <li>
                                 <span><%= product.productName %></span>
+                                <span><%= product.totalSold %></span>
+                                
                             </li>
                         <% }) %>
                     </ul>
@@ -136,16 +137,12 @@
                 <div class="section">
                     <h2>Best Selling Categories</h2>
                     <ul>
-                        <% const categories = [
-                            { name: 'Flagship Phones', units: 18 },
-                            { name: 'Budget Phones', units: 12 },
-                            { name: 'Sub Flagship Phones', units: 9 },
-                            { name: 'Rugged Phones', units: 7 },
-                            { name: 'Camera Phones', units: 4 }
-                        ] %>
+                      
                         <% topCategories.forEach(category => { %>
                             <li>
                                 <span><%= category.name %></span>
+                                <span><%= category.totalSold %></span>
+
                                 
                             </li>
                         <% }) %>
@@ -159,6 +156,8 @@
                         <% topBrands.forEach(brand => { %>
                             <li>
                                 <span><%= brand.brandName %></span>
+                                <span><%= brand.totalSold%></span>
+
                             </li>
                         <% }) %>
                     </ul>

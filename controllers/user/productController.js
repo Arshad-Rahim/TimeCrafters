@@ -76,7 +76,7 @@ const getProductList = async (req, res) => {
         });
       } else {
         return res.render("userProductList", {
-          user:true,
+          user:false,
           product: productData,
           cat: categories,
           currentPage: page,
@@ -214,7 +214,7 @@ const getProductDetails = async (req, res) => {
       });
     } else {
       return res.render("productDetails", {
-        user:true,
+        user:false,
         product: productData,
         cat: categories,
         id,

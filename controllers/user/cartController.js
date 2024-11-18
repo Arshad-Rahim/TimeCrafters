@@ -12,6 +12,14 @@ const getCart = async (req, res) => {
   try {
     const userId = req.session.user;
 
+    if(!userId){
+      return res.status(400).json({
+        success:false,
+        message:"Please Login First",
+        redirectURL:'/login'
+      })
+    }
+
     const cart = await Cart.findOne({ userId }).populate({
       path: "items.productId",
       populate: {
@@ -629,6 +637,13 @@ const applyCoupon = async (req, res) => {
     const { couponCode, totalPrice } = req.body;
     const userId = req.session.user;
 
+    if (isNaN(totalPrice) || totalPrice <= 0) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid total price",
+      });
+    }
+
     const coupon = await Coupon.findOne({ code: couponCode });
     if (!coupon) {
       return res.status(400).json({
@@ -679,7 +694,6 @@ const applyCoupon = async (req, res) => {
     const discountPercentage = coupon.discountPercentage;
     const maximumDiscount = coupon.maximumDiscount;
     let discountAmount = Math.round((totalPrice * discountPercentage) / 100);
-
     if (discountAmount > maximumDiscount) {
       discountAmount = maximumDiscount;
     }
@@ -726,48 +740,10 @@ const removeCoupon = async(req,res) =>{
     }
 
  
-    const userCouponUsage = await Coupon.aggregate([
-      {
-        $match: { code: couponCode },
-      },
-      {
-        $unwind: "$users_applied",
-      },
-      {
-        $match: {
-          "users_applied.user": new mongoose.Types.ObjectId(userId),
-        },
-      },
-      {
-        $group: {
-          _id: "$users_applied.user",
-          used_count: { $sum: "$users_applied.used_count" },
-          limit: { $first: "$usageLimit" },
-        },
-      },
-    ]);
 
-    if (
-      userCouponUsage.length > 0 &&
-      userCouponUsage[0].used_count >= userCouponUsage[0].limit
-    ) {
-      return res.status(400).json({
-        success: false,
-        message: `You have reached the usage limit for this coupon.`,
-      });
-    }
-
-
-
-    const discountPercentage = coupon.discountPercentage;
-    const maximumDiscount = coupon.maximumDiscount;
-    let discountAmount = Math.round((totalPrice * discountPercentage) / 100);
-
-    if (discountAmount > maximumDiscount) {
-      discountAmount = maximumDiscount;
-    }
     req.session.couponDiscount = 0;
-    const newTotal = totalPrice + discountAmount;
+    const newTotal = totalPrice; 
+    
     const order = await Order.findOne({ userId }).sort({ createdAt: -1 });
     if (order) {
       order.offerApplied = newTotal;
@@ -779,10 +755,8 @@ const removeCoupon = async(req,res) =>{
     return res.status(200).json({
       success: true,
       message: "Coupon removed successfully",
-      discountPercentage,
-      maximumDiscount,
       newTotal,
-      discountAmount,
+      discountAmount: 0
     });
   } catch (error) {
     console.error("Error in applyCoupon:", error);

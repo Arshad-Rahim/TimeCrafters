@@ -103,3 +103,7 @@ orderSchema.pre("save", function (next) {
 
 const Order = mongoose.model("Order", orderSchema);
 module.exports = Order;
+
+
+orderSchema.index({ 'paymentInfo.status': 1, 'items.orderStatus': 1 });
+orderSchema.index({ 'items.productId': 1 });

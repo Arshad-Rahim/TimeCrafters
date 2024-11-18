@@ -4,6 +4,7 @@ const bcrypt = require("bcrypt");
 const Order = require("../../models/orderScheama");
 const Category = require("../../models/categorySchema");
 const Brand = require("../../models/brandSchema");
+const Product = require('../../models/productSchema');
 const session = require("express-session");
 
 const pageError = async (req, res) => {
@@ -61,8 +62,10 @@ const loadDashboard = async (req, res) => {
     }, 0);
 
 
+
     const topProducts = await Order.aggregate([
       { $unwind: '$items' },
+      { $match: { 'items.orderStatus': { $ne: 'Canceled' } } },
       {
         $group: {
           _id: '$items.productId',
@@ -72,74 +75,133 @@ const loadDashboard = async (req, res) => {
         },
       },
       { $sort: { totalSold: -1 } },
-      { $limit: 10 },
+      { $limit: 10 }
     ]);
 
 
     const topCategories = await Category.aggregate([
       {
         $lookup: {
-          from: "products",
-          localField: "_id",
-          foreignField: "category",
-          as: "products"
+          from: 'products',
+          localField: '_id',
+          foreignField: 'category',
+          as: 'products'
+        }
+      },
+      {
+        $lookup: {
+          from: 'orders',
+          pipeline: [
+            { $unwind: '$items' },
+            { $match: { 'items.orderStatus': { $ne: 'Canceled' } } }
+          ],
+          as: 'allOrders'
         }
       },
       {
         $addFields: {
-          productCount: { $size: "$products" }
+          productCount: { $size: '$products' },
+          productIds: '$products._id'
+        }
+      },
+      {
+        $addFields: {
+          totalSold: {
+            $reduce: {
+              input: '$allOrders',
+              initialValue: 0,
+              in: {
+                $add: [
+                  '$$value',
+                  {
+                    $cond: {
+                      if: { $in: ['$$this.items.productId', '$productIds'] },
+                      then: '$$this.items.quantity',
+                      else: 0
+                    }
+                  }
+                ]
+              }
+            }
+          }
         }
       },
       {
         $sort: {
+          totalSold: -1,
           productCount: -1
         }
-      },
-      {
-        $limit: 10
       },
       {
         $project: {
           _id: 1,
           name: 1,
           description: 1,
-          productCount: 1
+          productCount: 1,
+          totalSold: 1,
         }
-      }
+      },
+      { $limit: 10 }
     ]);
 
-    const topBrands = await Brand.aggregate([
+
+    const topBrands = await Product.aggregate([
       {
         $lookup: {
-          from: "products",
-          localField: "_id",
-          foreignField: "brand",
-          as: "products"
+          from: 'orders',
+          let: { productId: '$_id' },
+          pipeline: [
+            { $unwind: '$items' },
+            { 
+              $match: {
+                $expr: {
+                  $and: [
+                    { $eq: ['$items.productId', '$$productId'] },
+                    { $ne: ['$items.orderStatus', 'Canceled'] }
+                  ]
+                }
+              }
+            },
+            {
+              $group: {
+                _id: '$items.productId',
+                totalQuantity: { $sum: '$items.quantity' } // Sum the quantity sold for each product
+              }
+            }
+          ],
+          as: 'orders'
         }
       },
       {
-        $addFields: {
-          productCount: { $size: "$products" }
+        $group: {
+          _id: '$brand',
+          brandName: { $first: '$brand' },
+          productCount: { $sum: 1 },
+          totalSold: {
+            $sum: {
+              $sum: '$orders.totalQuantity' // Sum the total quantity sold for each brand
+            }
+          },
+          brandImage: { $first: '$productImage' }
         }
       },
       {
         $sort: {
+          totalSold: -1,
           productCount: -1
         }
-      },
-      {
-        $limit: 10
       },
       {
         $project: {
           _id: 1,
           brandName: 1,
           brandImage: 1,
-          productCount: 1
+          productCount: 1,
+          totalSold: 1
         }
-      }
+      },
+      { $limit: 10 }
     ]);
-
     // Step 2: Prepare data with different time ranges
     const prepareTimeRangeData = (orders, range) => {
       const now = new Date();

@@ -99,6 +99,9 @@ const addProductOffer = async(req,res) =>{
        if (categoryOffer) {
          totalOfferPercentage += categoryOffer.percentage;
        }
+       if(totalOfferPercentage>99){
+        totalOfferPercentage=99;
+       }
  
        const totalOfferAmount = (target.regularPrice / 100) * totalOfferPercentage;
        const finalUpdatedSalePrice = target.regularPrice - totalOfferAmount;
@@ -209,6 +212,10 @@ if(exisitingOfferName){
             if (existingProductOffer) {
                 totalOfferPercentage += +existingProductOffer.percentage;
             }
+
+            if(totalOfferPercentage>99){
+              totalOfferPercentage=99;
+             }
 
             const totalOfferAmount = (product.regularPrice / 100) * totalOfferPercentage;
             const finalUpdatedSalePrice = product.regularPrice - totalOfferAmount;
