@@ -394,11 +394,21 @@ const postOrderSuccess = async (req, res) => {
 
     
   if (blockedItems.length ||blockedCategoryItems.length  > 0) {
-    return res.status(400).json({
-      success: false,
-      message: "Some products are blocked. Please refresh the page to proceed.",
-    });
+
+    if (!req.session.blockedItemsChecked) {
+      req.session.blockedItemsChecked = true;
+      return res.status(400).json({
+        success: false,
+        message: "Some products are blocked. Please refresh the page to proceed.",
+        redirectURL: '/checkOut',
+      });
+    }
+
   }
+  if (blockedItems.length === 0 && blockedCategoryItems.length === 0) {
+    delete req.session.blockedItemsChecked;
+  }
+ 
 
   if (cart && cart.items.length === 0) {
     return res.status(400).json({
