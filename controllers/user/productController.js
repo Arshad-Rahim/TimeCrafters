@@ -4,6 +4,7 @@ const Category = require("../../models/categorySchema");
 const Brand = require("../../models/brandSchema");
 const mongoose = require('mongoose');
 const Cart = require('../../models/cartSchema');
+const Wishlist = require('../../models/wishlistSchema');
 
 const getProductList = async (req, res) => {
   try {
@@ -33,7 +34,7 @@ const getProductList = async (req, res) => {
 
     const categories = await Category.find({ isListed: true });
 
-    const [totalProducts, productData, brand] = await Promise.all([
+    const [totalProducts, productData, brand,wallet] = await Promise.all([
       Product.find({
         $or: [
           { productName: { $regex: new RegExp(".*" + search + ".*", "i") } },
@@ -62,6 +63,7 @@ const getProductList = async (req, res) => {
     if (categories && brand) {
       if (user) {
         const userData = await User.findOne({ _id: user });
+        const wishlist = await Wishlist.findOne({userId:user});
       
 
         return res.render("userProductList", {
@@ -73,6 +75,7 @@ const getProductList = async (req, res) => {
           totalProducts: totalProducts,
           search: search,
           currentFilter: filter,
+          wishlist,
         });
       } else {
         return res.render("userProductList", {
@@ -84,6 +87,7 @@ const getProductList = async (req, res) => {
           totalProducts: totalProducts,
           search: search,
           currentFilter: filter,
+          wishlist:false,
         });
       }
     }
