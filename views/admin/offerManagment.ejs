@@ -114,9 +114,13 @@
                 </div>
                 
                 <div class="form-group">
-                    <label>Select Product</label>
-                    <input name='selectedProduct'type="text" class="form-control" placeholder="Search for a product">
-                </div>
+                  <label>Select Product</label>
+                  <select id="selectedProduct" name="selectedProduct" class="form-control">
+                    <% for(i=0;i<product.length;i++) {%>
+                      <option value="<%= product[i]._id %>"><%= product[i].productName %></option>
+                    <%}%>
+                  </select>
+                </div>       
                 
                 <button  type="submit" class="btn" >Add Offer</button>
             </form>
@@ -180,7 +184,7 @@ function handleFormSubmit(event) {
   const offerName = document.getElementsByName('offerName')[0].value;
   const offerPercentage = document.getElementsByName('offerPercentage')[0].value;
   const endDate = document.getElementsByName('endDate')[0].value;
-  const selectedProduct = document.getElementsByName('selectedProduct')[0].value;
+  const selectedProduct = document.getElementById('selectedProduct').value;
 
   $.ajax({
     url: `/admin/addProductOffer`,

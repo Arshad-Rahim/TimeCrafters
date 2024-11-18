@@ -9,7 +9,8 @@ const productOffers = async(req,res)=>{
     try {
 
         const offer = await Offer.find({type:'product'});
-        return res.render('offerManagment',{offer});
+        const product = await Product.find({});
+        return res.render('offerManagment',{offer,product});
         
     } catch (error) {
         console.log('Error n offerManagment',error);
@@ -40,12 +41,13 @@ const addProductOffer = async(req,res) =>{
        
        const  {offerName,offerPercentage,endDate,selectedProduct} = req.body;
      
-     
+    const product = await Product.findOne({_id:selectedProduct})
+    const productName = product.productName;
      const offerNameLowerCase = offerName.trim().toLowerCase();
      const exisitingOfferName = await Offer.findOne({
         name:{ $regex: new RegExp(`^${offerNameLowerCase}$`, "i")}
      });
-     const existingSelectedProduct = await Offer.findOne({targetName:selectedProduct});
+     const existingSelectedProduct = await Offer.findOne({targetName:productName});
      if(existingSelectedProduct){
         return res.status(400).json({
             success:false,
@@ -55,7 +57,7 @@ const addProductOffer = async(req,res) =>{
 
 
 
-     const target = await Product.findOne({productName:selectedProduct}).populate('category');
+     const target = await Product.findOne({productName:productName}).populate('category');
      if(!target){
         return res.status(400).json({
             success:false,
@@ -82,7 +84,7 @@ const addProductOffer = async(req,res) =>{
             percentage:offerPercentage,
             type:'product',
             targetId:targetId,
-            targetName:selectedProduct,
+            targetName:productName,
             endDate:endDate,
         })
 
