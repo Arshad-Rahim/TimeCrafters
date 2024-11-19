@@ -70,7 +70,7 @@ router.delete('/deleteCartProduct/:id',userAuth,cartController.deleteCartProduct
 
 
 // wishlist
-router.post('/wishlist/:productId',userAuth,wishlistController.wishlist);
+router.post('/wishlist/:productId',wishlistController.wishlist);
 router.get('/wishlist',userAuth,wishlistController.getWishlist);
 router.delete('/deleteWishlistProduct/:id',userAuth,wishlistController.deleteWishlistProduct);
 
