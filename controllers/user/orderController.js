@@ -123,6 +123,9 @@ const returnProduct = async(req,res) =>{
   try {
     const { orderId, productId } = req.params;
     const userId = req.session.user;
+    console.log(req.body);
+   const {reason,comments} = req.body;
+
 
     const order = await Order.findOne({ _id: orderId });
 
@@ -137,6 +140,9 @@ const returnProduct = async(req,res) =>{
       });
     }
     order.items[itemIndex].returnStatus = true;
+    order.items[itemIndex].returnReason = reason;
+    order.items[itemIndex].returnComments = comments;
+
     await order.save();
     console.log(order.items[itemIndex].returnStatus)
     return res.status(200).json({

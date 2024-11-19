@@ -401,10 +401,10 @@ if (!/^[0-9]\d*$/.test(goldenQuantity)) {
                   displayErrorMessage('salePrice-error', 'Please enter a valid non-negative price.');
                   isValid = false;
               }
-              if (price<=saleprice) {
-      displayErrorMessage('regularPrice-error', 'Regular price must be greater than sale price.');
-      isValid = false;
-   }
+//               if (price>=saleprice) {
+//       displayErrorMessage('regularPrice-error', 'Regular price must be greater than sale price.');
+//       isValid = false;
+//    }
   
   
              

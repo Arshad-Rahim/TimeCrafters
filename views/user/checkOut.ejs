@@ -212,6 +212,22 @@
                     </div> -->
 
                     <div class="mt-6">
+                        <h3 class="text-lg font-semibold mb-2">Available Coupons</h3>
+                        <div class="space-y-2">
+                           
+                            <% coupon.forEach(coupon => { %>
+                                <div class="flex justify-between items-center p-2 border rounded">
+                                    <div>
+                                        <span class="font-medium"><%= coupon.code %></span>
+                                        <p class="text-sm text-gray-600"><%= coupon.discountPercentage%>%  <%= coupon.description %></p>
+                                    </div>
+                                   
+                                </div>
+                            <% }) %>
+                        </div>
+                    </div>
+
+                    <div class="mt-6">
                         <h3 class="text-lg font-semibold mb-2">Coupon Code</h3>
                         <div class="grid grid-cols-2 gap-2">
                             <input id="couponCode" name="couponCode" type="text" placeholder="Enter coupon code" class="col-span-2 px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">

@@ -373,7 +373,8 @@ const getCheckOut = async (req, res) => {
     cartCalculation.totalPrice = cartCalculation.priceAfterOffer - cartCalculation.couponDiscount;
     cartCalculation.totalSavings = cartCalculation.offerSavings ;
     cartCalculation.totalCoupon = cartCalculation.couponDiscount; 
-    return res.render("checkOut", { cart, cartCalculation, address ,user:true,wallet});
+    const coupon = await Coupon.find({});
+    return res.render("checkOut", { cart, cartCalculation, address ,user:true,wallet,coupon});
   } catch (error) {
     console.log("Error in getCheckOut", error);
   }

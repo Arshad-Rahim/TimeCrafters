@@ -210,7 +210,10 @@
                     </div>
                 </div>
                 <% if(item.returnStatus === true && item.returnRequest == "Pending" ){ %>
+                    <p class="text-sm text-gray-700"><span class="font-medium">Reason:</span> <%=item.returnReason%></p>
+            <p class="text-sm text-gray-700 mt-2"><span class="font-medium">Comment:</span> <%= item.returnComments%></p>
                     <div class="mt-4 flex items-center space-x-2">
+                        
                         <button onclick="handleReturnAction('<%= order._id %>', '<%= item.productId._id %>', 'Approved')" class="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition duration-300">
                             Approve Return
                         </button>

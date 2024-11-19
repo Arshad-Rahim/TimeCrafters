@@ -54,6 +54,12 @@ const orderSchema = new mongoose.Schema(
         returnStatus:{
           type:Boolean,
           default:false
+        },
+        returnReason:{
+          type:String,
+        },
+        returnComments:{
+          type:String,
         }
       },
     ],
