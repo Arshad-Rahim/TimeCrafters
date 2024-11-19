@@ -149,23 +149,47 @@ const getSearchProduct = async (req, res) => {
       }).countDocuments(),
       Brand.find({ isBlocked: false }),
     ]);
-
-    if (category && brand) {
-      return res.render("userProductList", {
-        product: productData,
-        currentPage: page,
-        totalPages: Math.ceil(count / limit),
-        cat: category,
-        brand: brand,
-        search: search,
-        currentFilter: filter,
-        user:true,
-      });
-    } else {
-      return res
-        .status(400)
-        .json("Error in category and brand in get all product");
+    if(req.session.user){
+      const userId = req.session.user;
+      const wishlist = await Wishlist.findOne({userId:userId});
+      if (category && brand) {
+        return res.render("userProductList", {
+          product: productData,
+          currentPage: page,
+          totalPages: Math.ceil(count / limit),
+          cat: category,
+          brand: brand,
+          search: search,
+          currentFilter: filter,
+          user:true,
+          wishlist,
+        });
+      } else {
+        return res
+          .status(400)
+          .json("Error in category and brand in get all product");
+      }
+    }else{
+      if (category && brand) {
+        return res.render("userProductList", {
+          product: productData,
+          currentPage: page,
+          totalPages: Math.ceil(count / limit),
+          cat: category,
+          brand: brand,
+          search: search,
+          currentFilter: filter,
+          user:true,
+          wishlist:false,
+        });
+      } else {
+        return res
+          .status(400)
+          .json("Error in category and brand in get all product");
+      }
     }
+
+   
   } catch (error) {
     console.error("Error in getSearchProduct", error);
   }
@@ -288,19 +312,39 @@ const getFilteredCategory = async (req, res) => {
     ]);
 
     const totalPages = Math.ceil(totalProducts / limit);
-
-    return res.render("userProductList", {
-      product,
-      cat: categories,
-      brand,
-      categoryId,
-      currentPage: page,
-      totalPages: totalPages,
-      totalProducts: totalProducts,
-      search: search,
-      currentFilter: filter,
-      user:true,
+    if(req.session.user){
+      const userId = req.session.user;
+      const wishlist = await Wishlist.findOne({userId:userId});
+      return res.render("userProductList", {
+        product,
+        cat: categories,
+        brand,
+        categoryId,
+        currentPage: page,
+        totalPages: totalPages,
+        totalProducts: totalProducts,
+        search: search,
+        currentFilter: filter,
+        user:true,
+        wishlist,
     });
+
+    }else{
+      return res.render("userProductList", {
+        product,
+        cat: categories,
+        brand,
+        categoryId,
+        currentPage: page,
+        totalPages: totalPages,
+        totalProducts: totalProducts,
+        search: search,
+        currentFilter: filter,
+        user:true,
+        wishlist:false,
+      });
+    }
+    
   } catch (error) {
     console.log("Error in GetFilterCategory", error);
   }

@@ -215,7 +215,7 @@
 
 	
 	<!-- Product -->
-	<div class="bg0 m-t-23 p-b-140" style="margin-top:60px">
+	<div id="body" class="bg0 m-t-23 p-b-140" style="margin-top:60px">
 		<div class="container">
 			<div class="flex-w flex-sb-m p-b-52">
 				<div class="flex-w flex-l-m filter-tope-group m-tb-10">
@@ -327,7 +327,7 @@
 				</div>
 			</div>
 
-			<div id="body" class="row isotope-grid">
+			<div class="row isotope-grid">
 				<!-- product[i].category.name -->
 				<% for(let i=0;i<product.length;i++){  %>
 				<div class="col-sm-6 col-md-4 col-lg-3 p-b-35 isotope-item women">
@@ -458,6 +458,11 @@ function filterProducts(category) {
 
 	<script>
 
+function getCurrentPageUrl() {
+    // Get current URL without the domain
+    return window.location.pathname + window.location.search;
+}
+
 		function wishlist(event,productId){
 		
 			event.preventDefault();
@@ -478,8 +483,15 @@ function filterProducts(category) {
                     timer:1500,
                     customClass:'center-toast',
 
+                }).then(() =>{
+                    const currentUrl = getCurrentPageUrl();
+                    $('#body').load(currentUrl + ' #body', function(response, status, xhr) {
+                        if (status === 'error') {
+                            window.location.reload();
+                        }
+                    });
                 })
-                $('#body').load('/userProductList #body')
+               
             }
         },
         error:function(xhr,status,error){
