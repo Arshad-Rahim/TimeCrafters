@@ -19,16 +19,35 @@ const wishlist = async(req,res) =>{
     }
 
        const {productId} = req.params;
+       let {color} = req.body;
 
        const [product,userWishlistExisting] = await Promise.all([
         Product.findOne({_id:productId}),
         Wishlist.findOne({userId}),
        ])
+       if (!color && product.variants && product.variants.length > 0) {
+        color = product.variants[0].color;
+    }
+
+       if (color) {
+        const validVariant = product.variants.find(v => v.color.toLowerCase() === color.toLowerCase());
+        if (!validVariant) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid color selection",
+            });
+        }
+    }
        if(userWishlistExisting){
         const productExisting = await Wishlist.findOne({
             userId,
-            "wishlist.productId":product._id,
-        })
+            wishlist: {
+                $elemMatch: {
+                    productId: product._id,
+                    ...(color && { color: color }), // Only check color if it exists
+                },
+            },
+        });
         if(productExisting){
             return res.status(400).json({
                 success: false,
@@ -36,8 +55,9 @@ const wishlist = async(req,res) =>{
               }); 
         }else{
             userWishlistExisting.wishlist.push({
-                productId:product._id,
-            })
+                productId: product._id,
+                ...(color && {color}), // Only add color if it exists
+            });
 
         }
 
@@ -60,6 +80,7 @@ const wishlist = async(req,res) =>{
             wishlist:[
                 {
                     productId:product._id,
+                    ...(color && {color}),
                 }
             ]
         });

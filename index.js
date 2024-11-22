@@ -69,9 +69,29 @@
 
 
 
+      // Middleware to validate payment amount
+const validatePaymentAmount = (req, res, next) => {
+  const amount = req.session.convertAmount;
+  
+  // Validate amount exists and is valid
+  if (!amount || isNaN(parseFloat(amount)) || parseFloat(amount) <= 0) {
+    return res.status(400).json({
+      success: false,
+      message: 'Invalid payment amount',
+      redirectURL: '/checkout'
+    });
+  }
+  
+  // Store formatted amount in session
+  req.session.formattedAmount = parseFloat(amount).toFixed(2);
+  next();
+};
+
+
 
 app.get('/pay',  (req, res) => {
   const amount = req.session.convertAmount || "0.00";
+  console.log('Amount:',amount);
   if (!amount || isNaN(parseFloat(amount)) || parseFloat(amount) <= 0) {
     throw new Error('Invalid payment amount');
   }
@@ -104,6 +124,7 @@ app.get('/pay',  (req, res) => {
         "description": "Dynamic Price Purchased"
     }]
 };
+
 app.get('/success', (req, res) => {
   const payerId = req.query.PayerID;
   const paymentId = req.query.paymentId;
@@ -130,6 +151,8 @@ app.get('/success', (req, res) => {
           await order.save();
           // console.log(order)
         })();
+        delete req.session.convertAmount;
+        delete req.session.formattedAmount;
 
         res.redirect('/orderSuccess');
     }

@@ -15,10 +15,7 @@ body {
             margin: 20px;
         }
 
-        .color-radio {
-            display: flex;
-            align-items: center;
-        }
+       
 
         input[type="radio"] {
             display: none; /* Hide the default radio button */
@@ -40,17 +37,7 @@ body {
             box-shadow: 0 0 0 2px #333;
         }
 
-        .black {
-            background-color: black;
-        }
-
-        .silver {
-            background-color: silver;
-        }
-
-        .gold {
-            background-color: gold;
-        }
+       
 
 		.availability {
             background-color: #f7f7f7;
@@ -119,6 +106,33 @@ body {
     }
 	
 </style>
+
+
+<style>
+	.color-radio {
+		display: flex;
+		align-items: center;
+	}
+	
+	input[type="radio"] {
+		display: none;
+	}
+	
+	label.color-option {
+		cursor: pointer;
+		width: 30px;
+		height: 30px;
+		border-radius: 50%;
+		border: 2px solid #333;
+		margin: 20px 10px;
+		transition: background-color 0.3s, border-color 0.3s;
+	}
+	
+	input[type="radio"]:checked + label.color-option {
+		border-color: #333;
+		box-shadow: 0 0 0 2px #333;
+	}
+	</style>
 
 <!-- <script>
 	const extm = require('.')
@@ -215,20 +229,37 @@ body {
 						<div class="p-t-33">
 							<h2>Select Product Color</h2>
 	
-    <div class="color-radio">
+    <!-- <div class="color-radio">
         <input type="radio" id="color-black" name="productColor" value="black">
         <label class="black" for="color-black"></label>
         <input type="radio" id="color-silver" name="productColor" value="silver">
         <label class="silver" for="color-silver"></label>
         <input type="radio" id="color-gold" name="productColor" value="gold">
         <label class="gold" for="color-gold"></label>
-    </div>
+    </div> -->
+
+	
+	<div class="color-radio">
+		<% productDetails.variants.forEach((variant, index) => { %>
+			<input 
+				type="radio" 
+				id="color-<%= variant.color.toLowerCase() %>" 
+				name="productColor" 
+				value="<%= variant.color.toLowerCase() %>"
+			>
+			<label 
+				class="color-option" 
+				for="color-<%= variant.color.toLowerCase() %>"
+				style="background-color: <%= variant.color.toLowerCase() %>;"
+			></label>
+		<% }); %>
+	</div>	
 
 
 	<!-- availablity list cheythath -->
 
 
-	<div class="availability">
+	<!-- <div class="availability">
         <h2>Availability</h2>
         <ul>
             <li>
@@ -256,7 +287,25 @@ body {
 						<% } %>
             </li>
         </ul>
-    </div>
+    </div> -->
+
+
+
+	<div class="availability">
+		<h2>Availability</h2>
+		<ul>
+			<% productDetails.variants.forEach(variant => { %>
+				<li>
+					<span class="color"><%= variant.color %></span>
+					<% if(variant.quantity <= 0) { %>
+						<span class="quantity outofstock"><%= variant.quantity %> Out of stock</span>
+					<% } else { %>
+						<span class="quantity instock"><%= variant.quantity %> pieces in stock</span>
+					<% } %>
+				</li>
+			<% }); %>
+		</ul>
+	</div>
 							
 
 	<div class="flex-w flex-r-m p-b-10">
@@ -265,19 +314,21 @@ body {
 			style="margin-top: 15px;" 
 			class="flex-c-m stext-101 cl0 size-101 bg1 bor1 hov-btn1 p-lr-15 trans-04" 
 			id="cartButton"
-			onclick="handleCartAction(event,'<%= productDetails.id%>','<%= productDetails.blackQuantity%>','<%= productDetails.silverQuantity%>','<%= productDetails.goldenQuantity%>')">
+			onclick="handleCartAction(event,'<%= productDetails.id%>')">
 			Add to cart
 		  </button>
 		</div>
 	  </div>
 						</div>
 
-						<!--  -->
 						<div class="flex-w flex-m p-l-100 p-t-40 respon7">
 							<div class="flex-m bor9 p-r-10 m-r-11">
-								<a href="#" class="fs-14 cl3 hov-cl1 trans-04 lh-10 p-lr-5 p-tb-2 js-addwish-detail tooltip100" data-tooltip="Add to Wishlist">
+								<!-- <a href="#" class="fs-14 cl3 hov-cl1 trans-04 lh-10 p-lr-5 p-tb-2 js- tooltip100" data-tooltip="Add to Wishlist">
 									<i class="zmdi zmdi-favorite"></i>
-								</a>
+								</a> -->
+								<button class="fs-14 cl3 hov-cl1 trans-04 lh-10 p-lr-5 p-tb-2 js- tooltip100" data-tooltip="Add to Wishlist" onclick="wishlist(event,'<%= productDetails.id%>')" class="btn-addwish-b2 dis-block pos-relative ">
+									<i class="zmdi zmdi-favorite"></i>
+									</button>
 							</div>
 
 							<a href="#" class="fs-14 cl3 hov-cl1 trans-04 lh-10 p-lr-5 p-tb-2 m-r-8 tooltip100" data-tooltip="Facebook">
@@ -449,7 +500,7 @@ body {
 			</div>
 
 			<!-- Slide2 -->
-			
+			 
 			<div class="wrap-slick2">
 				
 				<div class="slick2">
@@ -459,6 +510,27 @@ body {
 						<!-- Block2 -->
 						
 						<div class="block2">
+							<div class="block2-txt-child2 flex-r p-t-3">
+								<!-- <a href="#" class="btn-addwish-b2 dis-block pos-relative js-addwish-b2">
+									<img class="icon-heart1 dis-block trans-04" src="/frontend/images/icons/icon-heart-01.png" alt="ICON">
+									<img class="icon-heart2 dis-block trans-04 ab-t-l" src="/frontend/images/icons/icon-heart-02.png" alt="ICON">
+								</a> -->
+								<button onclick="ajaxWishlist('<%= product[i]._id %>')" class="btn-addwish-b2 dis-block pos-relative ">
+									<% 
+			let isInWishlist = false;
+			// Check if wishlist exists and has a wishlist property
+			if (wishlist && wishlist.wishlist) {
+				isInWishlist = wishlist.wishlist.some(item => product[i]._id.toString() === item.productId.toString());
+			}
+			%>
+			<% if (isInWishlist) { %>
+				<img src="/frontend/images/icons/icon-heart-02.png" alt="ICON">
+			<% } else { %>
+				<img class="icon-heart1 dis-block trans-04" src="/frontend/images/icons/icon-heart-01.png" alt="ICON">
+				<img class="icon-heart2 dis-block trans-04 ab-t-l" src="/frontend/images/icons/icon-heart-02.png" alt="ICON">
+			<% } %>
+								</button>
+							</div>
 						
 							<div class="block2-pic hov-img0" >
 								<img src="/uploads/re-image/<%= product[i].productImage[0] %>" alt="<%= product[i].productName %>">
@@ -479,12 +551,7 @@ body {
 									</span>
 								</div>
 
-								<div class="block2-txt-child2 flex-r p-t-3">
-									<a href="#" class="btn-addwish-b2 dis-block pos-relative js-addwish-b2">
-										<img class="icon-heart1 dis-block trans-04" src="/frontend/images/icons/icon-heart-01.png" alt="ICON">
-										<img class="icon-heart2 dis-block trans-04 ab-t-l" src="/frontend/images/icons/icon-heart-02.png" alt="ICON">
-									</a>
-								</div>
+								
 							</div>
 					
 						</div>
@@ -519,7 +586,6 @@ body {
 
 		// radio button finout
 let selectedColor;
-let colorStock;
 const cartColorsForProduct = JSON.parse('<%- JSON.stringify(cartColorsForProduct) %>');
 
 // Update button text based on color selection
@@ -547,7 +613,7 @@ function updateButtonText(color) {
 
 
 
-		function handleCartAction(event,productId,black,silver,golden){
+		function handleCartAction(event,productId){
 			
 			event.preventDefault();
 
@@ -570,24 +636,18 @@ function updateButtonText(color) {
   }
 
 			
-			addToCartAjax(productId,selectedColor,black,silver,golden)
+			addToCartAjax(productId,selectedColor)
 		}
 
 
-	function addToCartAjax(productId,color,black,silver,golden){
-		if(color=='black'){
-		 colorStock = black;
-		}else if(color=='silver'){
-			 colorStock = silver;
-		}else {
-			 colorStock = golden	
-		}
+	function addToCartAjax(productId,color){
+		
 			$.ajax({
 				type:'POST',
 				url:`/cart/${productId}`,
 				dataType:'json',
 				contentType:'application/json',
-				data:JSON.stringify({color,colorStock}),
+				data:JSON.stringify({color}),
 				success:function(response){
 					if(response.success){
 						Swal.fire({
@@ -621,3 +681,83 @@ function updateButtonText(color) {
 			})
 		}
 	</script>
+
+
+
+<script>
+
+	function wishlist(event,productId){
+		
+		event.preventDefault();
+
+		if(!selectedColor){
+				Swal.fire({
+					toast:true,
+					position:'center',
+					icon:'warning',
+					title:"Warning",
+					text:'Please select a color first',
+					showConfirmButton:false,
+					timer:1500,
+					customClass:'center-toast',
+				})
+				return;
+			}
+			ajaxWishlist(productId);
+
+		
+	}
+
+
+	function ajaxWishlist(productId){
+		console.log(productId)
+		$.ajax({
+	url:`/wishlist/${productId}`,
+	type:'POST',
+	dataType:'json',
+	contentType:'application/json',
+	data:JSON.stringify({color:selectedColor}),
+
+	success:function(response){
+		if(response.success){
+			Swal.fire({
+				toast:true,
+				position:'center',
+				icon:'success',
+				title:response.message,
+				showConfirmButton:false,
+				timer:1500,
+				customClass:'center-toast',
+
+			})
+
+			// .then(() =>{
+			// 	const currentUrl = getCurrentPageUrl();
+			// 	$('#body').load(currentUrl + ' #body', function(response, status, xhr) {
+			// 		if (status === 'error') {
+			// 			window.location.reload();
+			// 		}
+			// 	});
+			// })
+		   
+		}
+	},
+	error:function(xhr,status,error){
+		let errorMessage = 'An error occurred';
+            if (xhr.responseJSON && xhr.responseJSON.message) {
+                errorMessage = xhr.responseJSON.message;
+            }
+		Swal.fire({
+			toast: true,
+			position: 'center',
+			icon: 'error',
+			title: 'Error',
+			text:errorMessage,
+			showConfirmButton: false,
+			timer: 1500,
+			customClass: 'center-toast',
+		});
+	}
+})
+	}
+</script>

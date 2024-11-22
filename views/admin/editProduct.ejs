@@ -30,7 +30,7 @@
             <div class="col-lg-6">
                 <div class="card mb-4">
                     <div class="card-body">
-                        <form method="post" action="/admin/editProduct/<%= product._id %>" enctype="multipart/form-data" onsubmit="return validateForm()">
+                        <form id="productForm" enctype="multipart/form-data" onsubmit="validateAndSubmit(event,'<%= product._id%>')">
                             <div class="mb-4">
                                 
                                 <label for="product_name" class="form-label">Product Name</label>
@@ -93,42 +93,7 @@
                                 </div>
                                 
                             </div>
-                            <div class="row">
-                                
-                                <div class="col-lg-4">
-                                
-                                    <div class="mb-4">
-                                     <label class="form-label">Black Stock</label>
-                                     <input  placeholder="" name="blackQuantity" type="text" class="form-control border" value="<%= product.blackQuantity%>" >
-                                     <div id="blackQuantity-error" class="error-message"></div>
-                                    </div>
-                                   
-                                </div>
-                                    
-                                <div class="col-lg-4">
-                                
-                                    <div class="mb-4">
-                                     <label class="form-label">Silver Stock</label>
-                                     <input placeholder="" name="silverQuantity" type="text" class="form-control border" value="<%= product.silverQuantity%>">
-                                     <div id="silverQuantity-error" class="error-message"></div>
-                                    </div>
-                                   
-                                </div>
-
-
-                                <div class="col-lg-4">
-                                
-                                    <div class="mb-4">
-                                     <label class="form-label">Golden Stock</label>
-                                     <input placeholder="" name="goldenQuantity" type="text" class="form-control border" value="<%= product.goldenQuantity%>">
-                                     <div id="goldenQuantity-error" class="error-message"></div>
-                                    </div>
-                                   
-                                </div>
-
-                            
-                                    
-                                </div>
+                        
                                 
                             </div>
                             <div class="card mb-4">
@@ -139,7 +104,6 @@
                                             <select class="form-select border" style="width: 150px;" name="category">
                                            
                                            
-                                          
 
                                                 <% for(let i=0;i<cat.length;i++){%>
                                                 
@@ -194,11 +158,45 @@
 
 
                             </div>
+
+                            <div class="card mb-4">
+                                <div class="card-header">
+                                    <h4>Product Variants</h4>
+                                </div>
+                                <div class="card-body">
+                                    <div id="variants-container">
+                                        <!-- vaients show -->
+                                        <% for(i=0; i<product.variants.length; i++) { %>
+                                            <div class="variant-item border rounded p-3 mb-3" id="existing-variant-<%= i %>">
+                                                <div class="row">
+                                                    <div class="col-md-6 mb-3">
+                                                        <label class="form-label">Color</label>
+                                                        <input type="text" name="existingVariants[<%= i %>][color]" class="form-control" value="<%= product.variants[i].color %>" required>
+                                                    </div>
+                                                    <div class="col-md-6 mb-3">
+                                                        <label class="form-label">Quantity</label>
+                                                        <input type="number" name="existingVariants[<%= i %>][quantity]" class="form-control" value="<%= product.variants[i].quantity %>" required>
+                                                    </div>
+                                                    <div class="col-12">
+                                                        <button type="button" class="btn btn-danger" onclick="removeVariant('existing-variant-<%= i %>')">
+                                                            Remove Variant
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        <% } %>
+                                    </div>
+                            
+                                    <button type="button" class="btn btn-primary mt-3" onclick="addVariant()">
+                                        Add Variant
+                                    </button>
+                                </div>
+                            </div>
                             
 
                             <div>
                                 
-                                <button class="btn btn-md rounded font-sm hover-up"  type="submit" onclick="validateAndSubmit()">Publish</button>
+                                <button class="btn btn-md rounded font-sm hover-up"  type="submit">Publish</button>
                             </div>
                         </form>
                     </div>
@@ -215,11 +213,134 @@
 
     <script>
 
-function validateAndSubmit(){
-        if(validateForm()){
-            document.forms[0].submit();
-        }
+// function validateAndSubmit(){
+//         if(validateForm()){
+//             document.forms[0].submit();
+//         }
+//     }
+function validateAndSubmit(event, productId) {
+    event.preventDefault();
+    
+    if(validateForm()) {
+        const form = document.getElementById('productForm');
+        const formData = new FormData(form);
+        
+        // Collect all variants (both existing and new)
+        const variants = [];
+        
+        // Collect existing variants
+        const existingVariantInputs = document.querySelectorAll('input[name^="existingVariants"]');
+        const existingVariantsMap = new Map();
+        
+        existingVariantInputs.forEach(input => {
+            const match = input.name.match(/existingVariants\[(\d+)\]\[(\w+)\]/);
+            if (match) {
+                const [_, index, field] = match;
+                if (!existingVariantsMap.has(index)) {
+                    existingVariantsMap.set(index, {});
+                }
+                existingVariantsMap.get(index)[field] = input.value;
+
+            }
+        });
+        
+        // Convert map to array and add to variants
+        existingVariantsMap.forEach(variant => {
+            if (variant.color && variant.quantity) {
+                variants.push({
+                    color: variant.color.trim(),
+                    quantity: parseInt(variant.quantity)
+                });
+            }
+        });
+        
+        // Collect new variants
+        const newVariantElements = document.querySelectorAll('.variant-item:not([id^="existing-variant"])');
+        newVariantElements.forEach(variantElement => {
+            const colorInput = variantElement.querySelector('input[name$="[color]"]');
+            const quantityInput = variantElement.querySelector('input[name$="[quantity]"]');
+            
+            if (colorInput && quantityInput) {
+                variants.push({
+                    color: colorInput.value.trim(),
+                    quantity: parseInt(quantityInput.value)
+                });
+            }
+        });
+
+        // Create final form data
+        const finalFormData = new FormData();
+
+        // Add basic product data
+        finalFormData.append('productName', formData.get('productName'));
+        finalFormData.append('brand', formData.get('brand'));
+        finalFormData.append('description', formData.get('description'));
+        finalFormData.append('additionalInfo', formData.get('additionalInfo'));
+        finalFormData.append('regularPrice', formData.get('regularPrice'));
+        finalFormData.append('salePrice', formData.get('salePrice'));
+        finalFormData.append('category', formData.get('category'));
+
+        // Add images
+        const imageInputs = form.querySelectorAll('input[type="file"]');
+        imageInputs.forEach((input, index) => {
+            if (input.files.length > 0) {
+                finalFormData.append('images', input.files[0]);
+            }
+        });
+        
+        // Add all variants as JSON string
+        finalFormData.append('variants', JSON.stringify(variants));
+        
+        // Debug log
+        console.log('All variants being sent:', variants);
+
+        // Send to server
+        fetch(`/admin/editProduct/${productId}`, {
+            method: 'POST',
+            body: finalFormData
+        })
+        .then(response => {
+    // CRITICAL CHANGE: Parse the JSON response
+    // Many times, the error occurs because the response is not parsed
+    return response.json(); 
+})
+
+        .then(data => {
+            if (data.success) {
+                // alert('Product updated successfully!');
+                // window.location.href = '/admin/product';
+                Swal.fire({
+                    toast: true,
+                    position: "top", // Positioning the toast
+                    icon: "success", // Success icon
+                    title: "Product updated successfully", // Success message
+                    showConfirmButton: false, // Hide confirm button
+                    timer: 3000 // Auto close after 3 seconds
+                });
+
+                // Redirect to products page after a short delay to allow toast to be visible
+                setTimeout(() => {
+                    window.location.href = '/admin/product';
+                }, 1500);
+            } else {
+                // throw new Error(data.error || 'Failed to update product');
+                Swal.fire({
+                    toast: true,
+                    position: "top",
+                    icon: 'error',
+                    title: 'Oops...',
+                    text: data.error || 'Failed to add product',
+                    showConfirmButton: false,
+                    timer: 3000 
+                });
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert(error.message);
+        });
     }
+}
 
 
     function viewImage1(event){
@@ -337,106 +458,240 @@ function validateAndSubmit(){
 
 
 // validating all the criteria that similar to previously done 
-    function validateForm() {
-              clearErrorMessages();
-              const name = document.getElementsByName('productName')[0].value;
-              const description = document.getElementById('descriptionid').value;
-              const brand = document.getElementsByName('brand')[0].value;
-              const price = document.getElementsByName('regularPrice')[0].value;
-              const saleprice = document.getElementsByName('salePrice')[0].value;
-              const category = document.getElementsByName('category')[0].value;
-              const images = document.getElementById('input1')
-              const blackQuantity=document.getElementsByName('blackQuantity')[0].value.trim();
-              const silverQuantity=document.getElementsByName('silverQuantity')[0].value.trim();
-              const goldenQuantity=document.getElementsByName('goldenQuantity')[0].value.trim();
-              const additionalInfo = document.getElementById('additionalInfo').value;
-              let isValid = true
-              if (name.trim() === "") {
-      displayErrorMessage('productName-error', 'Please enter a product name.');
-      isValid = false;
-   } else if (!/^[a-zA-Z0-9\s\-_]+$/.test(name.trim())) {
-    displayErrorMessage('productName-error', 'Product name should contain only alphabetic characters, numbers, hyphens, and underscores.');
-    isValid = false;
-}
-            
-   if (description.trim() === "") {
-      displayErrorMessage('description-error', 'Please enter a product description.');
-      isValid = false;
-   } else if (!/^[a-zA-Z0-9\s.,'!@#$%^&*()\-_=+{}[\]:;"<>?/\\|®–]*$/.test(description.trim())) {
-    displayErrorMessage('description-error', 'Additional information contains invalid characters.');
-    isValid = false;
-}
+function validateForm() {
+    clearErrorMessages();
+    const name = document.getElementsByName('productName')[0].value;
+    const description = document.getElementById('descriptionid').value;
+    const brand = document.getElementsByName('brand')[0].value;
+    const price = document.getElementsByName('regularPrice')[0].value;
+    const saleprice = document.getElementsByName('salePrice')[0].value;
+    const category = document.getElementsByName('category')[0].value;
+    const images = document.getElementById('input1');
+  
+    const additionalInfo = document.getElementById('additionalInfo').value;
+    let isValid = true;
 
-  
-           
-  
-if (!/^(0|[1-9]\d*)$/.test(blackQuantity)) {
-    displayErrorMessage('blackQuantity-error', 'Please enter a valid quantity (0 or a positive integer).');
-    isValid = false;
-}
-
-if (!/^(0|[1-9]\d*)$/.test(silverQuantity)) {
-    displayErrorMessage('silverQuantity-error', 'Please enter a valid quantity (0 or a positive integer).');
-    isValid = false;
-}
-
-if (!/^(0|[1-9]\d*)$/.test(goldenQuantity)) {
-    displayErrorMessage('goldenQuantity-error', 'Please enter a valid quantity (0 or a positive integer).');
-    isValid = false;
-}
-  
-              if (!/^\d+(\.\d{1,2})?$/.test(price) || parseFloat(price) < 0) {
-                  displayErrorMessage('regularPrice-error', 'Please enter a valid non-negative price.');
-                  isValid = false;
-              }
-  
-  
-  
-  
-              if (!/^\d+(\.\d{1,2})?$/.test(saleprice) || parseFloat(saleprice) < 0) {
-                  displayErrorMessage('salePrice-error', 'Please enter a valid non-negative price.');
-                  isValid = false;
-              }
-              if (Number(price) < Number(saleprice)) {
-  displayErrorMessage('regularPrice-error', 'Regular price must be greater than sale price.');
-  isValid = false;
-} else if (Number(price) === Number(saleprice)) {
-  isValid = true;
-}
-
-              
-
-              if (additionalInfo.trim() === "") {
-        displayErrorMessage('additionalInfo-error', 'Please enter additional information.');
+    // Basic field validation
+    if (name.trim() === "") {
+        displayErrorMessage('productName-error', 'Please enter a product name.');
         isValid = false;
-    } else if (!/^[a-zA-Z0-9\s.,'!@#$%^&*()\-_=+{}[\]:;"<>?/\\|]*$/.test(description.trim())) {
-    displayErrorMessage('description-error', 'Additional information contains invalid characters.');
+    } else if (!/^[a-zA-Z0-9\s\-_]+$/.test(name.trim())) {
+        displayErrorMessage('productName-error', 'Product name should contain only alphabetic characters, numbers, hyphens, and underscores.');
+        isValid = false;
+    }
+
+    if (description.trim() === "") {
+    displayErrorMessage('description-error', 'Please enter a product description.');
+    isValid = false;
+} else if (description.trim().length < 10) {
+    displayErrorMessage('description-error', 'Product description must be at least 10 characters long.');
+    isValid = false;
+} else if (!/^[a-zA-Z0-9\s.,'!@#$%^&*()\-_=+{}[\]:;"<>?/\\|®–]*$/.test(description.trim())) {
+    displayErrorMessage('description-error', 'Product description contains invalid characters.');
     isValid = false;
 }
+
+   
+    if (!/^\d+(\.\d{1,2})?$/.test(price) || parseFloat(price) < 0) {
+        displayErrorMessage('regularPrice-error', 'Please enter a valid non-negative price.');
+        isValid = false;
+    }
+
+    if (!/^\d+(\.\d{1,2})?$/.test(saleprice) || parseFloat(saleprice) < 0) {
+        displayErrorMessage('salePrice-error', 'Please enter a valid non-negative price.');
+        isValid = false;
+    }
+
+    if (Number(price) < Number(saleprice)) {
+        displayErrorMessage('regularPrice-error', 'Regular price must be greater than sale price.');
+        isValid = false;
+    }
+
+    if (additionalInfo.trim() === "") {
+    displayErrorMessage('additionalInfo-error', 'Please enter additional information.');
+    isValid = false;
+} else if (additionalInfo.trim().length < 10) {
+    displayErrorMessage('additionalInfo-error', 'Additional information must be at least 10 characters long.');
+    isValid = false;
+} else if (!/^[a-zA-Z0-9\s.,'!@#$%^&*()\-_=+{}[\]:;"<>?/\\|®–]*$/.test(additionalInfo.trim())) {
+    displayErrorMessage('additionalInfo-error', 'Additional information contains invalid characters.');
+    isValid = false;
+}
+
+    // Variant validation
+    const variants = document.querySelectorAll('.variant-item');
+if (variants.length === 0) {
+    // Change: Add a red error message for no variants
+    const variantsContainer = document.getElementById('variants-container');
+    const noVariantError = document.createElement('div');
+    noVariantError.className = 'error-message'; // Add this class for red color
+    noVariantError.style.color = 'red'; // Explicitly set red color
+    noVariantError.textContent = 'Please add at least one variant';
+    variantsContainer.appendChild(noVariantError);
+    isValid = false;
+}
+
+    const variantsData = [];
+     variants.forEach((variant, index) => {
+        // CHANGE: Create error div for each variant
+        const errorDiv = document.createElement('div');
+        errorDiv.className = 'error-message';
+        errorDiv.style.color = 'red';
+        variant.appendChild(errorDiv);
+
+        // Find color and quantity inputs
+        const colorInput = variant.querySelector('input[name$="[color]"]');
+        const quantityInput = variant.querySelector('input[name$="[quantity]"]');
+
+        if (!colorInput || !quantityInput) {
+            console.error('Could not find color or quantity input for variant:', variant);
+            isValid = false;
+            return;
+        }
+
+        const color = colorInput.value;
+        const quantity = quantityInput.value;
+
+        if (!color) {
+    errorDiv.textContent = 'Color is required';
+    errorDiv.style.color = 'red'; // Ensure error is red
+    colorInput.classList.add('is-invalid');
+    isValid = false;
+} else if (!/^[a-z]+$/.test(color)) {
+    // Change: Only allow lowercase letters
+    errorDiv.textContent = 'Color should contain only lowercase letters';
+    errorDiv.style.color = 'red'; // Ensure error is red
+    colorInput.classList.add('is-invalid');
+    isValid = false;
+} else {
+    errorDiv.textContent = '';
+    colorInput.classList.remove('is-invalid');
+}
+
+
+if (!quantity) {
+            // Check if quantity is empty
+            errorDiv.textContent = 'Quantity is required';
+            quantityInput.classList.add('is-invalid');
+            isValid = false;
+        } else if (isNaN(quantity) || parseInt(quantity) < 0) {
+            // Check if quantity is a valid non-negative number
+            errorDiv.textContent = 'Quantity must be a non-negative number';
+            quantityInput.classList.add('is-invalid');
+            isValid = false;
+        } else {
+            // Clear error if validation passes
+            errorDiv.textContent = '';
+            quantityInput.classList.remove('is-invalid');
+        }
+        
+        if (!quantity || isNaN(quantity) || parseInt(quantity) < 0) {
+            displayErrorMessage(`variant-${index}-error`, 'Valid quantity is required');
+            isValid = false;
+        }
+
+        if (color.trim() && !isNaN(quantity) && parseInt(quantity) >= 0) {
+            variantsData.push({
+                color: color.trim(),
+                quantity: parseInt(quantity)
+            });
+        }
+    });
+
+    if (isValid && variantsData.length > 0) {
+        // Only append variants data if validation passed
+        const variantsInput = document.querySelector('input[name="variants"]') || document.createElement('input');
+        variantsInput.type = 'hidden';
+        variantsInput.name = 'variants';
+        variantsInput.value = JSON.stringify(variantsData);
+        
+        if (!variantsInput.parentElement) {
+            document.getElementById('productForm').appendChild(variantsInput);
+        }
+    }
 
     return isValid;
-
-          }
-
+}
 
 
 
 
-          function displayErrorMessage(elementId, message) {
-              var errorElement = document.getElementById(elementId);
-              errorElement.innerText = message;
-              errorElement.style.display = "block";
-          }
+
+function displayErrorMessage(elementId, message) {
+    const errorElement = document.getElementById(elementId);
+    if (errorElement) {
+        errorElement.innerText = message;
+        errorElement.style.display = "block";
+    } else {
+        console.warn(`Error element with id '${elementId}' not found`);
+    }
+}
   
   
-          function clearErrorMessages() {
-              const errorElements = document.getElementsByClassName('error-message');
-              Array.from(errorElements).forEach(element => {
-                  element.innerText = '';
-              });
-              const errorMessage = document.getElementById('errorMessage');
-  
-  
-          }
+function clearErrorMessages() {
+    const errorElements = document.getElementsByClassName('error-message');
+    Array.from(errorElements).forEach(element => {
+        element.innerText = '';
+        element.style.display = "none";
+    });
+    const variantsContainer = document.getElementById('variants-container');
+    const noVariantError = variantsContainer.querySelector('.error-message');
+    if (noVariantError) {
+        noVariantError.remove();
+    }
+}
 
+    </script>
+
+
+
+
+
+
+
+
+<script>
+    let variantCount = 0;
+    
+    function addVariant() {
+    const container = document.getElementById('variants-container');
+    const variantDiv = document.createElement('div');
+    variantDiv.className = 'variant-item border rounded p-3 mb-3';
+    variantDiv.id = `variant-${variantCount}`;
+    
+    variantDiv.innerHTML = `
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label class="form-label">Color (lowercase letters only)</label>
+                <input type="text" name="variants[${variantCount}][color]" 
+                       class="form-control" 
+                       placeholder="e.g. red, blue, green" 
+                       required>
+            </div>
+            
+            <div class="col-md-6 mb-3">
+                <label class="form-label">Quantity</label>
+                <input type="number" name="variants[${variantCount}][quantity]" class="form-control" required>
+            </div>
+            
+            <div class="col-12">
+                <button type="button" class="btn btn-danger" onclick="removeVariant(${variantCount})">
+                    Remove Variant
+                </button>
+            </div>
+        </div>
+    `;
+    
+    container.appendChild(variantDiv);
+    variantCount++;
+}
+    
+function removeVariant(id) {
+    const variantDiv = document.getElementById(id);
+    if (variantDiv) {
+        variantDiv.remove();
+    }
+}
+    
+    
     </script>

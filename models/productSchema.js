@@ -36,18 +36,6 @@ const productSchema = new mongoose.Schema({
         type:Number,
         default:0,
     },
-    goldenQuantity:{
-        type:Number,
-        default:true,
-    },
-    blackQuantity:{
-        type:Number,
-        default:true,
-    },
-    silverQuantity:{
-        type:Number,
-        default:true,
-    },
     productImage:{
         type:[String],
         required:true,
@@ -62,6 +50,18 @@ const productSchema = new mongoose.Schema({
         required:true,
         default:'Available'
     },
+    variants:[
+        {
+            color:{
+                type:String,
+
+            },
+            quantity:{
+                type:Number,
+                default:0,
+            }
+        }
+    ],
     
 },{timestamps:true});
 

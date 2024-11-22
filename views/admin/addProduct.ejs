@@ -3,6 +3,28 @@
    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cropperjs/dist/cropper.min.css">
 </head>
 <style>
+    
+
+.is-invalid {
+    border-color: red !important;
+}
+
+.variant-error {
+    color: red;
+    font-size: 0.85rem;
+    margin-top: 5px;
+}
+
+.variant-item {
+    position: relative;
+    background: #f8f9fa;
+    transition: all 0.3s ease;
+}
+
+.variant-item:hover {
+    background: #fff;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
    .error-message{
        color: red;
    }
@@ -30,7 +52,7 @@
            <div class="col-lg-6">
                <div class="card mb-4">
                    <div class="card-body">
-                    <form method="post" action="/admin/addProduct" enctype="multipart/form-data" onsubmit="return validateForm()">
+                    <form id="productForm" enctype="multipart/form-data" onsubmit="validateAndSubmit(event)">
                            <div class="mb-4">
                                <label for="product_name" class="form-label">Product Name</label>
                                <input type="text" placeholder="Type here" name="productName"
@@ -86,31 +108,7 @@
                                </div>
                                
                            </div>
-                           <div class="row">
-                            
-                               <div class="col-lg-4">
-                                
-                                   <div class="mb-4">
-                                    <label class="form-label">Black Stock</label>
-                                    <input placeholder="" name="blackQuantity" type="text" class="form-control border">
-                                   </div>
-                                   <div id="blackQuantity-error" class="error-message"></div>
-                               </div>
-                               <div class="col-lg-4">
-                                <div class="mb-4">
-                                    <label class="form-label">Silver Stock</label>
-                                       <input placeholder="" name="silverQuantity" type="text" class="form-control border">
-                                </div>
-                                <div id="silverQuantity-error" class="error-message"></div>
-                            </div>
-                            <div class="col-lg-4">
-                                <div class="mb-4">
-                                    <label class="form-label">Golden Stock</label>
-                                       <input placeholder="" name="goldenQuantity" type="text" class="form-control border">
-                                </div>
-                                <div id="goldenQuantity-error" class="error-message"></div>
-                            </div>
-                           </div>
+                           
                            <div class="card mb-4">
                                <div class="card-body">
                                    <div class="row gx-2">
@@ -206,8 +204,23 @@
                           
                                                        </div>
                            </div>
+                           <div class="card mb-4">
+    <div class="card-header">
+        <h4>Product Variants</h4>
+    </div>
+    <div class="card-body">
+        <div id="variants-container">
+
+           
+        </div>
+
+        <button type="button" class="btn btn-primary mt-3" onclick="addVariant()">
+            Add Variant
+        </button>
+    </div>
+</div>
                            <div>
-                               <button class="btn btn-md rounded font-sm hover-up"  type="submit" onclick="validateAndSubmit()">Publish</button>
+                               <button class="btn btn-md rounded font-sm hover-up"  type="submit">Publish</button>
                            </div>
                        </form>
                    </div>
@@ -222,12 +235,107 @@
 
 <script>
 
-    function validateAndSubmit(){
-        if(validateForm()){
-            document.forms[0].submit();
-        }
-    }
+    // function validateAndSubmit(event){
+    //     // event.preventDefault();
+    //     if(validateForm()){
+    //         document.forms[0].submit();
+    //     }
+    // }
 
+    function validateAndSubmit(event) {
+    event.preventDefault();
+    
+    if(validateForm()) {
+        // Get the form data
+        const form = document.getElementById('productForm');
+        const formData = new FormData(form);
+        
+        // Get variants data
+        const variants = [];
+        document.querySelectorAll('.variant-item').forEach(variant => {
+            const color = variant.querySelector('input[name$="[color]"]').value;
+            const quantity = variant.querySelector('input[name$="[quantity]"]').value;
+            if (color && quantity) {
+                variants.push({
+                    color: color.trim(),
+                    quantity: parseInt(quantity)
+                });
+            }
+        });
+
+        // Make sure to keep all existing form data
+        const finalFormData = new FormData();
+
+        // Add all the basic product data
+        finalFormData.append('productName', formData.get('productName'));
+        finalFormData.append('brand', formData.get('brand'));
+        finalFormData.append('description', formData.get('description'));
+        finalFormData.append('additionalInfo', formData.get('additionalInfo'));
+        finalFormData.append('regularPrice', formData.get('regularPrice'));
+        finalFormData.append('salePrice', formData.get('salePrice'));
+        finalFormData.append('category', formData.get('category'));
+
+        // Add image files
+        const imageInputs = form.querySelectorAll('input[type="file"]');
+        imageInputs.forEach((input, index) => {
+            if (input.files.length > 0) {
+                finalFormData.append('images', input.files[0]);
+            }
+        });
+        
+        // Add variants as JSON string
+        finalFormData.append('variants', JSON.stringify(variants));
+
+        // Log the complete form data for debugging
+        for (let pair of finalFormData.entries()) {
+            console.log(pair[0] + ': ' + pair[1]);
+        }
+        
+        // Send the data to the server
+        fetch('/admin/addProduct', {
+            method: 'POST',
+            body: finalFormData
+        }).then(response => {
+    return response.json(); 
+})
+
+        .then(data => {
+            if (data.success) {
+               
+                Swal.fire({
+                    toast: true,
+                    position: "top", 
+                    icon: "success", 
+                    title: "Product added successfully", 
+                    showConfirmButton: false, 
+                    timer: 3000 
+                });
+
+                setTimeout(() => {
+                    window.location.href = '/admin/product';
+                }, 1500);
+            } else {
+                Swal.fire({
+                    toast: true,
+                    position: "top",
+                    icon: 'error',
+                    title: 'Oops...',
+                    text: data.error || 'Failed to add product',
+                    showConfirmButton: false,
+                    timer: 3000 
+                });
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert(error.message);
+        });
+    }
+}
+
+function isValidValue(value) {
+    return value !== null && value !== undefined && value.toString().trim() !== '';
+}
 
     function viewImage1(event){
         document.getElementById('imgView1').src= URL.createObjectURL(event.target.files[0])
@@ -341,17 +449,15 @@
 
     function validateForm() {
               clearErrorMessages();
-              const name = document.getElementsByName('productName')[0].value;
-              const description = document.getElementById('descriptionid').value;
-              const brand = document.getElementsByName('brand')[0].value;
-              const price = document.getElementsByName('regularPrice')[0].value;
-              const saleprice = document.getElementsByName('salePrice')[0].value;
-              const category = document.getElementsByName('category')[0].value;
+              const name = document.getElementsByName('productName')[0]?.value;
+              const description = document.getElementById('descriptionid')?.value;
+              const brand = document.getElementsByName('brand')[0]?.value;
+              const price = document.getElementsByName('regularPrice')[0]?.value;
+              const saleprice = document.getElementsByName('salePrice')[0]?.value;
+              const category = document.getElementsByName('category')[0]?.value;
               const images = document.getElementById('input1')
-              const blackQuantity=document.getElementsByName('blackQuantity')[0].value.trim();
-              const silverQuantity=document.getElementsByName('silverQuantity')[0].value.trim();
-              const goldenQuantity=document.getElementsByName('goldenQuantity')[0].value.trim();
-              const additionalInfo = document.getElementById('additionalInfo').value;
+             
+              const additionalInfo = document.getElementById('additionalInfo')?.value;
               let isValid = true
  if (name.trim() === "") {
       displayErrorMessage('productName-error', 'Please enter a product name.');
@@ -361,33 +467,20 @@
     isValid = false;
 }
             
-   if (description.trim() === "") {
-      displayErrorMessage('description-error', 'Please enter a product description.');
-      isValid = false;
-   } else if (!/^[a-zA-Z0-9\s.,'!@#$%^&*()\-_=+{}[\]:;"<>?/\\|®–]*$/.test(description.trim())) {
+if (description.trim() === "") {
+    displayErrorMessage('description-error', 'Please enter a product description.');
+    isValid = false;
+} else if (description.trim().length < 10) {
+    displayErrorMessage('description-error', 'Product description must be at least 10 characters long.');
+    isValid = false;
+} else if (!/^[a-zA-Z0-9\s.,'!@#$%^&*()\-_=+{}[\]:;"<>?/\\|®–]*$/.test(description.trim())) {
     displayErrorMessage('description-error', 'Product description contains invalid characters.');
     isValid = false;
 }
   
 
   
-           
-  
-if (!/^[0-9]\d*$/.test(blackQuantity)) {
-    displayErrorMessage('blackQuantity-error', 'Please enter a valid positive quantity.');
-    isValid = false;
-}
-
-if (!/^[0-9]\d*$/.test(silverQuantity)) {
-    displayErrorMessage('silverQuantity-error', 'Please enter a valid positive quantity.');
-    isValid = false;
-}
-
-if (!/^[0-9]\d*$/.test(goldenQuantity)) {
-    displayErrorMessage('goldenQuantity-error', 'Please enter a valid positive quantity.');
-    isValid = false;
-}
-  
+ 
   
               if (!/^\d+(\.\d{1,2})?$/.test(price) || parseFloat(price) < 0) {
                   displayErrorMessage('regularPrice-error', 'Please enter a valid non-negative price.');
@@ -401,10 +494,10 @@ if (!/^[0-9]\d*$/.test(goldenQuantity)) {
                   displayErrorMessage('salePrice-error', 'Please enter a valid non-negative price.');
                   isValid = false;
               }
-//               if (price>=saleprice) {
-//       displayErrorMessage('regularPrice-error', 'Regular price must be greater than sale price.');
-//       isValid = false;
-//    }
+              if (Number(price) < Number(saleprice)) {
+        displayErrorMessage('regularPrice-error', 'Regular price must be greater than sale price.');
+        isValid = false;
+    }
   
   
              
@@ -417,12 +510,82 @@ if (!/^[0-9]\d*$/.test(goldenQuantity)) {
               
 
               if (additionalInfo.trim() === "") {
-        displayErrorMessage('additionalInfo-error', 'Please enter additional information.');
-        isValid = false;
-    } else if (!/^[a-zA-Z0-9\s.,'!@#$%^&*()\-_=+{}[\]:;"<>?/\\|®–]*$/.test(description.trim())) {
-    displayErrorMessage('description-error', 'Additional information contains invalid characters.');
+    displayErrorMessage('additionalInfo-error', 'Please enter additional information.');
+    isValid = false;
+} else if (additionalInfo.trim().length < 10) {
+    displayErrorMessage('additionalInfo-error', 'Additional information must be at least 10 characters long.');
+    isValid = false;
+} else if (!/^[a-zA-Z0-9\s.,'!@#$%^&*()\-_=+{}[\]:;"<>?/\\|®–]*$/.test(additionalInfo.trim())) {
+    displayErrorMessage('additionalInfo-error', 'Additional information contains invalid characters.');
     isValid = false;
 }
+
+const variants = document.querySelectorAll('.variant-item');
+if (variants.length === 0) {
+    // Change: Add a red error message for no variants
+    const variantsContainer = document.getElementById('variants-container');
+    const noVariantError = document.createElement('div');
+    noVariantError.className = 'error-message'; // Add this class for red color
+    noVariantError.style.color = 'red'; // Explicitly set red color
+    noVariantError.textContent = 'Please add at least one variant';
+    variantsContainer.appendChild(noVariantError);
+    isValid = false;
+}
+
+const variantsData = [];
+variants.forEach((variant, index) => {
+    const colorInput = variant.querySelector('input[name^="variants"][name$="[color]"]');
+    const quantityInput = variant.querySelector('input[name^="variants"][name$="[quantity]"]');
+    const color = colorInput.value.trim();
+    const quantity = quantityInput.value;
+
+    
+    let errorDiv = variant.querySelector('.variant-error');
+    if (!errorDiv) {
+        errorDiv = document.createElement('div');
+        errorDiv.className = 'variant-error error-message';
+        variant.appendChild(errorDiv);
+    }
+
+    if (!color) {
+    errorDiv.textContent = 'Color is required';
+    errorDiv.style.color = 'red'; 
+    colorInput.classList.add('is-invalid');
+    isValid = false;
+} else if (!/^[a-z]+$/.test(color)) {
+
+    errorDiv.textContent = 'Color should contain only lowercase letters';
+    errorDiv.style.color = 'red'; 
+    colorInput.classList.add('is-invalid');
+    isValid = false;
+} else {
+    errorDiv.textContent = '';
+    colorInput.classList.remove('is-invalid');
+}
+
+    if (!quantity || parseInt(quantity) < 0) {
+        errorDiv.textContent = 'Valid quantity is required';
+        quantityInput.classList.add('is-invalid');
+        isValid = false;
+    } else {
+        errorDiv.textContent = '';
+        quantityInput.classList.remove('is-invalid');
+    }
+
+    // Only push valid variants
+    if (color && quantity && parseInt(quantity) >= 0) {
+        variantsData.push({ color, quantity });
+    }
+});
+
+
+
+        const variantsInput = document.createElement('input');
+        variantsInput.type = 'hidden';
+        variantsInput.name = 'variants'; // This name will be used to access the data in the backend
+        variantsInput.value = JSON.stringify(variantsData); // Convert the array to a JSON string
+        document.forms[0].appendChild(variantsInput);
+        console.log(document.forms[0]);
 
     return isValid;
 
@@ -440,15 +603,74 @@ if (!/^[0-9]\d*$/.test(goldenQuantity)) {
   
   
           function clearErrorMessages() {
-              const errorElements = document.getElementsByClassName('error-message');
-              Array.from(errorElements).forEach(element => {
-                  element.innerText = '';
-              });
-              const errorMessage = document.getElementById('errorMessage');
-            
-  
-  
-          }
+    const errorElements = document.getElementsByClassName('error-message');
+    Array.from(errorElements).forEach(element => {
+        element.innerText = '';
+    });
+
+    // CLEAR VARIANT ERRORS
+    const variantErrors = document.querySelectorAll('.variant-error');
+    variantErrors.forEach(error => {
+        error.textContent = '';
+    });
+
+    // Remove invalid classes from inputs
+    const invalidInputs = document.querySelectorAll('.is-invalid');
+    invalidInputs.forEach(input => {
+        input.classList.remove('is-invalid');
+    });
+}
 
 
 </script>           
+
+
+
+
+
+
+<script>
+    let variantCount = 0;
+    
+    function addVariant() {
+    const container = document.getElementById('variants-container');
+    const variantDiv = document.createElement('div');
+    variantDiv.className = 'variant-item border rounded p-3 mb-3';
+    variantDiv.id = `variant-${variantCount}`;
+    
+    variantDiv.innerHTML = `
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label class="form-label">Color (lowercase letters only)</label>
+                <input type="text" name="variants[${variantCount}][color]" 
+                       class="form-control" 
+                       placeholder="e.g. red, blue, green" 
+                       required>
+            </div>
+            
+            <div class="col-md-6 mb-3">
+                <label class="form-label">Quantity</label>
+                <input type="number" name="variants[${variantCount}][quantity]" class="form-control" required>
+            </div>
+            
+            <div class="col-12">
+                <button type="button" class="btn btn-danger" onclick="removeVariant(${variantCount})">
+                    Remove Variant
+                </button>
+            </div>
+        </div>
+    `;
+    
+    container.appendChild(variantDiv);
+    variantCount++;
+}
+    
+    function removeVariant(id) {
+        const variantDiv = document.getElementById(`variant-${id}`);
+        if (variantDiv) {
+            variantDiv.remove();
+        }
+    }
+    
+    
+    </script>

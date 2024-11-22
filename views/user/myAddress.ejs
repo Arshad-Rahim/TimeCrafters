@@ -1,24 +1,20 @@
 <%- include('../../views/partials/user/header',{user}) %>
 
-
-<head></head>
-  
+<head>
   <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-  
- 
   <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <style>
   :root {
-    --primary-color: #222;
-    --secondary-color: #444;
-    --background-color: #fff;
-    --text-color: #e0e0e0;
-    --card-bg: #1a1a1a;
-    --hover-color: #555;
+    --primary-color: #ffffff;
+    --secondary-color: #f5f5f5;
+    --background-color: #ffffff;
+    --text-color: #333333;
+    --card-bg: #ffffff;
+    --hover-color: #e0e0e0;
     --border-radius: 8px;
-    --box-shadow: 0 2px 4px rgba(255, 255, 255, 0.1);
+    --box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     --transition: all 0.3s ease;
   }
 
@@ -114,7 +110,7 @@
   }
 
   .card:hover {
-    box-shadow: 0 4px 8px rgba(255, 255, 255, 0.1);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   }
 
   .card-header {
@@ -123,6 +119,7 @@
     padding: 15px 20px;
     font-size: 18px;
     font-weight: 600;
+    border-bottom: 1px solid var(--secondary-color);
   }
 
   .card-body {
@@ -130,8 +127,8 @@
   }
 
   .btn-primary {
-    background-color: var(--primary-color);
-    color: var(--text-color);
+    background-color: #007bff;
+    color: #ffffff;
     border: none;
     padding: 10px 20px;
     border-radius: var(--border-radius);
@@ -143,7 +140,7 @@
   }
 
   .btn-primary:hover {
-    background-color: var(--secondary-color);
+    background-color: #0056b3;
   }
 
   @media (max-width: 768px) {
@@ -155,8 +152,6 @@
       margin-bottom: 20px;
     }
   }
-
-
 
   .address-item {
     background-color: var(--card-bg);
@@ -191,94 +186,45 @@
     text-decoration: underline;
   }
 
-
-
-
-
   .dashboard-container {
     display: grid;
-    grid-template-columns: 1fr 2fr 1fr; /* Menu, Content, and Extra Section */
+    grid-template-columns: 1fr 2fr 1fr;
     gap: 30px;
-}
+  }
 
-.dashboard-content {
-    grid-column: 2; /* This will make it take the second section (the main content area) */
-}
+  .dashboard-content {
+    grid-column: 2;
+  }
 
-.extra-data {
-    grid-column: 3; /* This will take the third section on the right */
+  .extra-data {
+    grid-column: 3;
     background-color: var(--card-bg);
     padding: 20px;
     border-radius: var(--border-radius);
     box-shadow: var(--box-shadow);
     color: var(--text-color);
-}
+  }
 
-.extra-data h3 {
+  .extra-data h3 {
     font-size: 20px;
     font-weight: bold;
     margin-bottom: 15px;
-}
+  }
 
-@media (max-width: 768px) {
+  @media (max-width: 768px) {
     .dashboard-container {
-        grid-template-columns: 1fr; /* Stack all sections on mobile */
+      grid-template-columns: 1fr;
     }
 
     .extra-data {
-        grid-column: 1; /* Take full width on mobile */
+      grid-column: 1;
     }
-}
-
+  }
 </style>
+
 <main class="main">
   <div class="container">
-    <!-- <div class="bread-crumb flex-w p-l-25 p-r-15 p-t-30 p-lr-0-lg">
-      <a href="/" class="stext-109 cl8 hov-cl1 trans-04">
-        Home
-        <i class="fa fa-angle-right m-l-9 m-r-10" aria-hidden="true"></i>
-      </a>
-
-      <a href="/userProductList" class="stext-109 cl8 hov-cl1 trans-04">
-        Products
-        <i class="fa fa-angle-right m-l-9 m-r-10" aria-hidden="true"></i>
-      </a>
-      <span class="stext-109 cl4">Account Details</span>
-    </div> -->
-
     <div class="dashboard-container">
-      <!-- Left Side Menu -->
-      <!-- <div class="dashboard-menu">
-        <ul class="nav flex-column" role="tablist">
-          <li class="nav-item">
-            <a class="nav-link" id="account-detail-tab" data-bs-toggle="tab" href="/userProfile" role="tab"
-              aria-controls="account-detail" aria-selected="true">
-              <i class="fi-rs-user mr-10"></i>Account details</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" id="orders-tab" data-bs-toggle="tab" href="/orderList" role="tab"
-              aria-controls="orders" aria-selected="false">
-              <i class="fi-rs-shopping-bag mr-10"></i>Orders</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" id="track-orders-tab" data-bs-toggle="tab" href="#track-orders" role="tab"
-              aria-controls="track-orders" aria-selected="false">
-              <i class="fi-rs-shopping-cart-check mr-10"></i>Track Your Order</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link active" id="address-tab" data-bs-toggle="tab" href="/myAddress" role="tab"
-              aria-controls="address" aria-selected="true">
-              <i class="fi-rs-marker mr-10"></i>My Address</a>
-          </li>
-          
-          <li class="nav-item">
-            <a class="nav-link" href="/logout">
-              <i class="fi-rs-sign-out mr-10"></i>Logout</a>
-          </li>
-        </ul>
-      </div> -->
-
-      <!-- Main Content (Center Section) -->
       <div class="dashboard-content">
         <div class="card">
           <div class="card-header">My Address</div>
@@ -289,7 +235,6 @@
         </div>
         <% for(i=0;i<address.length;i++){ %>
         <div class="card mt-4">
-         
           <div class="card-body">
             <div class="address-item">
               <h4>Address Type: <%= address[i].addressType %></h4>
@@ -305,16 +250,9 @@
               <a href="/editAddress/<%= address[i]._id %>" class="text-primary">Edit</a> | <button onclick="deleteAddress(event,'<%= address[i]._id%>')" class="text-danger">Delete</button>
             </div>
           </div>
-          
         </div>
         <% } %>
       </div>
-
-      <!-- Extra Data Section (Right Side) -->
-      <!-- <div class="extra-data">
-        <h3>Additional Information</h3>
-        <p>This section can be used for any additional user-related information, special offers, or any other relevant data that you want to show to the user.</p>
-      </div> -->
     </div>
   </div>
 </main>
@@ -333,21 +271,17 @@
   });
 </script>
 
-
 <script>
-
 function deleteAddress(event,addressId){
   event.preventDefault();
-  // add conformation dialogue
   Swal.fire({
     title:'Are you sure?',
-    text:'you wonot not be able to revert this!',
+    text:'You will not be able to revert this!',
     icon:'warning',
-    showConfirmButton:true,
+    showCancelButton: true,
     confirmButtonColor: '#3085d6',
     cancelButtonColor: '#d33',
     confirmButtonText:'Yes, delete it',
-
   }).then((result) =>{
     if(result.isConfirmed){
       deleteAddressAjax(addressId)
@@ -356,50 +290,41 @@ function deleteAddress(event,addressId){
 }
 
 function deleteAddressAjax(addressId){
-  
-
   $.ajax({
     url:`/deleteAddress/${addressId}`,
     type:'DELETE',
     dataType:'json',
     contentType:'application/json',
     data:JSON.stringify({}),
-
-
     success:function(response){
-if(response.success){
-    Swal.fire({
-                    toast:true,
-                    position:'center',
-                    icon:'success',
-                    title:'Success',
-                    text:response.message,
-                    showConfirmButton:false,
-                    timer:1500,
-                    customClass:'center-toast',
-
-
-                }) .then(() =>{
-                    window.location.href=response.redirectURL;
-                });
-}
-               
-            },
-
-            error: function(xhr, status, error) {
-              const response = xhr.responseJSON;
-                Swal.fire({
-                toast: true,
-                position: 'top',
-                icon: 'error',
-                title: 'Error',
-                text:response.message,
-                showConfirmButton: false,
-                timer: 1500,
-                customClass: 'center-toast',
-            });
-        }
+      if(response.success){
+        Swal.fire({
+          toast:true,
+          position:'center',
+          icon:'success',
+          title:'Success',
+          text:response.message,
+          showConfirmButton:false,
+          timer:1500,
+          customClass:'center-toast',
+        }).then(() =>{
+          window.location.href=response.redirectURL;
+        });
+      }
+    },
+    error: function(xhr, status, error) {
+      const response = xhr.responseJSON;
+      Swal.fire({
+        toast: true,
+        position: 'top',
+        icon: 'error',
+        title: 'Error',
+        text:response.message,
+        showConfirmButton: false,
+        timer: 1500,
+        customClass: 'center-toast',
+      });
+    }
   })
 }
-
 </script>

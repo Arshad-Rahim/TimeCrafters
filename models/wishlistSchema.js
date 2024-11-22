@@ -16,6 +16,9 @@ const wishlistSchema = new Schema({
             ref:'Product',
             required:true,
             },
+            color: {
+                type: String,
+            },
              addedAt: {
             type: Date,
             default: Date.now

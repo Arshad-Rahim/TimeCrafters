@@ -13,6 +13,7 @@ const Cart = require("../../models/cartSchema");
 const Wallet = require('../../models/walletShema');
 const handleUserBonus = require('../../service/welcomeBonus');
 const crypto = require('crypto');
+const Wishlist = require('../../models/wishlistSchema');
 
 const pageNotFound = async (req, res) => {
   try {
@@ -61,14 +62,16 @@ const categories = await  Category.find({ isListed: true });
           success_msg: req.flash("success_msg"),
         });
       } else {
+        const wishlist = await Wishlist.findOne({userId:user});
         return res.render("home", {
           user: userData,
           product: productData,
           cat: categories,
+          wishlist,
         });
       }
     } else {
-      return res.render("home", { product: productData ,user:null});
+      return res.render("home", { product: productData ,user:null,wishlist:false});
     }
   } catch (error) {
     console.log("Home page  not found");

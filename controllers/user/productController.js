@@ -198,9 +198,11 @@ const getSearchProduct = async (req, res) => {
 const getProductDetails = async (req, res) => {
   try {
     const id = req.params.id;
+    const userId = req.session.user;
+
     const categories = await Category.find({ isListed: true });
 
-    const [productDetails, productData] = await Promise.all([
+    const [productDetails, productData,wishlist] = await Promise.all([
       Product.findById({ _id: id }).populate("category"),
       Product.find({
         isBlocked: false,
@@ -208,9 +210,9 @@ const getProductDetails = async (req, res) => {
       })
         .populate("category")
         .sort({ createdAt: -1 }),
+      Wishlist.findOne({userId})
     ]);
 
-    const userId = req.session.user;
     let cartColorsForProduct = [];
 
     if (userId) {
@@ -239,6 +241,7 @@ const getProductDetails = async (req, res) => {
         id,
         productDetails,
         cartColorsForProduct,
+        wishlist,
       });
     } else {
       return res.render("productDetails", {
@@ -247,7 +250,8 @@ const getProductDetails = async (req, res) => {
         cat: categories,
         id,
         productDetails,
-        cartColorsForProduct:[]
+        cartColorsForProduct:[],
+        wishlist:false,
       });
     }
   } catch (error) {

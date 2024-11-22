@@ -264,7 +264,7 @@
 
 
 	<!-- Product -->
-	<section class="bg0 p-t-23 p-b-140">
+	<section id="body" class="bg0 p-t-23 p-b-140">
 		<div class="container">
 			<div class="p-b-10">
 				<h3 class="ltext-103 cl5">
@@ -275,21 +275,30 @@
 			
 
 			<div class="row isotope-grid">
-				<% for(i=0;i<product.length;i++){ %>
+				<!-- product[i].category.name -->
+				<% for(let i=0;i<product.length;i++){  %>
 				<div class="col-sm-6 col-md-4 col-lg-3 p-b-35 isotope-item women">
 					<!-- Block2 -->
-					<div class="block2-txt-child2 flex-r p-t-3">
-						<button onclick="wishlist(event,'<%= product[i]._id %>')" class="btn-addwish-b2 dis-block pos-relative ">
-							<!-- js-addwish-b2 -->
-							<img class="icon-heart1 dis-block trans-04" src="/frontend/images/icons/icon-heart-01.png" alt="ICON">
-							<img class="icon-heart2 dis-block trans-04 ab-t-l" src="/frontend/images/icons/icon-heart-02.png" alt="ICON">
-						</button>
-					</div>
-					
 					<div class="block2">
+						<div class="block2-txt-child2 flex-r p-t-3">
+							<button onclick="wishlist(event,'<%= product[i]._id %>')" class="btn-addwish-b2 dis-block pos-relative ">
+                                <% 
+        let isInWishlist = false;
+        // Check if wishlist exists and has a wishlist property
+        if (wishlist && wishlist.wishlist) {
+            isInWishlist = wishlist.wishlist.some(item => product[i]._id.toString() === item.productId.toString());
+        }
+        %>
+        <% if (isInWishlist) { %>
+            <img src="/frontend/images/icons/icon-heart-02.png" alt="ICON">
+        <% } else { %>
+            <img class="icon-heart1 dis-block trans-04" src="/frontend/images/icons/icon-heart-01.png" alt="ICON">
+            <img class="icon-heart2 dis-block trans-04 ab-t-l" src="/frontend/images/icons/icon-heart-02.png" alt="ICON">
+        <% } %>
+							</button>
+						</div>
 						<div class="block2-pic hov-img0">
-							<img src="/uploads/re-image/<%=product[i].productImage[0]%>" alt="<%= product[i].productName %>">
-
+							<img src="/uploads/re-image/<%= product[i].productImage[0] %>" alt="<%= product[i].productName  %>">
 							<a href="/productDetails/<%= product[i]._id %>" class="block2-btn flex-c-m stext-103 cl2 size-102 bg0 bor2 hov-btn1 p-lr-15 trans-04 ">
 								Product View
 							</a>
@@ -297,21 +306,27 @@
 
 						<div class="block2-txt flex-w flex-t p-t-14">
 							<div class="block2-txt-child1 flex-col-l ">
-								<a href="/productDetails/<%= product[i]._id %>" class="stext-104 cl4 hov-cl1 trans-04 js-name-b2 p-b-6">
+								<a href="product-detail.html" class="stext-104 cl4 hov-cl1 trans-04 js-name-b2 p-b-6">
 									<%= product[i].productName %>
 								</a>
 
+								<!-- <span class="stext-105 cl3">
+									Rs: <%= product[i].salePrice %>
+								</span> -->
+
 								<span class="mtext-106 cl2">
 									<del class="regular-price"><span class="indian-rupee"></span><%= product[i].regularPrice %></del>
-									<span class="sale-price"><span class="indian-rupee"></span> <%= product[i].salePrice %></span>
+									<span class="sale-price"><span class="indian-rupee"></span><%= product[i].salePrice %></span>
 								  </span>
 							</div>
 
 							
+							
 						</div>
+						
 					</div>
-					
-				</div>	
+				</div>
+
 				<% } %>
 			</div>
 
@@ -365,7 +380,7 @@
                     customClass:'center-toast',
 
                 })
-                // $('#body').load('/cart #body')
+                $('#body').load('/ #body')
             }
         },
         error:function(xhr,status,error){

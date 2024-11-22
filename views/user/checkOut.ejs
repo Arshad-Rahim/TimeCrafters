@@ -370,7 +370,9 @@
             timer: 1500,
             customClass: "center-toast",
           }).then(() =>{
-                    window.location.href=response.redirectURL;
+            if(response.redirectURL){
+                window.location.href=response.redirectURL;
+            }
                 });
         }
       },
@@ -387,7 +389,9 @@
           timer: 1500,
           customClass: "center-toast",
         }).then(() =>{
-                    window.location.href=response.redirectURL;
+            if(response.redirectURL){
+                window.location.href=response.redirectURL;
+            }
                 });
       },
             

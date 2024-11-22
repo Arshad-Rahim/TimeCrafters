@@ -132,29 +132,35 @@
         <tbody>
             <% if(wishlist && wishlist.wishlist.length > 0) { %>
                 <% wishlist.wishlist.forEach(item => { %>
+                    <% 
+                    // Find the matching variant based on color
+                    const matchingVariant = item.productId.variants.find(
+                        variant => variant.color?.toLowerCase() === item.color?.toLowerCase()
+                    ) || item.productId.variants[0]; // Fallback to first variant if no match
+                %>
             <tr>
                 <td>
                     <img src="uploads/re-image/<%=item.productId.productImage[0]%>" alt="Ferrari 499P" class="product-image"/>
                 </td>
                 <td>
                     <div class="product-name"><%= item.productId.productName%></div>
-                    <div class="product-size">Black</div>
+                    <div class="product-size"><%=matchingVariant.color%></div>
                 </td>
                 <td><%= item.productId.salePrice %></td>
-                <% if(item.productId.blackQuantity<5){ %>
+                <% if(matchingVariant.quantity<5){ %>
                 <td>
-                    <span class="stock-status limited">Only <%=item.productId.blackQuantity%> Stock Available !</span>
+                    <span class="stock-status limited">Only <%=matchingVariant.quantity%> Stock Available !</span>
                 </td>
                 <% }else{ %>
                 <td>
-                    <span class="stock-status available"><%= item.productId.blackQuantity%>  Pieace Available</span>
+                    <span class="stock-status available"><%= matchingVariant.quantity%>  Pieace Available</span>
                 </td>
                 <% } %>
                 <td>
                     <button class="btn remove-btn" onclick="deleteWishlistProduct(event,'<%= item.productId._id %>')">Remove</button>
                 </td>
                 <td>
-                    <button class="btn add-to-cart-btn" onclick="addToCart(event,'<%= item.productId._id%>','<%= item.productId.blackQuantity%>')">Add to Cart </button>
+                    <button class="btn add-to-cart-btn" onclick="addToCart(event,'<%= item.productId._id%>','<%= matchingVariant.color%>')">Add to Cart </button>
                 </td>
             </tr>
             <% }) %>
@@ -174,24 +180,23 @@
 
 <script>
 
-function addToCart(event,productId,black){
+function addToCart(event,productId,color){
 			
 			event.preventDefault();
 			
-			addToCartAjax(productId,black)
+			addToCartAjax(productId,color)
 		}
 
 
-	function addToCartAjax(productId,black){
+	function addToCartAjax(productId,color){
 		
-		 colorStock = black;
-		
+		 
 			$.ajax({
 				type:'POST',
 				url:`/cart/${productId}`,
 				dataType:'json',
 				contentType:'application/json',
-				data:JSON.stringify({colorStock}),
+				data:JSON.stringify({color}),
 				success:function(response){
 					if(response.success){
 						Swal.fire({

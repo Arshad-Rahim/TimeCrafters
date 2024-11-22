@@ -110,8 +110,11 @@ const postCart = async (req, res) => {
     const userId = req.session.user;
 
     const { id } = req.params;
-    const { color, colorStock } = req.body;
+    const { color} = req.body;
     const product = await Product.findOne({ _id: id });
+  
+  const colorVariant = product.variants.find(variant => variant.color === color);
+   const colorStock = colorVariant ? colorVariant.quantity : 0;
 
     if (!userId) {
       return res.status(400).json({
@@ -227,6 +230,7 @@ const putQuantity = async (req, res) => {
       Product.findById(productId),
     ]);
 
+
     if (!quantity || quantity < 1) {
       return res.status(400).json({
         success: false,
@@ -268,35 +272,36 @@ const putQuantity = async (req, res) => {
         message: "Product is not Found in the cart",
       });
     }
-    
 
-    let colorQuantityField;
-      switch (color) {
-        case "gold":
-          colorQuantityField = "goldenQuantity";
-          break;
-        case "black":
-          colorQuantityField = "blackQuantity";
-          break;
-        case "silver":
-          colorQuantityField = "silverQuantity";
-          break;
-        default:
-          console.log("unsupported color");
-      }
-      console.log(colorQuantityField)
-      console.log(product[colorQuantityField])
-      if (product[colorQuantityField] < quantity) {
+const variants = product.variants.find(variant => variant.color === foundItem.color);
+
+    // let colorQuantityField;
+    //   switch (color) {
+    //     case "gold":
+    //       colorQuantityField = "goldenQuantity";
+    //       break;
+    //     case "black":
+    //       colorQuantityField = "blackQuantity";
+    //       break;
+    //     case "silver":
+    //       colorQuantityField = "silverQuantity";
+    //       break;
+    //     default:
+    //       console.log("unsupported color");
+    //   }
+      // console.log(colorQuantityField)
+      // console.log(product[colorQuantityField])
+      if (variants.quantity < quantity) {
         return res.status(400).json({
           success: false,
-          message: "Selected Color Product is Out of Stock",
+          message:  `Only ${variants.quantity} items available in this color`,
         });
       }
 
-    if (quantity > foundItem.colorStock) {
+    if (quantity > variants.quantity) {
       return res.status(400).json({
         success: false,
-        message: `Only ${foundItem.colorStock} items available in this color`,
+        message: `Only ${variants.quantity} items available in this color`,
       });
     }
 
@@ -585,6 +590,7 @@ const postOrderSuccess = async (req, res) => {
         return res.status(400).json({
           success: false,
           message: "Insufficient Balence in the wallet",
+        // redirectURL: '/checkOut',
         });
       }
       wallet.balance -= finalTotal;
@@ -605,7 +611,7 @@ const postOrderSuccess = async (req, res) => {
     delete req.session.couponDiscount;
     if (paymentMethod == "paypal") {
       const currentTotal = finalTotal;
-
+console.log('finalTotal:',currentTotal);
       const convertAmount = await convertCurrency(currentTotal);
       req.session.convertAmount = convertAmount;
       return res.json({

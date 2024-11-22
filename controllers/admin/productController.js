@@ -24,66 +24,82 @@ const getAddProduct = async (req, res) => {
 
 const addProduct = async (req, res) => {
   try {
-    const product = req.body;
-
-    const productExists = await Product.findOne({
-      productName: product.productName,
-    });
-
-    const categoryId = await Category.findOne({ name: product.category });
-
-    if (!productExists) {
-      const images = [];
-
-      if (req.files && req.files.length > 0) {
-        const uploadDir = path.join("public", "uploads", "re-image");
-        if (!fs.existsSync(uploadDir)) {
-          fs.mkdirSync(uploadDir, { recursive: true });
-        }
-
-        for (let i = 0; i < req.files.length; i++) {
-          const originalImagePath = req.files[i].path;
-          const originalFilename = req.files[i].filename;
-          const resizedFilename = `resized-${originalFilename}`;
-          const resizedImagePath = path.join(uploadDir, resizedFilename);
-          await sharp(originalImagePath)
-            .resize({ width: 440, height: 440 })
-            .toFile(resizedImagePath);
-          images.push(resizedFilename);
-        }
+      const product = req.body;
+      let variants = [];
+      
+    
+      if (req.body.variants) {
+          try {
+              const variantsString = req.body.variants.toString().trim();
+              
+              variants = JSON.parse(variantsString);
+          } catch (error) {
+              console.error('Error parsing variants:', error);
+              console.error('Problematic variants string:', req.body.variants);
+              return res.status(400).json({ error: 'Invalid variant data' });
+          }
       }
 
-      if (!categoryId) {
-        return res.status(400).json("invalid category name");
-      }
-
-      const newProduct = new Product({
-        productName: product.productName,
-        description: product.description,
-        additionalInfo: product.additionalInfo,
-        brand: product.brand,
-        category: categoryId._id,
-        regularPrice: product.regularPrice,
-        salePrice: product.salePrice,
-        createdOn: new Date(),
-        blackQuantity: product.blackQuantity,
-        silverQuantity: product.silverQuantity,
-        goldenQuantity: product.goldenQuantity,
-        productImage: images,
-        status: "Available",
+      const productExists = await Product.findOne({
+          productName: product.productName,
       });
-      await newProduct.save();
-      return res.redirect("/admin/product");
-    } else {
-      return res
-        .status(400)
-        .json("product already exist,please try with another name");
-    }
+
+      if (productExists) {
+          return res.status(400).json({ error: "Product name already exists" });
+      }
+
+      // Process images
+      const images = [];
+      if (req.files && req.files.length > 0) {
+          const uploadDir = path.join("public", "uploads", "re-image");
+          if (!fs.existsSync(uploadDir)) {
+              fs.mkdirSync(uploadDir, { recursive: true });
+          }
+
+          for (let i = 0; i < req.files.length; i++) {
+              const originalImagePath = req.files[i].path;
+              const originalFilename = req.files[i].filename;
+              const resizedFilename = `resized-${originalFilename}`;
+              const resizedImagePath = path.join(uploadDir, resizedFilename);
+              await sharp(originalImagePath)
+                  .resize({ width: 440, height: 440 })
+                  .toFile(resizedImagePath);
+              images.push(resizedFilename);
+          }
+      }
+      const categoryId = await Category.findOne({ name: product.category });
+      if (!categoryId) {
+          return res.status(400).json({ error: "Invalid category name" });
+      }
+
+      const newProduct = await Product.create({
+          productName: product.productName,
+          description: product.description,
+          additionalInfo: product.additionalInfo,
+          brand: product.brand,
+          category: categoryId._id,
+          regularPrice: product.regularPrice,
+          salePrice: product.salePrice,
+          productImage: images,
+          variants: variants.map(variant => ({
+            color: variant.color,
+            quantity: parseInt(variant.quantity),
+        }))
+    
+      });
+
+    
+
+      return res.status(200).json({ 
+        success: true, 
+        message: "Product added successfully",
+      });
   } catch (error) {
-    console.error("error to saving product", error);
-    return res
-      .status(500)
-      .json({ error: "An error occurred while saving the product" });
+      console.error("Error saving product:", error);
+      return res.status(500).json({ 
+        success: false, 
+        error: "An error occurred while saving the product" 
+      });
   }
 };
 
@@ -162,7 +178,7 @@ const getEditProduct = async (req, res) => {
     const [brand, category, product] = await Promise.all([
       Brand.find({ isBlocked: false }),
       Category.find({ isListed: true }),
-      Product.findOne({ _id: id }),
+      Product.findOne({ _id: id }).populate('category'),
     ]);
 
     return res.render("editProduct", {
@@ -179,6 +195,19 @@ const editProduct = async (req, res) => {
   try {
     const id = req.params.id;
     const data = req.body;
+    let variants = [];
+
+    if (req.body.variants) {
+      try {
+          const variantsString = req.body.variants.toString().trim();
+          
+          variants = JSON.parse(variantsString);
+      } catch (error) {
+          console.error('Error parsing variants:', error);
+          console.error('Problematic variants string:', req.body.variants);
+          return res.status(400).json({ error: 'Invalid variant data' });
+      }
+  }
 
     const [product, category, existingProduct] = await Promise.all([
       Product.find({ _id: id }),
@@ -190,11 +219,7 @@ const editProduct = async (req, res) => {
     ]);
 
     if (existingProduct) {
-      return res
-        .status(400)
-        .json(
-          "The product name is alredy existing so you can try with another name"
-        );
+      return res.status(400).json({ error: "Product name already exists" });
     }
 
     const images = [];
@@ -213,9 +238,10 @@ const editProduct = async (req, res) => {
       category: category._id,
       regularPrice: data.regularPrice,
       salePrice: data.salePrice,
-      blackQuantity: data.blackQuantity,
-      silverQuantity: data.silverQuantity,
-      goldenQuantity: data.goldenQuantity,
+      variants: variants.map(variant => ({
+        color: variant.color,
+        quantity: parseInt(variant.quantity),
+    }))
     };
 
     if (req.files.length > 0) {
@@ -223,9 +249,16 @@ const editProduct = async (req, res) => {
     }
 
     await Product.findByIdAndUpdate(id, updateFields, { new: true });
-    return res.redirect("/admin/product");
+    return res.status(200).json({ 
+      success: true, 
+      message: "Product Updated successfully",
+    });
   } catch (error) {
     console.error("error in Editing the product in product Controller", error);
+    return res.status(500).json({ 
+      success: false, 
+      error: "An error occurred while saving the product" 
+    });
   }
 };
 
