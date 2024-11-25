@@ -230,7 +230,7 @@
           <div class="card-header">My Address</div>
           <div class="card-body">
             <p>Manage your shipping addresses for a smoother checkout experience.</p>
-            <a href="/addAddress" class="btn-primary mt-4">Add New Address</a>
+            <a href="/addAddress/?redirect=myAddress" class="btn-primary mt-4">Add New Address</a>
           </div>
         </div>
         <% for(i=0;i<address.length;i++){ %>
@@ -247,7 +247,7 @@
               <p><strong>Zip Code:</strong> <%= address[i].zipCode %></p>
               <p><strong>Mobile Number:</strong> <%= address[i].mobileNumber %></p>
               <p><strong>Alternate Mobile Number:</strong> <%= address[i].altMobileNumber %></p>
-              <a href="/editAddress/<%= address[i]._id %>" class="text-primary">Edit</a> | <button onclick="deleteAddress(event,'<%= address[i]._id%>')" class="text-danger">Delete</button>
+              <a href="/editAddress/<%= address[i]._id %>/?redirect=myAddress" class="text-primary">Edit</a> | <button onclick="deleteAddress(event,'<%= address[i]._id%>')" class="text-danger">Delete</button>
             </div>
           </div>
         </div>

@@ -112,34 +112,54 @@ const deleteOrderListProduct = async (req, res) => {
       });
     }
 
+    const cancelledItem = order.items[itemIndex];
+
+
     order.items[itemIndex].orderStatus = "Canceled";
-const initialOrderTotal = order.orderTotal;
+
+    let refundAmount = cancelledItem.ProductTotal;
+
+
+    if (order.couponDiscount > 0) {
+      // Calculate total order subtotal before cancellation
+      const orderSubtotal = order.items.reduce((sum, item) => sum + item.ProductTotal, 0);
+      
+      // Calculate this item's proportion of the discount
+      const itemDiscountProportion = cancelledItem.ProductTotal / orderSubtotal;
+      const itemCouponDiscount = order.couponDiscount * itemDiscountProportion;
+      
+      // Subtract the proportional discount from refund amount
+      refundAmount -= itemCouponDiscount;
+    }
+
+    refundAmount = Math.round(refundAmount);
+
+
     order.orderTotal = order.items
       .filter((item) => item.orderStatus !== "Canceled")
       .reduce((acc, curr) => acc + curr.ProductTotal, 0);
     await order.save();
-    const resultOrderTotal = order.orderTotal;
-    const differenceAmount = initialOrderTotal - resultOrderTotal;
 
-    const colorQuantityMap = {
-      gold: "goldenQuantity",
-      black: "blackQuantity",
-      silver: "silverQuantity",
-    };
     const product = await Product.findOne({ _id: productId });
 
-    const cancelItem = order.items[itemIndex];
-    const colorQuantityField = colorQuantityMap[cancelItem.color];
-
-    if (!colorQuantityField) {
+    if (!product) {
       return res.status(400).json({
         success: false,
-        message: `Unsupported color in deleteOrderListProduct`,
+        message: "Product not found",
       });
     }
 
-    product[colorQuantityField] =
-      product[colorQuantityField] + cancelItem.quantity;
+
+    const variant = product.variants.find(v => v.color === cancelledItem.color);
+    if (!variant) {
+      return res.status(400).json({
+        success: false,
+        message: `Color variant ${cancelledItem.color} not found for product ${product.productName}`,
+      });
+    }
+
+   variant.quantity += cancelledItem.quantity;
+  
 
     await product.save();
 
@@ -147,13 +167,13 @@ const initialOrderTotal = order.orderTotal;
 
     if(order.paymentInfo.method == 'wallet' || 'paypal' ){
       wallet.userId = userId;
-      wallet.balance+= differenceAmount;
+      wallet.balance+= refundAmount;
       const transactions ={
         order_id:orderId,
         transaction_date:Date.now(),
         transaction_type:'credit',
         transaction_status:'completed',
-        amount:differenceAmount,
+        amount:refundAmount,
       }
       wallet.transactions.push(transactions);
       await wallet.save();
@@ -215,7 +235,7 @@ const handleReturn = async(req,res) =>{
         refundAmount -= itemCouponDiscount;
       }
 
-      refundAmount = Math.round(refundAmount * 100) / 100;
+      refundAmount = Math.round(refundAmount);
 
     const userId = order.userId;
     const wallet = await Wallet.findOne({userId});

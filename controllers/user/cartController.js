@@ -421,6 +421,7 @@ const deleteCartProduct = async (req, res) => {
 const postOrderSuccess = async (req, res) => {
   try {
     const userId = req.session.user;
+
     const cart = await Cart.findOne({ userId }).populate({
       path: "items.productId",
       populate: {

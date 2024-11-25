@@ -23,23 +23,7 @@ const getOrderList = async (req, res) => {
   }
 };
 
-// const getOrderDetails = async (req, res) => {
-//   try {
-//     const userId = req.session.user;
-//     const { id } = req.params;
 
-//     const [cart, findOrder] = await Promise.all([
-//       Cart.findOne({ userId }),
-//       Order.findOne({ _id: id })
-//         .sort({ createdAt: -1 })
-//         .populate("items.productId"),
-//     ]);
-
-//     return res.render("orderDetails", { order: findOrder, cart,user:true });
-//   } catch (error) {
-//     console.log("Error in getOrderDetails", error);
-//   }
-// };
 
 
 const getOrderDetails = async (req, res) => {
@@ -125,49 +109,65 @@ const deleteOrderListProduct = async (req, res) => {
       });
     }
 
+    const cancelledItem = order.items[itemIndex];
+
     order.items[itemIndex].orderStatus = "Canceled";
-const initialOrderTotal = order.orderTotal;
+
+    let refundAmount = cancelledItem.ProductTotal;
+
+    if (order.couponDiscount > 0) {
+      const orderSubtotal = order.items.reduce((sum, item) => sum + item.ProductTotal, 0);
+      
+      const itemDiscountProportion = cancelledItem.ProductTotal / orderSubtotal;
+      const itemCouponDiscount = order.couponDiscount * itemDiscountProportion;
+      
+      refundAmount -= itemCouponDiscount;
+    }
+
+    refundAmount = Math.round(refundAmount);
+
     order.orderTotal = order.items
       .filter((item) => item.orderStatus !== "Canceled")
       .reduce((acc, curr) => acc + curr.ProductTotal, 0);
     await order.save();
-    // const resultOrderTotal = order.paymentInfo.paidAmount;
-    // const differenceAmount = initialOrderTotal - resultOrderTotal;
-    const differenceAmount = order.paymentInfo.paidAmount;
-    const colorQuantityMap = {
-      gold: "goldenQuantity",
-      black: "blackQuantity",
-      silver: "silverQuantity",
-    };
+
+    
+
     const product = await Product.findOne({ _id: productId });
 
-    const cancelItem = order.items[itemIndex];
-    const colorQuantityField = colorQuantityMap[cancelItem.color];
-
-    if (!colorQuantityField) {
+    if (!product) {
       return res.status(400).json({
         success: false,
-        message: `Unsupported color in deleteOrderListProduct`,
+        message: "Product not found",
       });
     }
 
-    product[colorQuantityField] =
-      product[colorQuantityField] + cancelItem.quantity;
+     const variant = product.variants.find(v => v.color === cancelledItem.color);
+     if (!variant) {
+       return res.status(400).json({
+         success: false,
+         message: `Color variant ${cancelledItem.color} not found for product ${product.productName}`,
+       });
+     }
+
+    variant.quantity += cancelledItem.quantity;
+   
+
+
 
     await product.save();
 
     const wallet = await Wallet.findOne({userId});
 
-    console.log(order.paymentInfo.method)
     if(order.paymentInfo.method == 'wallet' || order.paymentInfo.method == 'paypal' ){
       wallet.userId = userId;
-      wallet.balance+= differenceAmount;
+      wallet.balance+= refundAmount;
       const transactions ={
         order_id:orderId,
         transaction_date:Date.now(),
         transaction_type:'credit',
         transaction_status:'completed',
-        amount:differenceAmount,
+        amount:refundAmount,
       }
       wallet.transactions.push(transactions);
       await wallet.save();

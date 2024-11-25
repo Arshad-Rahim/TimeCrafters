@@ -141,6 +141,8 @@
   <div class="container">
     <div class="form-container">
       <h2>Add New Address</h2>
+      <input type="hidden" id="redirect" value="<%= redirect %>" />
+
       <form
         action="/add-address"
         method="POST"
@@ -284,6 +286,7 @@
   function validateAndSubmit(event) {
     event.preventDefault();
 
+    const redirect = document.getElementById('redirect').value;
     const userId = document.getElementById('userId').value;
     const houseName = document.getElementsByName("house")[0].value;
     const street = document.getElementsByName("street")[0].value;
@@ -308,7 +311,8 @@
         zipCode,
         addressType,
         mobileNumber,
-        altMobileNumber
+        altMobileNumber,
+        redirect
       );
     } else {
       return false;
@@ -464,7 +468,8 @@
     zipCode,
     addressType,
     mobileNumber,
-    altMobileNumber
+    altMobileNumber,
+    redirect
   ) {
     $.ajax({
       url: `/addAddress`,
@@ -483,6 +488,7 @@
         addressType,
         mobileNumber,
         altMobileNumber,
+        redirect
       }),
 
       success: function (response) {

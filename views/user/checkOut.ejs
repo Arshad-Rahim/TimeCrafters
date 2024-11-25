@@ -160,13 +160,13 @@
                                     <%= address[i].altMobileNumber %>
                                 </address>
                             </label>
-                            <a href="/editAddress/<%= address[i]._id %>" class="px-3 py-1 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition duration-300">Edit</a>
+                            <a href="/editAddress/<%= address[i]._id %>/?redirect=checkOut" class="px-3 py-1 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition duration-300">Edit</a>
                         </div>
                         <% } %>
                     </div>
                 
                     <div class="mt-6">
-                        <a href="/addAddress" class="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition duration-300">Add New Address</a>
+                        <a href="/addAddress/?redirect=checkOut" class="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition duration-300">Add New Address</a>
                     </div>
                 </div>
             </div>
