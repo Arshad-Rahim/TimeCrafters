@@ -13,11 +13,45 @@ const getOrderManagment = async (req, res) => {
   }
 };
 
+
 const updateStatus = async (req, res) => {
   try {
-    let { orderId, productId } = req.params;
-
+    const { orderId, productId } = req.params;
     const { status } = req.body;
+
+    const order = await Order.findById(orderId);
+
+    if (!order) {
+      return res.status(404).json({
+        success: false,
+        message: "Order not found",
+      });
+    }
+
+    if (order.paymentInfo.status === 'Failed') {
+      return res.status(400).json({
+        success: false,
+        message: "Cannot update status for orders with failed payment",
+      });
+    }
+
+    const orderItem = order.items.find(
+      item => item.productId.toString() === productId
+    );
+
+    if (!orderItem) {
+      return res.status(404).json({
+        success: false,
+        message: "Product not found in this order",
+      });
+    }
+
+    if (orderItem.orderStatus === 'Delivered' && status !== 'Delivered') {
+      return res.status(400).json({
+        success: false,
+        message: "Cannot change status after delivery",
+      });
+    }
 
     const updateOrder = await Order.findOneAndUpdate(
       {
@@ -34,19 +68,20 @@ const updateStatus = async (req, res) => {
       }
     );
 
-    if (!updateOrder) {
-      return res.status(400).json({
-        success: false,
-        message: "Order or Product not found",
-      });
-    } else {
-      return res.status(200).json({
-        success: true,
-        message: "Order status changed Succesfully",
-      });
-    }
+    return res.status(200).json({
+      success: true,
+      message: "Order status changed successfully",
+      order: updateOrder,
+    });
+
   } catch (error) {
     console.log("Error in updateStatus", error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error",
+      error: error.message,
+    });
   }
 };
 
@@ -110,7 +145,6 @@ const initialOrderTotal = order.orderTotal;
 
     const wallet = await Wallet.findOne({userId});
 
-    console.log(order.paymentInfo.method)
     if(order.paymentInfo.method == 'wallet' || 'paypal' ){
       wallet.userId = userId;
       wallet.balance+= differenceAmount;
@@ -145,6 +179,13 @@ const handleReturn = async(req,res) =>{
 
     const order = await Order.findOne({ _id: orderId });
 
+    if (!order) {
+      return res.status(404).json({
+        success: false,
+        message: "Order not found",
+      });
+    }
+
     const itemIndex = order.items.findIndex(
       (item) => item.productId.toString() == productId
     );
@@ -156,28 +197,53 @@ const handleReturn = async(req,res) =>{
       });
     }
 
+    const returnedItem = order.items[itemIndex];
+
+
     order.items[itemIndex].returnRequest = action;
-    await order.save();
 
     if(action == 'Approved'){
+
+      let refundAmount = returnedItem.ProductTotal;
+
+      if (order.couponDiscount > 0) {
+        const orderSubtotal = order.items.reduce((sum, item) => sum + item.ProductTotal, 0);
+        
+        const itemDiscountProportion = returnedItem.ProductTotal / orderSubtotal;
+        const itemCouponDiscount = order.couponDiscount * itemDiscountProportion;
+        
+        refundAmount -= itemCouponDiscount;
+      }
+
+      refundAmount = Math.round(refundAmount * 100) / 100;
+
     const userId = order.userId;
     const wallet = await Wallet.findOne({userId});
-    const differenceAmount = order.paymentInfo.paidAmount;
 
-    wallet.balance+= differenceAmount;
+    if (!wallet) {
+      return res.status(404).json({
+        success: false,
+        message: "Wallet not found",
+      });
+    }
+
+     wallet.balance += refundAmount;
     const transactions ={
       order_id:orderId,
       transaction_date:Date.now(),
       transaction_type:'credit',
       transaction_status:'completed',
-      amount:differenceAmount,
+      amount:refundAmount,
     }
     wallet.transactions.push(transactions);
-    await wallet.save();
+
+    
+    await Promise.all([wallet.save(), order.save()]);
     return res.status(200).json({
       success:true,
       message:'Request accepted succesfully',
     })
+
   }else{
     return res.status(200).json({
       success:true,

@@ -23,19 +23,85 @@ const getOrderList = async (req, res) => {
   }
 };
 
+// const getOrderDetails = async (req, res) => {
+//   try {
+//     const userId = req.session.user;
+//     const { id } = req.params;
+
+//     const [cart, findOrder] = await Promise.all([
+//       Cart.findOne({ userId }),
+//       Order.findOne({ _id: id })
+//         .sort({ createdAt: -1 })
+//         .populate("items.productId"),
+//     ]);
+
+//     return res.render("orderDetails", { order: findOrder, cart,user:true });
+//   } catch (error) {
+//     console.log("Error in getOrderDetails", error);
+//   }
+// };
+
+
 const getOrderDetails = async (req, res) => {
   try {
     const userId = req.session.user;
     const { id } = req.params;
 
     const [cart, findOrder] = await Promise.all([
-      Cart.findOne({ userId }),
+      Cart.findOne({ userId }).populate({
+        // Added category population to match getOrderSuccess
+        path: "items.productId",
+        populate: {
+          path: "category",
+        },
+      }),
       Order.findOne({ _id: id })
         .sort({ createdAt: -1 })
         .populate("items.productId"),
     ]);
 
-    return res.render("orderDetails", { order: findOrder, cart,user:true });
+    // Filter cart items to remove blocked products and unlisted categories
+    if (cart && cart.items) {
+      cart.items = cart.items.filter(item => {
+        const product = item.productId;
+        return product && !product.isBlocked && product.category.isListed;
+      });
+    }
+
+    if (findOrder) {
+      // Calculate all order totals
+      const orderCalculations = {
+        // Original total price without any discounts
+        baseTotal: findOrder.items.reduce((total, item) => 
+          total + (item.regularPrice * item.quantity), 0),
+        
+        // Total after product discounts but before coupon
+        saleTotal: findOrder.items.reduce((total, item) => 
+          total + (item.salePrice * item.quantity), 0),
+        
+        // Only product discount savings (not including coupon)
+        productSavings: findOrder.items.reduce((total, item) => 
+          total + ((item.regularPrice - item.salePrice) * item.quantity), 0),
+      };
+
+      // Update order with calculated values
+      findOrder.orderTotal = orderCalculations.baseTotal;
+      findOrder.productSavings = orderCalculations.productSavings;
+      findOrder.finalTotal = orderCalculations.saleTotal - (findOrder.couponDiscount || 0);
+    }
+
+    return res.render("orderDetails", { 
+      order: findOrder, 
+      cart,
+      user: true,
+      // Add orderTotals object to match getOrderSuccess
+      orderTotals: {
+        subTotal: findOrder?.orderTotal || 0,
+        productSavings: findOrder?.productSavings || 0,  // Only product discounts
+        couponDiscount: findOrder?.couponDiscount || 0,  // Separate coupon discount
+        finalAmount: findOrder?.finalTotal || 0
+      }
+    });
   } catch (error) {
     console.log("Error in getOrderDetails", error);
   }

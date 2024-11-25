@@ -1,6 +1,9 @@
 <%- include("../../views/partials/admin/header") %>
 
   <head>
+    <script src="https://cdn.jsdelivr.net/npm/lodash@4.17.21/lodash.min.js"></script>
+			<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+			<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Sales Report</title>
@@ -158,13 +161,12 @@
           </button>
         </div>
         
-        <div class="date-range" style="display: '<%= activeFilter === 'custom' ? 'block' : 'none' %>'">
-          <label for="start-date">Start Date:</label>
-          <input type="date" id="start-date" name="start-date" value="<%= startDate %>">
-          <label for="end-date">End Date:</label>
-          <input type="date" id="end-date" name="end-date" value="<%= endDate %>">
-          <button id="apply-date-range">Apply</button>
-        </div>
+ <div class="date-range" style="display: '<%= activeFilter === 'custom' ? 'block' : 'none' %>'">
+        <label for="start-date">Start Date:</label>
+        <input type="date" id="start-date" name="start-date" value="<%= startDate %>">
+        <label for="end-date">End Date:</label>
+        <input type="date" id="end-date" name="end-date" value="<%= endDate %>">
+        <button id="apply-date-range">Apply</button>
       </div>
 
       <div class="card">
@@ -291,6 +293,39 @@ document.getElementById("apply-date-range").addEventListener("click", function()
     alert("Please select both start and end dates");
     return;
   }
+
+
+   if (!validateStartDate(startDate)) {
+    Swal.fire({
+                    toast:true,
+                    position:'top',
+                    icon:'error',
+                    title:"Error",
+                    text:"Start date cannot be in the future",
+                    showConfirmButton:false,
+                    timer:1500,
+                    customClass:'center-toast',
+
+                })
+    
+    return;
+  }
+  
+  if (new Date(endDate) < new Date(startDate)) {
+
+    Swal.fire({
+                    toast:true,
+                    position:'top',
+                    icon:'error',
+                    title:"Error",
+                    text:"End date cannot be before start date",
+                    showConfirmButton:false,
+                    timer:1500,
+                    customClass:'center-toast',
+
+                })
+    return;
+  }
   
   window.location.href = `/admin/salesReport?filter=custom&startDate=${startDate}&endDate=${endDate}`;
 });
@@ -356,6 +391,19 @@ document.getElementById("excel").addEventListener("click", function () {
   
   window.location.href = downloadUrl;
 });
+
+
+
+function validateStartDate(startDateStr) {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  
+  const startDate = new Date(startDateStr);
+  startDate.setHours(0, 0, 0, 0);
+  
+  return startDate <= today;
+}
+
 
 </script>
   <%- include("../../views/partials/admin/footer") %>

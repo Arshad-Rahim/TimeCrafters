@@ -265,16 +265,20 @@
       },
 
       error: function (xhr, status, error) {
+        const errorMessage = xhr.responseJSON ? 
+                               (xhr.responseJSON.message || "An error occurred") : 
+                               "An error occurred";
         Swal.fire({
           toast: true,
           position: "center",
           icon: "error",
           title: "Error",
-          text: xhr.responseJSON ? xhr.responseJSON.error : "An error occurred",
+          text: errorMessage,
           showConfirmButton: false,
           timer: 1500,
           customClass: "center-toast",
         });
+        $('#refresh').load('/admin/orderManagment #refresh');
       },
     });
 

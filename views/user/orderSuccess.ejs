@@ -119,12 +119,16 @@
                 <div class="p-6">
                     <h2 class="text-2xl font-semibold mb-4">Order Summary</h2>
                     <div class="flex justify-between mb-2">
-                        <span>Subtotal:</span>
-                        <span><span class="indian-rupee"></span><%= order.orderTotal %></span>
+                        <span>Base price:</span>
+                        <span><span class="indian-rupee"></span><%= orderTotals.subTotal %></span>
+                    </div>
+                    <div class="flex justify-between mb-2">
+                        <span>Savings:</span>
+                        <span class="font-medium text-green-600">-<span class="indian-rupee"></span><%= orderTotals.productSavings %></span>
                     </div>
                     <div class="flex justify-between mb-2">
                         <span>Coupon Discount:</span>
-                        <span>-<span class="indian-rupee"></span><%= order.couponDiscount %></span>
+                        <span class="font-medium text-green-600">-<span class="indian-rupee"></span><%= orderTotals.couponDiscount %></span>
                     </div>
                     <div class="flex justify-between mb-2">
                         <span>Delivery Charge:</span>
@@ -132,7 +136,7 @@
                     </div>
                     <div class="flex justify-between font-semibold text-lg mt-4 pt-4 border-t border-gray-700">
                         <span>Grand Total:</span>
-                        <span><span class="indian-rupee"></span><%= order.paymentInfo.paidAmount%></span>
+                        <span><span class="indian-rupee"></span><%= orderTotals.finalAmount %></span>
                     </div>
                 </div>
             </div>

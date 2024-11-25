@@ -8,11 +8,18 @@
             background-color: #ffffff;
             color: #333333;
         }
-    </style></head>
+        /* Add Indian Rupee symbol styling from order success */
+        .indian-rupee::before {
+            content: "\20B9";
+            font-family: Arial, sans-serif;
+            margin-right: 2px;
+            font-weight: 300;
+            color: #666;
+        }
+    </style>
+</head>
   
 <body class="min-h-screen flex flex-col">
-   
-
     <main class="flex-grow container mx-auto px-4 py-8">
         <h1 class="text-4xl font-bold text-center mb-8 text-gray-800">Order Details</h1>
 
@@ -33,8 +40,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <% for(let i=0;i<order.items.length;i++) {%>
-
+                            <% for(let i=0; i<order.items.length; i++) { %>
                             <tr>
                                 <td class="px-4 py-2">
                                     <img src="/uploads/re-image/<%= order.items[i].productImage%>" alt="Img" class="w-16 h-16 object-cover">
@@ -42,12 +48,20 @@
                                 <td class="px-4 py-2"><%= order.items[i].ProductName %></td>
                                 <td class="px-4 py-2"><%= order.items[i].color%></td>
                                 <td class="px-4 py-2"><%= order.items[i].quantity %></td>
-                                <td class="px-4 py-2"><%= order.items[i].regularPrice * order.items[i].quantity %></td>
-                                <td class="px-4 py-2"><%= (order.items[i].regularPrice - order.items[i].salePrice)* order.items[i].quantity %></td>
-                                <td class="px-4 py-2"><%= order.items[i].salePrice * order.items[i].quantity %></td>
+                                <td class="px-4 py-2"><span class="indian-rupee"></span><%= order.items[i].regularPrice * order.items[i].quantity %></td>
+                                <td class="px-4 py-2"><span class="indian-rupee"></span><%= (order.items[i].regularPrice - order.items[i].salePrice)* order.items[i].quantity %></td>
+                                <td class="px-4 py-2"><span class="indian-rupee"></span><%= order.items[i].salePrice * order.items[i].quantity %></td>
                             </tr>
                             <% } %>
-
+                            
+                            <!-- Add payment status display if needed -->
+                            <% if(order.paymentInfo) { %>
+                                <% if(order.paymentInfo.status == "Failed") { %>
+                                    <p style="margin:10px">payment status: <span class="px-2 py-1 bg-red-100 text-red-800 rounded-full text-sm"><%= order.paymentInfo.status %></span></p>
+                                <% } else if(order.paymentInfo.status == "Paid") { %>
+                                    <p style="margin:10px">payment status: <span class="px-2 py-1 bg-green-100 text-green-800 rounded-full text-sm"><%= order.paymentInfo.status %></span></p>
+                                <% } %>
+                            <% } %>
                         </tbody>
                     </table>
                 </div>
@@ -72,16 +86,24 @@
                 <div class="p-6">
                     <h2 class="text-2xl font-semibold mb-4">Order Summary</h2>
                     <div class="flex justify-between mb-2">
-                        <span>Subtotal:</span>
-                        <span><%= order.orderTotal %></span>
+                        <span>Base price:</span>
+                        <span><span class="indian-rupee"></span><%= orderTotals.subTotal %></span>
+                    </div>
+                    <div class="flex justify-between mb-2">
+                        <span>Savings:</span>
+                        <span class="font-medium text-green-600">-<span class="indian-rupee"></span><%= orderTotals.productSavings %></span>
+                    </div>
+                    <div class="flex justify-between mb-2">
+                        <span>Coupon Discount:</span>
+                        <span class="font-medium text-green-600">-<span class="indian-rupee"></span><%= orderTotals.couponDiscount %></span>
                     </div>
                     <div class="flex justify-between mb-2">
                         <span>Delivery Charge:</span>
-                        <span>₹0</span>
+                        <span><span class="indian-rupee"></span>0</span>
                     </div>
                     <div class="flex justify-between font-semibold text-lg mt-4 pt-4 border-t border-gray-700">
                         <span>Grand Total:</span>
-                        <span><%= order.orderTotal + 0 %></span>
+                        <span><span class="indian-rupee"></span><%= orderTotals.finalAmount %></span>
                     </div>
                 </div>
             </div>
@@ -99,6 +121,5 @@
             <p>&copy; 2024 Your Store Name. All rights reserved.</p>
         </div>
     </footer>
- 
 </body>
 <%- include('../../views/partials/user/footer') %>

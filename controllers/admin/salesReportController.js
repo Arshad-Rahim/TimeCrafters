@@ -56,7 +56,7 @@ const getSalesReport = async (req, res) => {
           }
         : {};
 
-    const order = await Order.find(query).populate("userId");
+    const order = await Order.find(query).populate("userId").sort({createdAt:-1});
 
     const aggregatePipeline = [
       ...(queryStartDate && queryEndDate

@@ -5,6 +5,42 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Login Page</title>
     <style>
+
+.google-btn {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 20px 0;
+            padding: 12px;
+            background-color: white;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Google button shadow */
+        }
+        .google-btn img {
+            width: 20px;
+            margin-right: 8px;
+        }
+
+.or-divider {
+            display: flex;
+            align-items: center;
+            text-align: center;
+            margin: 20px 0;
+        }
+        .or-divider::before, .or-divider::after {
+            content: '';
+            flex: 1;
+            border-bottom: 1px solid #ddd;
+        }
+        .or-divider:not(:empty)::before {
+            margin-right: .5em;
+        }
+        .or-divider:not(:empty)::after {
+            margin-left: .5em;
+        }
+
       .error-message {
     color: #ff0000; /* Red color to indicate error */
     background-color: #ffe6e6; /* Light red background for emphasis */
@@ -213,6 +249,13 @@
         </div>
         <button type="submit" class="login-btn">Log in</button>
       </form>
+
+      <div class="or-divider">or</div>
+
+      <a href="/auth/google" class="google-btn" onclick="loginWithGoogle()">
+        <img src="frontend/images/googlesignup.png" alt="Google logo">
+        Sign in with Google
+    </a>
 
       <div class="signup-link">
         Don't have an account? <a href="/signup">Sign Up</a>

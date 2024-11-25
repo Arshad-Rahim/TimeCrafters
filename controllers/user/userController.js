@@ -111,7 +111,11 @@ const login = async (req, res) => {
 
 const loadSignup = async (req, res) => {
   try {
-    return res.render("signup");
+    if(!req.session.user){
+      return res.render("signup");
+    }else{
+      return res.redirect('/');
+    }
   } catch (error) {
     console.log("Signup page is not found");
     res.status(500).send("Server error");

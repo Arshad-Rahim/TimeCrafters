@@ -282,7 +282,7 @@ const variants = product.variants.find(variant => variant.color === foundItem.co
     //       break;
     //     case "black":
     //       colorQuantityField = "blackQuantity";
-    //       break;
+    //       break; 
     //     case "silver":
     //       colorQuantityField = "silverQuantity";
     //       break;
@@ -470,6 +470,47 @@ const postOrderSuccess = async (req, res) => {
       message: "All selected products are blocked.",
     });
   }
+
+
+  for (const cartItem of cart.items) {
+    const product = await Product.findById(cartItem.productId);
+    
+    if (!product) {
+      return res.status(400).json({
+        success: false,
+        message: "Product not found",
+      });
+    }
+
+    // Find the variant matching the cart item's color
+    const variant = product.variants.find(v => v.color === cartItem.color);
+    
+    if (!variant) {
+      return res.status(400).json({
+        success: false,
+        message: `Color variant ${cartItem.color} not found for product ${product.productName}`,
+      });
+    }
+
+    // Check if enough quantity is available
+    if (variant.quantity < cartItem.quantity) {
+      return res.status(400).json({
+        success: false,
+        message: `Insufficient stock for ${product.productName} in ${cartItem.color} color`,
+      });
+    }
+
+    // Update the quantity for the specific color variant
+    variant.quantity -= cartItem.quantity;
+
+    // If variant quantity becomes 0, you might want to update the product status
+    const totalQuantityAcrossVariants = product.variants.reduce((sum, v) => sum + v.quantity, 0);
+    if (totalQuantityAcrossVariants === 0) {
+      product.status = 'out of stock';
+    }
+
+    await product.save();
+  }
     const coupon = await Coupon.findOne({ code: couponCode });
 
  
@@ -611,7 +652,6 @@ const postOrderSuccess = async (req, res) => {
     delete req.session.couponDiscount;
     if (paymentMethod == "paypal") {
       const currentTotal = finalTotal;
-console.log('finalTotal:',currentTotal);
       const convertAmount = await convertCurrency(currentTotal);
       req.session.convertAmount = convertAmount;
       return res.json({
@@ -619,40 +659,6 @@ console.log('finalTotal:',currentTotal);
         redirectURL: "/pay",
         convertAmount: convertAmount,
       });
-    }
-    for (const cartItem of cart.items) {
-      const product = await Product.findOne({ _id: cartItem.productId });
-
-      if (!product) {
-        console.log("Product not found in PostOrderSuccess");
-      }
-
-      let colorQuantityField;
-
-      switch (cartItem.color) {
-        case "gold":
-          colorQuantityField = "goldenQuantity";
-          break;
-        case "black":
-          colorQuantityField = "blackQuantity";
-          break;
-        case "silver":
-          colorQuantityField = "silverQuantity";
-          break;
-        default:
-          console.log("unsupported color");
-      }
-
-      if (product[colorQuantityField] < cartItem.quantity) {
-        return res.status(400).json({
-          success: false,
-          message: "Selected Product is Out of Stock",
-        });
-      }
-      product[colorQuantityField] =
-      product[colorQuantityField] - cartItem.quantity;
-    await product.save();
-   
     }
    
 
@@ -671,7 +677,7 @@ const getOrderSuccess = async (req, res) => {
   try {
     const userId = req.session.user;
 
-    const [cart, findOrder] = await Promise.all([
+    const [cart, order] = await Promise.all([
       Cart.findOne({ userId }).populate({
         path: "items.productId",
         populate: {
@@ -689,9 +695,36 @@ const getOrderSuccess = async (req, res) => {
       });
   }
 
+  if (order) {
+    // Calculate base totals from order items
+    const orderCalculations = {
+      // Original total price without any discounts
+      baseTotal: order.items.reduce((total, item) => 
+        total + (item.regularPrice * item.quantity), 0),
+      
+      // Total after product discounts but before coupon
+      saleTotal: order.items.reduce((total, item) => 
+        total + (item.salePrice * item.quantity), 0),
+      
+      // Only product discount savings (not including coupon)
+      productSavings: order.items.reduce((total, item) => 
+        total + ((item.regularPrice - item.salePrice) * item.quantity), 0),
+    };
+
+    // Update order with calculated values
+    order.orderTotal = orderCalculations.baseTotal;
+    order.productSavings = orderCalculations.productSavings;
+    order.finalTotal = orderCalculations.saleTotal - (order.couponDiscount || 0);
+  }
 
 
-    return res.render("orderSuccess", { order: findOrder, cart,user:true });
+    return res.render("orderSuccess", { order: order, cart,user:true , orderTotals: {
+      subTotal: order?.orderTotal || 0,
+      productSavings: order?.productSavings || 0,  // Only product discounts
+      couponDiscount: order?.couponDiscount || 0,  // Separate coupon discount
+      finalAmount: order?.finalTotal || 0
+    
+    }});
   } catch (error) {
     console.log("Error in getOrderSuccess", error);
   }
