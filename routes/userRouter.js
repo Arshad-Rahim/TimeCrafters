@@ -59,7 +59,7 @@ router.delete('/deleteAddress/:id',userAuth,addressController.deleteAddress);
 
 router.get('/orderList',userAuth,orderController.getOrderList);
 router.get('/orderDetails/:id',userAuth,orderController.getOrderDetails);
-router.delete('/deleteOrderListProduct/:orderId/:productId',userAuth, orderController.deleteOrderListProduct);
+router.delete('/deleteOrderListProduct/:orderId/:productId/:color',userAuth, orderController.deleteOrderListProduct);
 
 
 // cart

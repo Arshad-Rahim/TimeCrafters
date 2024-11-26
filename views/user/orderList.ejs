@@ -100,7 +100,7 @@
                                                 <% } %>
                                     <% if(item.orderStatus !== 'Canceled' && item.orderStatus !== 'Delivered'  && item.productId){ %>
 
-                                    <button onclick="cancel(event,'<%= order._id%>','<%=item.productId._id%>')" class="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600 transition duration-300">Cancel</button>
+                                    <button onclick="cancel(event,'<%= order._id%>','<%=item.productId._id%>','<%=item.color%>')" class="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600 transition duration-300">Cancel</button>
                                     <button onclick="Invoice(event,'<%= order._id%>','<%=item.productId._id%>')" id="Invoice" class="px-3 py-1 bg-gray-200 text-gray-800 rounded hover:bg-gray-300 transition duration-300">Invoice</button>
                               <% } %>
 
@@ -191,7 +191,7 @@
 
 <script>
 
-    function cancel(event,orderId,productId){
+    function cancel(event,orderId,productId,color){
 
         event.preventDefault();
 
@@ -206,17 +206,17 @@
 
         }).then((result) =>{
             if(result.isConfirmed){{
-                deleteProductAjax(orderId,productId);
+                deleteProductAjax(orderId,productId,color);
             }}
         })
 
     }
 
 
-    function deleteProductAjax(orderId,productId){
+    function deleteProductAjax(orderId,productId,color){
 
         $.ajax({
-            url:`/deleteOrderListProduct/${orderId}/${productId}`,
+            url:`/deleteOrderListProduct/${orderId}/${productId}/${color}`,
             type:'DELETE',
             dataType:'json',
             contentType:'application/json',

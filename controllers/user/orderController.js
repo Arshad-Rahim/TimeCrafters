@@ -93,13 +93,17 @@ const getOrderDetails = async (req, res) => {
 
 const deleteOrderListProduct = async (req, res) => {
   try {
-    const { orderId, productId } = req.params;
+    const { orderId, productId,color } = req.params;
+
     const userId = req.session.user;
 
     const order = await Order.findOne({ _id: orderId });
 
     const itemIndex = order.items.findIndex(
-      (item) => item.productId.toString() == productId
+      (item) => 
+        item.productId.toString() === productId && 
+        item.color === color &&
+        item.orderStatus !== "Canceled"
     );
 
     if (itemIndex == -1) {
