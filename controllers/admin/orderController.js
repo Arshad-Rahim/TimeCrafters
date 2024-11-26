@@ -16,7 +16,7 @@ const getOrderManagment = async (req, res) => {
 
 const updateStatus = async (req, res) => {
   try {
-    const { orderId, productId } = req.params;
+    const { orderId, productId,color } = req.params;
     const { status } = req.body;
 
     const order = await Order.findById(orderId);
@@ -35,17 +35,25 @@ const updateStatus = async (req, res) => {
       });
     }
 
-    const orderItem = order.items.find(
-      item => item.productId.toString() === productId
+    const itemIndex = order.items.findIndex(
+      (item) => 
+        item.productId.toString() === productId && 
+        item.color === color &&
+        item.orderStatus !== "Canceled"
     );
 
-    if (!orderItem) {
+ 
+    
+
+    if (itemIndex === -1) {
       return res.status(404).json({
         success: false,
         message: "Product not found in this order",
       });
     }
 
+    const orderItem = order.items[itemIndex];
+    
     if (orderItem.orderStatus === 'Delivered' && status !== 'Delivered') {
       return res.status(400).json({
         success: false,
@@ -53,25 +61,13 @@ const updateStatus = async (req, res) => {
       });
     }
 
-    const updateOrder = await Order.findOneAndUpdate(
-      {
-        _id: orderId,
-        "items.productId": productId,
-      },
-      {
-        $set: {
-          "items.$.orderStatus": status,
-        },
-      },
-      {
-        new: true,
-      }
-    );
+    order.items[itemIndex].orderStatus = status;
+    await order.save();
 
     return res.status(200).json({
       success: true,
       message: "Order status changed successfully",
-      order: updateOrder,
+      order: order,
     });
 
   } catch (error) {
@@ -97,13 +93,17 @@ const getPopUpOrderDetails = async (req, res) => {
 
 const deleteOrderListProduct = async (req, res) => {
   try {
-    const { orderId, productId } = req.params;
+    const { orderId, productId,color } = req.params;
+    console.log(color)
 
     const order = await Order.findOne({ _id: orderId });
       const userId = order.userId;
-    const itemIndex = order.items.findIndex(
-      (item) => item.productId.toString() == productId
-    );
+      const itemIndex = order.items.findIndex(
+        (item) => 
+          item.productId.toString() === productId && 
+          item.color === color &&
+          item.orderStatus !== "Canceled"
+      );
 
     if (itemIndex == -1) {
       return res.status(400).json({

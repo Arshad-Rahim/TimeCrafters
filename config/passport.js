@@ -11,8 +11,7 @@ passport.use(
     {
       clientID: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-      callbackURL: "/auth/google/callback",
-      // callbackURL: "/auth/google/callback",
+      callbackURL: "https://timecrafters.arshadrahim.tech/auth/google/callback",
     },
 
     async (accessToken, refreshToken, profile, done) => {
@@ -25,11 +24,9 @@ passport.use(
             const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
             let code = "";
 
-            // Generate first part using timestamp (first 4 chars)
             const timestamp = Date.now().toString(36).slice(-4).toUpperCase();
             code += timestamp;
 
-            // Generate remaining random characters
             const remainingLength = length - timestamp.length;
             for (let i = 0; i < remainingLength; i++) {
               const randomIndex = crypto.randomInt(0, characters.length);

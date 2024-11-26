@@ -90,7 +90,7 @@
 
                                 <div class="mt-2 flex items-center">
                                     <select class="mr-2 border rounded px-2 py-1"
-                                    onchange="updateStatus(this.value,'<%= order._id%>','<%= item.productId%>')"
+                                    onchange="updateStatus(this.value,'<%= order._id%>','<%= item.productId%>','<%=item.color%>')"
                                     >
                         <option value="Pending" <%= item.orderStatus === 'Pending' ? 'selected' : '' %>>Pending</option>
                         <option value="Shipped" <%= item.orderStatus === 'Shipped' ? 'selected' : '' %>>Shipped</option>
@@ -98,7 +98,7 @@
                         <option value="Canceled" <%= item.orderStatus === 'Canceled' ? 'selected' : '' %>>Canceled</option>
                                     </select>
                                 <% if(item.returnStatus == false && item.orderStatus != 'Delivered' ){ %>
-                                    <button onclick="cancel(event,'<%= order._id%>','<%=item.productId._id%>')"  class="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 transition duration-300">Cancel</button>
+                                    <button onclick="cancel(event,'<%= order._id%>','<%=item.productId._id%>','<%=item.color%>')"  class="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 transition duration-300">Cancel</button>
                                 <% } %>
                                 </div>
                                    <% if(item.returnStatus === true && item.returnRequest == "Pending"){ %>
@@ -205,7 +205,7 @@
                             </div>
                         </div>
                         <% if(item.orderStatus != 'Canceled' && item.orderStatus != "Delivered" ) { %>
-                        <button onclick="cancel(event,'<%= order._id%>','<%=item.productId._id%>')" class="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition duration-300">Cancel</button>
+                        <button onclick="cancel(event,'<%= order._id%>','<%=item.productId._id%>','<%=item.color%>')" class="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition duration-300">Cancel</button>
                         <% } %>
                     </div>
                 </div>
@@ -238,10 +238,10 @@
 
 
 <script>
-    function updateStatus(status,orderId,productId){
+    function updateStatus(status,orderId,productId,color){
 
         $.ajax({
-            url:`/admin/updateStatus/${orderId}/${productId}`,
+            url:`/admin/updateStatus/${orderId}/${productId}/${color}`,
             type:"PUT",
             dataType:'json',
             contentType:"application/json",
@@ -322,7 +322,7 @@
 <script>
 
 
-function cancel(event,orderId,productId){
+function cancel(event,orderId,productId,color){
 
 event.preventDefault();
 
@@ -338,7 +338,7 @@ confirmButtonText:'Yes, remove it',
 }).then((result) =>{
     
     if(result.isConfirmed){{
-        deleteProductAjax(orderId,productId);
+        deleteProductAjax(orderId,productId,color);
     }}
 })
 
@@ -346,11 +346,11 @@ confirmButtonText:'Yes, remove it',
 
 
 
-function deleteProductAjax(orderId,productId){
+function deleteProductAjax(orderId,productId,color){
 
 
 $.ajax({
-    url:`/admin/deleteOrderListProduct/${orderId}/${productId}`,
+    url:`/admin/deleteOrderListProduct/${orderId}/${productId}/${color}`,
     type:'DELETE',
     dataType:'json',
     contentType:'application/json',

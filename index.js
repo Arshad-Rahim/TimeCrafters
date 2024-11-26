@@ -104,8 +104,8 @@ app.get('/pay',  (req, res) => {
         "payment_method": "paypal"
     },
     "redirect_urls": {
-        "return_url": "http://localhost:3000/success",
-        "cancel_url": "http://localhost:3000/cancel"
+        "return_url": "https://timecrafters.arshadrahim.tech/success",
+        "cancel_url": "https://timecrafters.arshadrahim.tech/cancel"
     },
     "transactions": [{
         "item_list": {
@@ -143,58 +143,11 @@ app.get('/pay',  (req, res) => {
   });
     });
 
-// app.get('/success', async(req, res) => {
-//   const payerId = req.query.PayerID;
-//   const paymentId = req.query.paymentId;
-
-//   const execute_payment_json = {
-//     "payer_id": payerId,
-//     "transactions": [{
-//         "amount": {
-//             "currency": "USD",
-//             "total": formattedAmount.toString(),
-//         }
-//     }]
-//   };
-
-//    paypal.payment.execute (paymentId, execute_payment_json, function (error, payment) {
-//     if (error) {
-//         console.log(error.response);
-//         throw error;
-//     } else {
-//         // console.log(JSON.stringify(payment));
-//         (async ()=>{
-//           const order = await Order.findOne({ userId: req.session.user }).sort({ createdAt: -1 });
-//           order.paymentInfo.status = "Paid"
-//           await order.save();
-//           // console.log(order)
-//         })();
-//         delete req.session.convertAmount;
-//         delete req.session.formattedAmount;
-// console.log('order succes index varunnunto')
-//         res.redirect('/orderSuccess');
-//     }
-// });
-// });
-//   paypal.payment.create(create_payment_json, function (error, payment) {
-//       if (error) {
-//           throw error;
-//       } else {
-//           for(let i = 0;i < payment.links.length;i++){
-//             if(payment.links[i].rel === 'approval_url'){
-//               res.redirect(payment.links[i].href);
-//             }
-//           }
-//       }
-//     });
-    
-// app.get('/cancel', (req, res) => res.send('Cancelled'));
 app.get('/success', async (req, res) => {
   try {
     const payerId = req.query.PayerID;
     const paymentId = req.query.paymentId;
     
-    // Verify we have the correct payment ID
     if (paymentId !== req.session.paypalPaymentId) {
       throw new Error('Payment ID mismatch');
     }
