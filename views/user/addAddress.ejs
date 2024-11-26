@@ -407,7 +407,7 @@
     } else if (!/^\d{6}(-\d{4})?$/.test(zipCode.trim())) {
       displayErrorMessage(
         "zipCode-error",
-        "Zip code should be a 5-digit number, optionally followed by a hyphen and 4 additional digits (e.g., 12345 or 12345-6789)."
+        "Zip code should be a 6-digit number,(e.g., 123456 )."
       );
       isValid = false;
     }
