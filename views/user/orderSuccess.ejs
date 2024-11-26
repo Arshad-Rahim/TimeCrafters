@@ -172,17 +172,9 @@
                    }),
             success: function (response) {
         if (response.success) {
-          Swal.fire({
-            toast: true,
-            position: "center",
-            icon: "success",
-            title: "Success",
-            text: response.message,
-            timer: 1500,
-            customClass: "center-toast",
-          }).then(() =>{
-                    window.location.href=response.redirectURL;
-                });
+            if(response.redirectURL){
+                window.location.href=response.redirectURL;
+            }
         }
       },
 

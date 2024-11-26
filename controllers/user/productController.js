@@ -179,7 +179,7 @@ const getSearchProduct = async (req, res) => {
           brand: brand,
           search: search,
           currentFilter: filter,
-          user:true,
+          user:false,
           wishlist:false,
         });
       } else {
@@ -344,7 +344,7 @@ const getFilteredCategory = async (req, res) => {
         totalProducts: totalProducts,
         search: search,
         currentFilter: filter,
-        user:true,
+        user:false,
         wishlist:false,
       });
     }

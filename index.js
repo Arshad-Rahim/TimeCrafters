@@ -9,12 +9,12 @@
 
       const paypal = require('paypal-rest-sdk');
 
-      const db = require("../first project/config/db");
+      const db = require("./config/db");
       db();
       const userRouter = require("./routes/userRouter");
       const adminRouter = require('./routes/adminRouter');
 
-      const Order = require('/home/arshad-rahim/first project/models/orderScheama');
+      const Order = require('./models/orderScheama');
       paypal.configure({
         'mode': 'sandbox', //sandbox or live
         'client_id': process.env.PAYPAL_CLIENT_ID,
