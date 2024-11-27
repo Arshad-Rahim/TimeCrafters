@@ -33,13 +33,19 @@ const getProductList = async (req, res) => {
     }
 
     const categories = await Category.find({ isListed: true });
+    const brands = await Brand.find({isBlocked:false});
 
-    const [totalProducts, productData, brand,wallet] = await Promise.all([
+
+    const [totalProducts, productData] = await Promise.all([
+     
       Product.find({
         $or: [
           { productName: { $regex: new RegExp(".*" + search + ".*", "i") } },
           { brand: { $regex: new RegExp(".*" + search + ".*", "i") } },
         ],
+        isBlocked: false,
+        category: { $in: categories.map((category) => category._id) },
+        brand: { $in: brands.map((brand) => brand.brandName) }
       }).countDocuments(),
 
       Product.find({
@@ -49,18 +55,19 @@ const getProductList = async (req, res) => {
         ],
         isBlocked: false,
         category: { $in: categories.map((category) => category._id) },
+        brand: { $in : brands.map((brand) => brand.brandName) }
+
       })
         .populate("category")
         .sort(getSortObject(filter))
         .skip(skip)
         .limit(limit),
 
-      Brand.find({ isBlocked: false }),
     ]);
 
     const totalPages = Math.ceil(totalProducts / limit);
     const user = req.session.user;
-    if (categories && brand) {
+    if (categories && brands) {
       if (user) {
         const userData = await User.findOne({ _id: user });
         const wishlist = await Wishlist.findOne({userId:user});

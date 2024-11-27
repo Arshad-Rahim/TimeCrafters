@@ -43,11 +43,13 @@ const loadHome = async (req, res) => {
   try {
     const user = req.session.user;
 const categories = await  Category.find({ isListed: true });
+const brands = await Brand.find({isBlocked:false});
     const [userData,productData] = await Promise.all([
       User.findOne({ _id: user }),
       Product.find({
         isBlocked: false,
         category: { $in: categories.map((category) => category._id) },
+        brand:{$in:brands.map((brand) => brand.brandName) }
       })
         .sort({ createdOn: -1 })
         .limit(8),
