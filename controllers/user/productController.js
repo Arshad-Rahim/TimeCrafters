@@ -135,13 +135,17 @@ const getSearchProduct = async (req, res) => {
     }
 
     const category = await Category.find({ isListed: true });
+    const brand = await  Brand.find({ isBlocked: false });
 
-    const [productData, count, brand] = await Promise.all([
+    const [productData, count] = await Promise.all([
       Product.find({
         $or: [
           { productName: { $regex: new RegExp(".*" + search + ".*", "i") } },
           { brand: { $regex: new RegExp(".*" + search + ".*", "i") } },
         ],
+        isBlocked: false,
+        category: { $in: category.map((category) => category._id) },
+        brand: { $in : brand.map((brand) => brand.brandName) }
       })
         .sort(getSortObject(filter))
         .limit(limit * 1)
@@ -153,8 +157,11 @@ const getSearchProduct = async (req, res) => {
           { productName: { $regex: new RegExp(".*" + search + ".*", "i") } },
           { brand: { $regex: new RegExp(".*" + search + ".*", "i") } },
         ],
+        isBlocked: false,
+        category: { $in: category.map((category) => category._id) },
+        brand: { $in : brand.map((brand) => brand.brandName) }
       }).countDocuments(),
-      Brand.find({ isBlocked: false }),
+     
     ]);
     if(req.session.user){
       const userId = req.session.user;
