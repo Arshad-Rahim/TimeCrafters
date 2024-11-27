@@ -299,12 +299,17 @@ const getFilteredCategory = async (req, res) => {
       }
     }
 
+    const categories = await Category.find({ isListed: true });
+    const brand = await  Brand.find({ isBlocked: false });
+
     let query = {
-      isBlocked: false,
       $or: [
         { productName: { $regex: new RegExp(".*" + search + ".*", "i") } },
         { brand: { $regex: new RegExp(".*" + search + ".*", "i") } },
       ],
+      isBlocked: false,
+      category: { $in: categories.map((category) => category._id) },
+      brand: { $in : brand.map((brand) => brand.brandName) }
     };
 
     if (categoryId === "All") {
@@ -317,16 +322,15 @@ const getFilteredCategory = async (req, res) => {
     }
    
 
-    const categories = await Category.find({ isListed: true });
 
-    const [totalProducts, product, brand] = await Promise.all([
+    const [totalProducts, product] = await Promise.all([
       Product.countDocuments(query),
       Product.find(query)
         .populate("category")
         .sort(getSortObject(filter))
         .skip(skip)
         .limit(limit),
-      Brand.find({ isBlocked: false }),
+     
     ]);
 
     const totalPages = Math.ceil(totalProducts / limit);
