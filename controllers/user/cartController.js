@@ -7,6 +7,7 @@ const Coupon = require("../../models/couponSchema");
 const User = require("../../models/userSchema");
 const convertCurrency = require("../../service/currencyConversion");
 const Wallet = require("../../models/walletShema");
+const Brand = require('../../models/brandSchema');
 
 
 
@@ -78,10 +79,30 @@ const getCart = async (req, res) => {
     });
 
     if (cart) {
-      cart.items = cart.items.filter(item => {
-        const product = item.productId; 
-        return product && !product.isBlocked && product.category.isListed; 
-      });
+      const validItems = await Promise.all(
+        cart.items.map(async (item) => {
+          const product = item.productId;
+
+          if (!product) return null; 
+          
+          const brand = await Brand.findOne({ brandName: product.brand });
+          
+          const isValidItem = (
+            product && 
+            !product.isBlocked && 
+            product.category.isListed && 
+            (!brand || !brand.isBlocked) 
+          );
+
+          if (!isValidItem) {
+            console.log('Removing item due to blocking:', product.productName);
+            return null; 
+          }
+          return item;
+        })
+      );
+
+      cart.items = validItems.filter(item => item !== null);
 
     
       
@@ -353,13 +374,32 @@ const getCheckOut = async (req, res) => {
       Wallet.findOne({userId})
     ]);
     if (cart && cart.items) {
-      cart.items = cart.items.filter(item => {
-        const product = item.productId; 
-        return product && !product.isBlocked && product.category.isListed; 
-      });
+      const validItems = await Promise.all(
+        cart.items.map(async (item) => {
+          const product = item.productId;
+
+          if (!product) return null; 
+          
+          const brand = await Brand.findOne({ brandName: product.brand });
+          
+          const isValidItem = (
+            product && 
+            !product.isBlocked && 
+            product.category.isListed && 
+            (!brand || !brand.isBlocked) 
+          );
+
+          if (!isValidItem) {
+            return null; 
+          }
+          return item;
+        })
+      );
+
+      cart.items = validItems.filter(item => item !== null);
   }
 
-    const cartCalculation = {
+  const cartCalculation = {
       basePrice: cart.items.reduce(
         (total, item) => total + item.regularPrice * item.quantity,
         0
@@ -437,40 +477,49 @@ const postOrderSuccess = async (req, res) => {
       couponCode
     } = req.body;
 
-  const blockedItems = cart.items.filter(item => item.productId.isBlocked);
-  const blockedCategoryItems = cart.items.filter(item => item.productId.category && item.productId.category.isListed === false);
 
-    if (cart && cart.items) {
-      cart.items = cart.items.filter(item => {
-        const product = item.productId; 
-        return product && !product.isBlocked && product.category.isListed; 
-      });
-  }
-
-    
-  if (blockedItems.length ||blockedCategoryItems.length  > 0) {
-
-    if (!req.session.blockedItemsChecked) {
-      req.session.blockedItemsChecked = true;
-      return res.status(400).json({
-        success: false,
-        message: "Some products are blocked. Please refresh the page to proceed.",
-        redirectURL: '/checkOut',
-      });
-    }
-
-  }
-  if (blockedItems.length === 0 && blockedCategoryItems.length === 0) {
-    delete req.session.blockedItemsChecked;
-  }
  
+    const blockedItems = await Promise.all(cart.items.map(async (item) => {
+    const product = await Product.findById(item.productId).populate('category');
+    const brand = await Brand.findOne({ brandName: product.brand });
+    
+    return (
+      product.isBlocked || 
+      !product.category.isListed || 
+      (brand && brand.isBlocked)
+    );
+  }));
 
-  if (cart && cart.items.length === 0) {
+  const validCartItems = await Promise.all(
+    cart.items.map(async (item) => {
+      const product = await Product.findById(item.productId).populate('category');
+      const brand = await Brand.findOne({ brandName: product.brand });
+      
+      const isValidItem = (
+        !product.isBlocked && 
+        product.category.isListed && 
+        (!brand || !brand.isBlocked)
+      );
+
+      return isValidItem ? item : null;
+    })
+  ).then(items => items.filter(item => item !== null));
+
+  // Update cart with only valid items
+  cart.items = validCartItems;
+
+  // If all items are blocked
+  if (cart.items.length === 0) {
     return res.status(400).json({
       success: false,
-      message: "All selected products are blocked.",
+      message: "All selected products are blocked or unavailable.",
     });
   }
+
+   
+    
+
+ 
 
 
   for (const cartItem of cart.items) {
@@ -690,29 +739,46 @@ const getOrderSuccess = async (req, res) => {
         .populate("items.productId"),
     ]);
     if (cart && cart.items) {
-      cart.items = cart.items.filter(item => {
-        const product = item.productId; 
-        return product && !product.isBlocked && product.category.isListed; 
-      });
+
+      const validItems = await Promise.all(
+        cart.items.map(async (item) => {
+          const product = item.productId;
+
+          if (!product) return null; 
+          
+          const brand = await Brand.findOne({ brandName: product.brand });
+          
+          const isValidItem = (
+            product && 
+            !product.isBlocked && 
+            product.category.isListed && 
+            (!brand || !brand.isBlocked) 
+          );
+
+          if (!isValidItem) {
+            return null; 
+          }
+          return item;
+        })
+      );
+
+      cart.items = validItems.filter(item => item !== null);
+     
+
   }
 
   if (order) {
-    // Calculate base totals from order items
     const orderCalculations = {
-      // Original total price without any discounts
       baseTotal: order.items.reduce((total, item) => 
         total + (item.regularPrice * item.quantity), 0),
       
-      // Total after product discounts but before coupon
       saleTotal: order.items.reduce((total, item) => 
         total + (item.salePrice * item.quantity), 0),
       
-      // Only product discount savings (not including coupon)
       productSavings: order.items.reduce((total, item) => 
         total + ((item.regularPrice - item.salePrice) * item.quantity), 0),
     };
 
-    // Update order with calculated values
     order.orderTotal = orderCalculations.baseTotal;
     order.productSavings = orderCalculations.productSavings;
     order.finalTotal = orderCalculations.saleTotal - (order.couponDiscount || 0);
