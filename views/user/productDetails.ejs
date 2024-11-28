@@ -133,9 +133,6 @@ body {
 	}
 	</style>
 
-<!-- <script>
-	const extm = require('.')
-</script> -->
 
 	
 
@@ -212,9 +209,7 @@ body {
 							<%= productDetails.productName %>
 						</h4>
 
-						<!-- <span class="mtext-106 cl2">
-							Rs: <%= productDetails.salePrice %>
-						</span> -->
+						
 						<span class="mtext-106 cl2">
 							<del class="regular-price">Rs: <%= productDetails.regularPrice %></del>
 							<span class="sale-price">Rs: <%= productDetails.salePrice %></span>
@@ -228,14 +223,7 @@ body {
 						<div class="p-t-33">
 							<h2>Select Product Color</h2>
 	
-    <!-- <div class="color-radio">
-        <input type="radio" id="color-black" name="productColor" value="black">
-        <label class="black" for="color-black"></label>
-        <input type="radio" id="color-silver" name="productColor" value="silver">
-        <label class="silver" for="color-silver"></label>
-        <input type="radio" id="color-gold" name="productColor" value="gold">
-        <label class="gold" for="color-gold"></label>
-    </div> -->
+   
 
 	
 	<div class="color-radio">
@@ -255,38 +243,7 @@ body {
 	</div>	
 
 
-	<!-- availablity list cheythath -->
-
-
-	<!-- <div class="availability">
-        <h2>Availability</h2>
-        <ul>
-            <li>
-                <span class="color">Black</span>
-				<% if(productDetails.blackQuantity<=0){ %>
-					<span class="quantity outofstock"><%= productDetails.blackQuantity%> Out of stock</span>
-					<% }else{ %>
-						<span class="quantity instock"><%= productDetails.blackQuantity%> pieces in stock</span>
-						<% } %>
-            </li>
-            <li>
-                <span class="color">Silver</span>
-				<% if(productDetails.silverQuantity<=0){ %>
-                <span class="quantity outofstock"><%= productDetails.silverQuantity%> Out of stock</span>
-				<% }else{ %>
-					<span class="quantity instock"><%= productDetails.silverQuantity%> pieces in stock</span>
-					<% } %>
-            </li>
-            <li>
-                <span class="color">Gold</span>
-                <% if(productDetails.goldenQuantity<=0){ %>
-					<span class="quantity outofstock"><%= productDetails.goldenQuantity%> Out of stock</span>
-					<% }else{ %>
-						<span class="quantity instock"><%= productDetails.goldenQuantity%> pieces in stock</span>
-						<% } %>
-            </li>
-        </ul>
-    </div> -->
+	
 
 
 
@@ -322,9 +279,7 @@ body {
 
 						<div class="flex-w flex-m p-l-100 p-t-40 respon7">
 							<div class="flex-m bor9 p-r-10 m-r-11">
-								<!-- <a href="#" class="fs-14 cl3 hov-cl1 trans-04 lh-10 p-lr-5 p-tb-2 js- tooltip100" data-tooltip="Add to Wishlist">
-									<i class="zmdi zmdi-favorite"></i>
-								</a> -->
+								
 								<button class="fs-14 cl3 hov-cl1 trans-04 lh-10 p-lr-5 p-tb-2 js- tooltip100" data-tooltip="Add to Wishlist" onclick="wishlist(event,'<%= productDetails.id%>')" class="btn-addwish-b2 dis-block pos-relative ">
 									<i class="zmdi zmdi-favorite"></i>
 									</button>
@@ -510,10 +465,7 @@ body {
 						
 						<div class="block2">
 							<div class="block2-txt-child2 flex-r p-t-3">
-								<!-- <a href="#" class="btn-addwish-b2 dis-block pos-relative js-addwish-b2">
-									<img class="icon-heart1 dis-block trans-04" src="/frontend/images/icons/icon-heart-01.png" alt="ICON">
-									<img class="icon-heart2 dis-block trans-04 ab-t-l" src="/frontend/images/icons/icon-heart-02.png" alt="ICON">
-								</a> -->
+								
 								<button onclick="ajaxWishlist('<%= product[i]._id %>')" class="btn-addwish-b2 dis-block pos-relative ">
 									<% 
 			let isInWishlist = false;
@@ -730,14 +682,7 @@ function updateButtonText(color) {
 
 			})
 
-			// .then(() =>{
-			// 	const currentUrl = getCurrentPageUrl();
-			// 	$('#body').load(currentUrl + ' #body', function(response, status, xhr) {
-			// 		if (status === 'error') {
-			// 			window.location.reload();
-			// 		}
-			// 	});
-			// })
+			
 		   
 		}
 	},

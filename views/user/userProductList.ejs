@@ -328,7 +328,6 @@
 			</div>
 
 			<div class="row isotope-grid">
-				<!-- product[i].category.name -->
 				<% for(let i=0;i<product.length;i++){  %>
 				<div class="col-sm-6 col-md-4 col-lg-3 p-b-35 isotope-item women">
 					<!-- Block2 -->
@@ -363,9 +362,7 @@
 									<%= product[i].productName %>
 								</a>
 
-								<!-- <span class="stext-105 cl3">
-									Rs: <%= product[i].salePrice %>
-								</span> -->
+								
 
 								<span class="mtext-106 cl2">
 									<del class="regular-price"><span class="indian-rupee"></span><%= product[i].regularPrice %></del>
@@ -382,12 +379,7 @@
 
 				<% } %>
 			</div>
-			<!-- Load more -->
-			<!-- <div class="flex-c-m flex-w w-full p-t-45">
-				<a href="#" class="flex-c-m stext-101 cl5 size-103 bg2 bor1 hov-btn1 p-lr-15 trans-04">
-					Load More
-				</a>
-			</div> -->
+		
 
 			<div class="flex-c-m flex-w w-full p-t-45">
 				<nav class="inline-flex rounded-md shadow">

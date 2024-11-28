@@ -33,7 +33,6 @@ const getOrderDetails = async (req, res) => {
 
     const [cart, findOrder] = await Promise.all([
       Cart.findOne({ userId }).populate({
-        // Added category population to match getOrderSuccess
         path: "items.productId",
         populate: {
           path: "category",
@@ -44,7 +43,6 @@ const getOrderDetails = async (req, res) => {
         .populate("items.productId"),
     ]);
 
-    // Filter cart items to remove blocked products and unlisted categories
     if (cart && cart.items) {
       cart.items = cart.items.filter(item => {
         const product = item.productId;

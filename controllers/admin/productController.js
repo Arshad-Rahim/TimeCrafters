@@ -49,7 +49,6 @@ const addProduct = async (req, res) => {
           return res.status(400).json({ error: "Product name already exists" });
       }
 
-      // Process images
       const images = [];
       if (req.files && req.files.length > 0) {
           const uploadDir = path.join("public", "uploads", "re-image");
@@ -252,23 +251,10 @@ const editProduct = async (req, res) => {
     await Product.findByIdAndUpdate(id, updateFields, { new: true });
 
 
-    // await Cart.updateMany(
-    //   { 'items.productId': id },
-    //   {
-    //     $set: {
-    //       'items.$[elem].regularPrice': data.regularPrice,
-    //       'items.$[elem].salePrice': data.salePrice
-    //     }
-    //   },
-    //   {
-    //     arrayFilters: [{ 'elem.productId': id }],
-    //     multi: true
-    //   }
-    // );
     const cartsToUpdate = await Cart.find({ 'items.productId': id });
 
     for (const cart of cartsToUpdate) {
-      // Update individual item prices and product amounts
+
       cart.items = cart.items.map(item => {
         if (item.productId.toString() === id) {
           return {
@@ -281,13 +267,11 @@ const editProduct = async (req, res) => {
         return item;
       });
 
-      // Recalculate total price
       cart.totalPrice = cart.items.reduce(
         (total, item) => total + item.salePrice * item.quantity,
         0
       );
 
-      // Save the updated cart
       await cart.save();
     }
 

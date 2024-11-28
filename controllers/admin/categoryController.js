@@ -113,11 +113,7 @@ const editCategory = async (req, res) => {
 
     const existingCategory = await Category.findById(id);
 
-    // ee two way ith implement cheyyam
-    // const updateCategory = await Category.findByIdAndUpdate(id,{
-    //   name:categoryName,
-    //   description:description,
-    // },{new:true});
+  
 
     if (existingCategory.name != categoryName) {
       existingCategory.name = categoryName;

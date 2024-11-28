@@ -213,11 +213,6 @@
 
     <script>
 
-// function validateAndSubmit(){
-//         if(validateForm()){
-//             document.forms[0].submit();
-//         }
-//     }
 function validateAndSubmit(event, productId) {
     event.preventDefault();
     
@@ -300,30 +295,26 @@ function validateAndSubmit(event, productId) {
             body: finalFormData
         })
         .then(response => {
-    // CRITICAL CHANGE: Parse the JSON response
-    // Many times, the error occurs because the response is not parsed
+   
     return response.json(); 
 })
 
         .then(data => {
             if (data.success) {
-                // alert('Product updated successfully!');
-                // window.location.href = '/admin/product';
+              
                 Swal.fire({
                     toast: true,
-                    position: "top", // Positioning the toast
-                    icon: "success", // Success icon
-                    title: "Product updated successfully", // Success message
-                    showConfirmButton: false, // Hide confirm button
-                    timer: 3000 // Auto close after 3 seconds
+                    position: "top", 
+                    icon: "success",
+                    title: "Product updated successfully",
+                    showConfirmButton: false, 
+                    timer: 3000 
                 });
 
-                // Redirect to products page after a short delay to allow toast to be visible
                 setTimeout(() => {
                     window.location.href = '/admin/product';
                 }, 1500);
             } else {
-                // throw new Error(data.error || 'Failed to update product');
                 Swal.fire({
                     toast: true,
                     position: "top",

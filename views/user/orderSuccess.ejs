@@ -42,13 +42,40 @@
   .retry-payment-btn svg {
     margin-right: 8px;
   }
+
+  .success-icon {
+            width: 80px;
+            height: 80px;
+            background-color: #198754;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto;
+        }
+
+        .success-icon svg {
+            width: 40px;
+            height: 40px;
+            color: white;
+        }
+
     </style></head>
   
 <body class="min-h-screen flex flex-col">
    
 
     <main class="flex-grow container mx-auto px-4 py-8">
-        <h1 class="text-4xl font-bold text-center mb-8 text-gray-800">Order Success</h1>
+        <!-- <h1 class="text-4xl font-bold text-center mb-8 text-gray-800">Order Success</h1> -->
+        <div class="text-center mb-5">
+            <div class="success-icon mb-4">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                </svg>
+            </div>
+            <h1 class="display-4 mb-3">Order Placed Successfully!</h1>
+          
+                    </div>
 
         <div class="bg-white shadow-lg rounded-lg overflow-hidden mb-8 border border-gray-200">
             <div class="p-6">

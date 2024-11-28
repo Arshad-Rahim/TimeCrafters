@@ -296,22 +296,7 @@ const putQuantity = async (req, res) => {
 
 const variants = product.variants.find(variant => variant.color === foundItem.color);
 
-    // let colorQuantityField;
-    //   switch (color) {
-    //     case "gold":
-    //       colorQuantityField = "goldenQuantity";
-    //       break;
-    //     case "black":
-    //       colorQuantityField = "blackQuantity";
-    //       break; 
-    //     case "silver":
-    //       colorQuantityField = "silverQuantity";
-    //       break;
-    //     default:
-    //       console.log("unsupported color");
-    //   }
-      // console.log(colorQuantityField)
-      // console.log(product[colorQuantityField])
+   
       if (variants.quantity < quantity) {
         return res.status(400).json({
           success: false,
@@ -532,7 +517,6 @@ const postOrderSuccess = async (req, res) => {
       });
     }
 
-    // Find the variant matching the cart item's color
     const variant = product.variants.find(v => v.color === cartItem.color);
     
     if (!variant) {
@@ -542,7 +526,6 @@ const postOrderSuccess = async (req, res) => {
       });
     }
 
-    // Check if enough quantity is available
     if (variant.quantity < cartItem.quantity) {
       return res.status(400).json({
         success: false,
@@ -550,10 +533,8 @@ const postOrderSuccess = async (req, res) => {
       });
     }
 
-    // Update the quantity for the specific color variant
     variant.quantity -= cartItem.quantity;
 
-    // If variant quantity becomes 0, you might want to update the product status
     const totalQuantityAcrossVariants = product.variants.reduce((sum, v) => sum + v.quantity, 0);
     if (totalQuantityAcrossVariants === 0) {
       product.status = 'out of stock';

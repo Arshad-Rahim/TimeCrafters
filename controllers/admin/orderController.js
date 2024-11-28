@@ -121,14 +121,11 @@ const deleteOrderListProduct = async (req, res) => {
 
 
     if (order.couponDiscount > 0) {
-      // Calculate total order subtotal before cancellation
       const orderSubtotal = order.items.reduce((sum, item) => sum + item.ProductTotal, 0);
       
-      // Calculate this item's proportion of the discount
       const itemDiscountProportion = cancelledItem.ProductTotal / orderSubtotal;
       const itemCouponDiscount = order.couponDiscount * itemDiscountProportion;
       
-      // Subtract the proportional discount from refund amount
       refundAmount -= itemCouponDiscount;
     }
 

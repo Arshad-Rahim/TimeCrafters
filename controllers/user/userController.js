@@ -452,7 +452,6 @@ const postUserProfile = async (req, res) => {
 
 const logout = async (req, res) => {
   try {
-    // req.session.destroy();
     delete req.session.user;
     return res.redirect("/");
   } catch (error) {
