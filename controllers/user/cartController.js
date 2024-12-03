@@ -208,7 +208,7 @@ const postCart = async (req, res) => {
             productName: product.productName,
             regularPrice: product.regularPrice,
             salePrice: product.salePrice,
-            productImage: product.productImage[0],
+            productImage: product.variants[0].productImage[0],
             quantity: 1,
             productAmount: product.salePrice * 1,
             color: color,
