@@ -13,8 +13,8 @@ const couponController = require('../controllers/admin/couponController');
 const salesReportController = require('../controllers/admin/salesReportController');
 
 const multer = require('multer');
-const storage = require('../helpers/multer');
-const uploads = multer({storage:storage});
+const uploads =  require('../helpers/multer');
+// const uploads = multer({storage:storage});
 
 // admin normal loging routes
 router.get('/page-error-404',adminController.pageError);
@@ -22,7 +22,7 @@ router.get('/adminLogin',adminController.loadLogin);
 router.post('/adminLogin',adminController.login);
 router.get('/',adminAuth,adminController.loadDashboard);
 router.get('/users',adminAuth,customerController.customerInfo);
-
+    
 router.get('/logout',adminAuth,adminController.logout);
 
 // customer controller routes
@@ -51,13 +51,13 @@ router.post('/editBrand/:id',adminAuth,uploads.single('brandImage'),brandControl
 
 // product Managemetn
 router.get('/addProduct',adminAuth,productController.getAddProduct);
-router.post('/addProduct',adminAuth,uploads.array('images',4),productController.addProduct)
+router.post('/addProduct',adminAuth,uploads.any(),productController.addProduct)
 router.get('/product',adminAuth,productController.getAllProducts);
 
 router.get('/blockProduct',adminAuth,productController.blockProduct);
 router.get('/unBlockProduct',adminAuth,productController.unBlockProduct);
 router.get('/editProduct',adminAuth,productController.getEditProduct);
-router.post('/editProduct/:id',adminAuth,uploads.array('images',4),productController.editProduct);
+router.post('/editProduct/:id',adminAuth,uploads.any(),productController.editProduct);
 
 
 // order Management

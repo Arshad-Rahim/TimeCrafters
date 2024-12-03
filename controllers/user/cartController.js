@@ -173,7 +173,7 @@ const postCart = async (req, res) => {
         productName: product.productName,
         salePrice: product.salePrice,
         regularPrice: product.regularPrice,
-        productImage: product.productImage[0],
+        productImage: product.variants[0].productImage[0],
         quantity: 1,
         productAmount: product.salePrice * 1,
         color: color,
@@ -445,6 +445,7 @@ const deleteCartProduct = async (req, res) => {
 
 const postOrderSuccess = async (req, res) => {
   try {
+    let product;
     const userId = req.session.user;
 
     const cart = await Cart.findOne({ userId }).populate({
@@ -465,7 +466,7 @@ const postOrderSuccess = async (req, res) => {
 
  
     const blockedItems = await Promise.all(cart.items.map(async (item) => {
-    const product = await Product.findById(item.productId).populate('category');
+    product = await Product.findById(item.productId).populate('category');
     const brand = await Brand.findOne({ brandName: product.brand });
     
     return (
@@ -477,7 +478,7 @@ const postOrderSuccess = async (req, res) => {
 
   const validCartItems = await Promise.all(
     cart.items.map(async (item) => {
-      const product = await Product.findById(item.productId).populate('category');
+      // const product = await Product.findById(item.productId).populate('category');
       const brand = await Brand.findOne({ brandName: product.brand });
       
       const isValidItem = (
@@ -508,7 +509,7 @@ const postOrderSuccess = async (req, res) => {
 
 
   for (const cartItem of cart.items) {
-    const product = await Product.findById(cartItem.productId);
+    // let product = await Product.findById(cartItem.productId);
     
     if (!product) {
       return res.status(400).json({
@@ -619,16 +620,28 @@ const postOrderSuccess = async (req, res) => {
     }
 
 
-    const orderItems = cart.items.map((item) => ({
-      productId: item.productId,
-      ProductName: item.productName,
-      quantity: item.quantity,
-      salePrice: item.salePrice,
-      regularPrice: item.regularPrice,
-      ProductTotal: item.salePrice * item.quantity,
-      color: item.color,
-      productImage: item.productImage,
-    }));
+    const orderItems = cart.items.map((item) => {
+      // Find the matched variant for this specific item
+      const matchedVariant = product.variants.find(variant => 
+        variant.color.toLowerCase() === item.color.toLowerCase()
+      );
+    
+      // Select the product image based on the matched variant or default to first variant
+      const productImage = matchedVariant
+        ? matchedVariant.productImage[0]
+        : product.variants[0].productImage[0];
+    
+      return {
+        productId: item.productId,
+        ProductName: item.productName,
+        quantity: item.quantity,
+        salePrice: item.salePrice,
+        regularPrice: item.regularPrice,
+        ProductTotal: item.salePrice * item.quantity,
+        color: item.color,
+        productImage: productImage,
+      };
+    });
 
     const saveOrderList = new Order({
       userId,

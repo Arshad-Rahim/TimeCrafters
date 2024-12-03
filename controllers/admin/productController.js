@@ -6,6 +6,7 @@ const fs = require("fs");
 const path = require("path");
 const sharp = require("sharp");
 const Cart = require('../../models/cartSchema');
+const { image } = require("pdfkit");
 
 const getAddProduct = async (req, res) => {
   try {
@@ -31,9 +32,10 @@ const addProduct = async (req, res) => {
     
       if (req.body.variants) {
           try {
-              const variantsString = req.body.variants.toString().trim();
-              
-              variants = JSON.parse(variantsString);
+           
+
+              variants = req.body.variants; 
+
           } catch (error) {
               console.error('Error parsing variants:', error);
               console.error('Problematic variants string:', req.body.variants);
@@ -49,29 +51,47 @@ const addProduct = async (req, res) => {
           return res.status(400).json({ error: "Product name already exists" });
       }
 
-      const images = [];
-      if (req.files && req.files.length > 0) {
-          const uploadDir = path.join("public", "uploads", "re-image");
-          if (!fs.existsSync(uploadDir)) {
-              fs.mkdirSync(uploadDir, { recursive: true });
-          }
+      const processedVariants = [];
+      if (req.files) {
+        await Promise.all(variants.map(async (variant, variantIndex) => {
+            const variantImages = [];
 
-          for (let i = 0; i < req.files.length; i++) {
-              const originalImagePath = req.files[i].path;
-              const originalFilename = req.files[i].filename;
-              const resizedFilename = `resized-${originalFilename}`;
-              const resizedImagePath = path.join(uploadDir, resizedFilename);
-              await sharp(originalImagePath)
-                  .resize({ width: 440, height: 440 })
-                  .toFile(resizedImagePath);
-              images.push(resizedFilename);
-          }
-      }
+            // Filter images for the current variant
+            const variantImageFiles = req.files.filter(file => 
+                file.fieldname.startsWith(`variants[${variantIndex}][images]`)
+            );
+
+            // Resize and save images for each variant
+            await Promise.all(variantImageFiles.map(async (imageFile) => {
+                const uploadDir = path.join("public", "uploads", "product-variants");
+                if (!fs.existsSync(uploadDir)) {
+                    fs.mkdirSync(uploadDir, { recursive: true });
+                }
+
+                const originalFilename = imageFile.filename;
+                const resizedFilename = `resized-${originalFilename}`;
+                const resizedImagePath = path.join(uploadDir, resizedFilename);
+
+                // Resize image
+                await sharp(imageFile.path)
+                    .resize({ width: 440, height: 440 })
+                    .toFile(resizedImagePath);
+
+                variantImages.push(resizedFilename);
+            }));
+
+            // Create processed variant object
+            processedVariants.push({
+                color: variant.color,
+                quantity: parseInt(variant.quantity),
+                productImage: variantImages
+            });
+        }));
+    }
       const categoryId = await Category.findOne({ name: product.category });
       if (!categoryId) {
           return res.status(400).json({ error: "Invalid category name" });
       }
-
       const newProduct = await Product.create({
           productName: product.productName,
           description: product.description,
@@ -80,11 +100,8 @@ const addProduct = async (req, res) => {
           category: categoryId._id,
           regularPrice: product.regularPrice,
           salePrice: product.salePrice,
-          productImage: images,
-          variants: variants.map(variant => ({
-            color: variant.color,
-            quantity: parseInt(variant.quantity),
-        }))
+          variants:processedVariants,
+          
     
       });
 
@@ -198,17 +215,9 @@ const editProduct = async (req, res) => {
     let variants = [];
 
     if (req.body.variants) {
-      try {
-          const variantsString = req.body.variants.toString().trim();
-          
-          variants = JSON.parse(variantsString);
-      } catch (error) {
-          console.error('Error parsing variants:', error);
-          console.error('Problematic variants string:', req.body.variants);
-          return res.status(400).json({ error: 'Invalid variant data' });
-      }
-  }
-
+      variants = req.body.variants; 
+    }
+    
     const [product, category, existingProduct] = await Promise.all([
       Product.find({ _id: id }),
       Category.findOne({ name: data.category }),
@@ -222,13 +231,52 @@ const editProduct = async (req, res) => {
       return res.status(400).json({ error: "Product name already exists" });
     }
 
-    const images = [];
 
-    if (req.files && req.files.length > 0) {
-      for (let i = 0; i < req.files.length; i++) {
-        images.push(req.files[i].filename);
-      }
-    }
+
+    const processedVariants = [];
+    if (req.files) {
+      await Promise.all(variants.map(async (variant, variantIndex) => {
+          const variantImages = [];
+
+          // Filter images for the current variant
+          if (variant.existingImages) {
+            variant.existingImages.forEach(existingImage => {
+                variantImages.push(existingImage); // Add existing images to the array
+            });
+        }
+          const variantImageFiles = req.files.filter(file => 
+              file.fieldname.startsWith(`variants[${variantIndex}][images]`)
+          );
+
+          // Resize and save images for each variant
+          await Promise.all(variantImageFiles.map(async (imageFile) => {
+              const uploadDir = path.join("public", "uploads", "product-variants");
+              if (!fs.existsSync(uploadDir)) {
+                  fs.mkdirSync(uploadDir, { recursive: true });
+              }
+
+              const originalFilename = imageFile.filename;
+              const resizedFilename = `resized-${originalFilename}`;
+              const resizedImagePath = path.join(uploadDir, resizedFilename);
+
+              // Resize image
+              await sharp(imageFile.path)
+                  .resize({ width: 440, height: 440 })
+                  .toFile(resizedImagePath);
+
+              variantImages.push(resizedFilename);
+          }));
+
+          // Create processed variant object
+          processedVariants.push({
+            color: Array.isArray(variant.color) ? variant.color[0] : variant.color,
+              quantity: parseInt(variant.quantity),
+              productImage: variantImages
+          });
+      }));
+  }
+
+
 
     const updateFields = {
       productName: data.productName,
@@ -238,15 +286,9 @@ const editProduct = async (req, res) => {
       category: category._id,
       regularPrice: data.regularPrice,
       salePrice: data.salePrice,
-      variants: variants.map(variant => ({
-        color: variant.color,
-        quantity: parseInt(variant.quantity),
-    }))
+      variants:processedVariants,
     };
 
-    if (req.files.length > 0) {
-      updateFields.$push = { productImage: { $each: images } };
-    }
 
     await Product.findByIdAndUpdate(id, updateFields, { new: true });
 

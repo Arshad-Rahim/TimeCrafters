@@ -123,7 +123,19 @@
                                 <% cart.items.forEach(item =>{ %>
                             <tr>
                                 <td class="px-6 py-4 whitespace-nowrap">
-                                   <img src="uploads/re-image/<%= item.productImage %>" alt="IMG">
+                                  <!-- Updated image selection logic -->
+                                  <% 
+                                  // Find the variant that matches the cart item's color
+                                  const matchedVariant = item.productId.variants.find(variant => 
+                                      variant.color.toLowerCase() === item.color.toLowerCase()
+                                  );
+                                  
+                                  // Use the first image of the matched variant, or fallback to the first variant's image
+                                  const displayImage = matchedVariant 
+                                      ? matchedVariant.productImage[0] 
+                                      : item.productId.variants[0].productImage[0];
+                                  %>
+                                  <img src='uploads/product-variants/<%=displayImage%>' alt="Product Image">
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <div class="text-sm font-medium text-gray-900"><%= item.productName %></div>

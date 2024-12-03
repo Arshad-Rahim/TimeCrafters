@@ -36,10 +36,6 @@ const productSchema = new mongoose.Schema({
         type:Number,
         default:0,
     },
-    productImage:{
-        type:[String],
-        required:true,
-    },
     isBlocked:{
         type:Boolean,
         default:false,
@@ -59,9 +55,13 @@ const productSchema = new mongoose.Schema({
             quantity:{
                 type:Number,
                 default:0,
-            }
+            },
+            productImage:{
+                type:[String],
+                required:true,
+            },
         }
-    ],
+    ],  
     
 },{timestamps:true});
 

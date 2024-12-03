@@ -170,11 +170,21 @@
                                     <tr class="table_row">
                                         <td class="column-1">
                                             <button type="button" class="delete-cart-item" data-product-id="<%= item.productId._id%>" data-color="<%= item.color%>">
-                                            <div class="how-itemcart1">
-                                               
-                                                <img src='uploads/re-image/<%=item.productImage%>' alt="IMG">
-                                                
-                                            </div>
+                                                <div class="how-itemcart1">
+                                                    <!-- Updated image selection logic -->
+                                                    <% 
+                                                    // Find the variant that matches the cart item's color
+                                                    const matchedVariant = item.productId.variants.find(variant => 
+                                                        variant.color.toLowerCase() === item.color.toLowerCase()
+                                                    );
+                                                    
+                                                    // Use the first image of the matched variant, or fallback to the first variant's image
+                                                    const displayImage = matchedVariant 
+                                                        ? matchedVariant.productImage[0] 
+                                                        : item.productId.variants[0].productImage[0];
+                                                    %>
+                                                    <img src='uploads/product-variants/<%=displayImage%>' alt="Product Image">
+                                                </div>
                                             </button>
                                         </td>
                                         <td class="column-2"><%= item.productName %></td>

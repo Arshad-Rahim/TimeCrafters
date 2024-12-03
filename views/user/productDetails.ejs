@@ -1,92 +1,86 @@
 <%-include('../../views/partials/user/header',{user})  %>
 
 <head>
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <link href="https://cdn.jsdelivr.net/npm/@sweetalert2/theme-dark@4/dark.css" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/elevatezoom/3.0.8/jquery.elevatezoom.min.js"></script>
+</head>
 
-	<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-	<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-	<link href="https://cdn.jsdelivr.net/npm/@sweetalert2/theme-dark@4/dark.css" rel="stylesheet">
-	
-  </head>
 <style>
-
 body {
-	
-            font-family: Arial, sans-serif;
-        }
+  font-family: Arial, sans-serif;
+}
 
-       
+input[type="radio"] {
+  display: none;
+}
 
-        input[type="radio"] {
-            display: none; /* Hide the default radio button */
-        }
+label {
+  cursor: pointer;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: 2px solid #333;
+  margin: 20px 10px;
+  transition: background-color 0.3s, border-color 0.3s;
+}
 
-        label {
-            cursor: pointer;
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
-            border: 2px solid #333;
-            margin: 20px 10px;
-            transition: background-color 0.3s, border-color 0.3s;
-        }
+input[type="radio"]:checked + label {
+  border-color: #333;
+  box-shadow: 0 0 0 2px #333;
+}
 
-        /* Style for the color options */
-        input[type="radio"]:checked + label {
-            border-color: #333; /* Border color when selected */
-            box-shadow: 0 0 0 2px #333;
-        }
+.availability {
+  background-color: #f7f7f7;
+  padding: 20px;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
 
-       
+.availability h2 {
+  margin-top: 0;
+  font-weight: bold;
+  color: #333;
+}
 
-		.availability {
-            background-color: #f7f7f7;
-            padding: 20px;
-            border: 1px solid #ddd;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        }
+.availability ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
 
-        .availability h2 {
-            margin-top: 0;
-            font-weight: bold;
-            color: #333;
-        }
+.availability li {
+  margin-bottom: 15px;
+  padding: 10px;
+  border-bottom: 1px solid #eee;
+}
 
-        .availability ul {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-        }
+.availability li:last-child {
+  border-bottom: none;
+}
 
-        .availability li {
-            margin-bottom: 15px;
-            padding: 10px;
-            border-bottom: 1px solid #eee;
-        }
+.availability li span.color {
+  font-weight: bold;
+  color: #337ab7;
+}
 
-        .availability li:last-child {
-            border-bottom: none;
-        }
+.availability li span.quantity {
+  float: right;
+  font-size: 14px;
+  color: #666;
+}
 
-        .availability li span.color {
-            font-weight: bold;
-            color: #337ab7;
-        }
+.availability li span.instock {
+  color: #3e8e41;
+}
 
-        .availability li span.quantity {
-            float: right;
-            font-size: 14px;
-            color: #666;
-        }
+.availability li span.outofstock {
+  color: #e74c3c;
+}
 
-        .availability li span.instock {
-            color: #3e8e41;
-        }
-
-        .availability li span.outofstock {
-            color: #e74c3c;
-        }
-		.regular-price {
+.regular-price {
   font-size: 14px;
   color: #666;
   text-decoration: line-through;
@@ -97,452 +91,386 @@ body {
   font-size: 18px;
   color: #333;
   font-weight: bold;
-}	
-   
+}
+
+.pd_img {
+  position: relative;
+  width: 100%;
+  padding-top: 100%;
+  overflow: hidden;
+}
+
 .pd_img img {
-      max-width: 100%;
-      height: auto;
-    }
-	
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.color-radio {
+  display: flex;
+  align-items: center;
+}
+
+.color-option {
+  cursor: pointer;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: 2px solid #333;
+  margin: 20px 10px;
+  transition: background-color 0.3s, border-color 0.3s;
+}
+
+input[type="radio"]:checked + .color-option {
+  border-color: #333;
+  box-shadow: 0 0 0 2px #333;
+}
+
+.thumbnail-container {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  padding: 10px 0;
+}
+
+.thumbnail {
+  width: 80px;
+  height: 80px;
+  object-fit: cover;
+  cursor: pointer;
+  border: 2px solid transparent;
+}
+
+.thumbnail.active {
+  border-color: #333;
+}
 </style>
 
-
-<style>
-	.color-radio {
-		display: flex;
-		align-items: center;
-	}
-	
-	input[type="radio"] {
-		display: none;
-	}
-	
-	label.color-option {
-		cursor: pointer;
-		width: 30px;
-		height: 30px;
-		border-radius: 50%;
-		border: 2px solid #333;
-		margin: 20px 10px;
-		transition: background-color 0.3s, border-color 0.3s;
-	}
-	
-	input[type="radio"]:checked + label.color-option {
-		border-color: #333;
-		box-shadow: 0 0 0 2px #333;
-	}
-	</style>
-
-
-	
-
-
-	<!-- breadcrumb -->
-	 <!-- dynamically set cheyth -->
-	  <div style="margin-top: 60px;">
-	<div class="container" >
-		<div class="bread-crumb flex-w p-l-25 p-r-15 p-t-30 p-lr-0-lg">
-			<a href="/" class="stext-109 cl8 hov-cl1 trans-04">
-				Home
-				<i class="fa fa-angle-right m-l-9 m-r-10" aria-hidden="true"></i>
-			</a>
-
-			<a href="/userProductList" class="stext-109 cl8 hov-cl1 trans-04">
-				<%= productDetails.category.name  %>
-				<i class="fa fa-angle-right m-l-9 m-r-10" aria-hidden="true"></i>
-			</a>
-
-			<span class="stext-109 cl4">
-				<%= productDetails.productName  %>
-			</span>
-		</div>
-	</div>
-		
-
-	<!-- Product Detail -->
-	<section class="sec-product-detail bg0 p-t-65 p-b-60">
-		<div class="container">
-			<div class="row">
-				<div class="col-md-6 col-lg-7 p-b-30">
-					<div class="p-l-25 p-r-30 p-lr-0-lg">
-						<div class="wrap-slick3 flex-sb flex-w">
-							<div class="wrap-slick3-dots"></div>
-							<div class="wrap-slick3-arrows flex-sb-m flex-w"></div>
-
-							<div class="slick3 gallery-lb">
-    <div class="item-slick3" data-thumb="/uploads/re-image/<%= productDetails.productImage[0] %>">
-        <div class="pd_img wrap-pic-w pos-relative">
-            <img class="zoomImg" data-index="0" src="/uploads/re-image/<%= productDetails.productImage[0] %>" alt="IMG-PRODUCT">
-            <a class="flex-c-m size-108 how-pos1 bor0 fs-16 cl10 bg0 hov-btn3 trans-04" href="/uploads/re-image/<%= productDetails.productImage[0] %>">
-                <i class="fa fa-expand"></i>
-            </a>
-        </div>
+<!-- breadcrumb -->
+<div style="margin-top: 60px;">
+  <div class="container">
+    <div class="bread-crumb flex-w p-l-25 p-r-15 p-t-30 p-lr-0-lg">
+      <a href="/" class="stext-109 cl8 hov-cl1 trans-04">
+        Home
+        <i class="fa fa-angle-right m-l-9 m-r-10" aria-hidden="true"></i>
+      </a>
+      <a href="/userProductList" class="stext-109 cl8 hov-cl1 trans-04">
+        <%= productDetails.category.name %>
+        <i class="fa fa-angle-right m-l-9 m-r-10" aria-hidden="true"></i>
+      </a>
+      <span class="stext-109 cl4">
+        <%= productDetails.productName %>
+      </span>
     </div>
-
-    <div class="item-slick3" data-thumb="/uploads/re-image/<%= productDetails.productImage[3] %>">
-        <div class="wrap-pic-w pos-relative">
-            <img class="zoomImg" data-index="1" src="/uploads/re-image/<%= productDetails.productImage[3] %>" alt="IMG-PRODUCT">
-            <a class="flex-c-m size-108 how-pos1 bor0 fs-16 cl10 bg0 hov-btn3 trans-04" href="/uploads/re-image/<%= productDetails.productImage[3] %>">
-                <i class="fa fa-expand"></i>
-            </a>
-        </div>
-    </div>
-
-    <div class="item-slick3" data-thumb="/uploads/re-image/<%= productDetails.productImage[2] %>">
-        <div class="wrap-pic-w pos-relative">
-            <img class="zoomImg" data-index="2" src="/uploads/re-image/<%= productDetails.productImage[2] %>" alt="IMG-PRODUCT">
-            <a class="flex-c-m size-108 how-pos1 bor0 fs-16 cl10 bg0 hov-btn3 trans-04" href="/uploads/re-image/<%= productDetails.productImage[2] %>">
-                <i class="fa fa-expand"></i>
-            </a>
-        </div>
-    </div>
+  </div>
 </div>
-						</div>
-					</div>
+
+<!-- Product Detail -->
+<section class="sec-product-detail bg0 p-t-65 p-b-60">
+  <div class="container">
+    <div class="row">
+      <div class="col-md-6 col-lg-7 p-b-30">
+        <div class="p-l-25 p-r-30 p-lr-0-lg">
+          <div class="wrap-slick3 flex-sb flex-w">
+            
+            <div class="wrap-slick3-arrows flex-sb-m flex-w"></div>
+
+            <div class="slick3 gallery-lb">
+				<div class="item-slick3" data-thumb="/uploads/product-variants/<%= productDetails.variants[0].productImage[0] %>">
+				  <div class="pd_img wrap-pic-w pos-relative">
+					<img id="mainImage" class="zoomImg" src="/uploads/product-variants/<%= productDetails.variants[0].productImage[0] %>" alt="IMG-PRODUCT">
+					<a class="flex-c-m size-108 how-pos1 bor0 fs-16 cl10 bg0 hov-btn3 trans-04" href="/uploads/product-variants/<%= productDetails.variants[0].productImage[0] %>">
+					  <i class="fa fa-expand"></i>
+					</a>
+				  </div>
 				</div>
-					
-				<div class="col-md-6 col-lg-5 p-b-30">
-				
-					<div class="p-r-50 p-t-5 p-lr-0-lg">
-						<h4 class="mtext-105 cl2 js-name-detail p-b-14">
-							
-							<%= productDetails.productName %>
-						</h4>
+			  </div>
 
-						
-						<span class="mtext-106 cl2">
-							<del class="regular-price">Rs: <%= productDetails.regularPrice %></del>
-							<span class="sale-price">Rs: <%= productDetails.salePrice %></span>
-						  </span>
+			
+          </div>
+          <div class="thumbnail-container">
+            <% productDetails.variants[0].productImage.forEach((image, index) => { %>
+              <img class="thumbnail <%= index === 0 ? 'active' : '' %>" src="/uploads/product-variants/<%= image %>" alt="Thumbnail <%= index + 1 %>" onclick="changeMainImage(this.src, this)">
+            <% }); %>
+          </div>
+        </div>
+      </div>
 
-						<p class="stext-102 cl3 p-t-23">
-							<%= productDetails.description %>
-						</p>
-						
-						<!--Product color specify cheytha radio buttons  -->
-						<div class="p-t-33">
-							<h2>Select Product Color</h2>
-	
-   
+      <div class="col-md-6 col-lg-5 p-b-30">
+        <div class="p-r-50 p-t-5 p-lr-0-lg">
+          <h4 class="mtext-105 cl2 js-name-detail p-b-14">
+            <%= productDetails.productName %>
+          </h4>
 
-	
-	<div class="color-radio">
-		<% productDetails.variants.forEach((variant, index) => { %>
-			<input 
-				type="radio" 
-				id="color-<%= variant.color.toLowerCase() %>" 
-				name="productColor" 
-				value="<%= variant.color.toLowerCase() %>"
-			>
-			<label 
-				class="color-option" 
-				for="color-<%= variant.color.toLowerCase() %>"
-				style="background-color: <%= variant.color.toLowerCase() %>;"
-			></label>
-		<% }); %>
-	</div>	
+          <span class="mtext-106 cl2">
+            <del class="regular-price">Rs: <%= productDetails.regularPrice %></del>
+            <span class="sale-price">Rs: <%= productDetails.salePrice %></span>
+          </span>
+
+          <p class="stext-102 cl3 p-t-23">
+            <%= productDetails.description %>
+          </p>
+
+          <div class="p-t-33">
+            <h2>Select Product Color</h2>
+
+            <div class="color-radio">
+              <% productDetails.variants.forEach((variant, index) => { %>
+                <input 
+                  type="radio" 
+                  id="color-<%= variant.color.toLowerCase() %>" 
+                  name="productColor" 
+                  value="<%= variant.color.toLowerCase() %>"
+                  <%= index === 0 ? 'checked' : '' %>
+                >
+                <label 
+                  class="color-option" 
+                  for="color-<%= variant.color.toLowerCase() %>"
+                  style="background-color: <%= variant.color.toLowerCase() %>;"
+                  onclick="selectColor(this, '<%= variant.color.toLowerCase() %>')"
+                ></label>
+              <% }); %>
+            </div>
+
+            <div class="availability">
+              <h2>Availability</h2>
+              <ul>
+                <% productDetails.variants.forEach(variant => { %>
+                  <li>
+                    <span class="color"><%= variant.color %></span>
+                    <% if(variant.quantity <= 0) { %>
+                      <span class="quantity outofstock"><%= variant.quantity %> Out of stock</span>
+                    <% } else { %>
+                      <span class="quantity instock"><%= variant.quantity %> pieces in stock</span>
+                    <% } %>
+                  </li>
+                <% }); %>
+              </ul>
+            </div>
+
+            <div class="flex-w flex-r-m p-b-10">
+              <div class="size-204 flex-w flex-m respon6-next">
+                <button 
+                  style="margin-top: 15px;" 
+                  class="flex-c-m stext-101 cl0 size-101 bg1 bor1 hov-btn1 p-lr-15 trans-04" 
+                  id="cartButton"
+                  onclick="handleCartAction(event,'<%= productDetails.id%>')"
+                >
+                  Add to cart
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="flex-w flex-m p-l-100 p-t-40 respon7">
+            <div class="flex-m bor9 p-r-10 m-r-11">
+              <button class="fs-14 cl3 hov-cl1 trans-04 lh-10 p-lr-5 p-tb-2 js-addwish-detail tooltip100" data-tooltip="Add to Wishlist" onclick="wishlist(event,'<%= productDetails.id%>')" class="btn-addwish-b2 dis-block pos-relative">
+                <i class="zmdi zmdi-favorite"></i>
+              </button>
+            </div>
+
+            <a href="#" class="fs-14 cl3 hov-cl1 trans-04 lh-10 p-lr-5 p-tb-2 m-r-8 tooltip100" data-tooltip="Facebook">
+              <i class="fa fa-facebook"></i>
+            </a>
+
+            <a href="#" class="fs-14 cl3 hov-cl1 trans-04 lh-10 p-lr-5 p-tb-2 m-r-8 tooltip100" data-tooltip="Twitter">
+              <i class="fa fa-twitter"></i>
+            </a>
+
+            <a href="#" class="fs-14 cl3 hov-cl1 trans-04 lh-10 p-lr-5 p-tb-2 m-r-8 tooltip100" data-tooltip="Google Plus">
+              <i class="fa fa-google-plus"></i>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
 
 
-	
+  </div>
 
 
 
-	<div class="availability">
-		<h2>Availability</h2>
-		<ul>
-			<% productDetails.variants.forEach(variant => { %>
-				<li>
-					<span class="color"><%= variant.color %></span>
-					<% if(variant.quantity <= 0) { %>
-						<span class="quantity outofstock"><%= variant.quantity %> Out of stock</span>
-					<% } else { %>
-						<span class="quantity instock"><%= variant.quantity %> pieces in stock</span>
-					<% } %>
-				</li>
-			<% }); %>
+  <div class="bor10 m-t-50 p-t-43 p-b-40">
+	<!-- Tab01 -->
+	<div class="tab01">
+		<!-- Nav tabs -->
+		<ul class="nav nav-tabs" role="tablist">
+			<li class="nav-item p-b-10">
+				<a class="nav-link active" data-toggle="tab" href="#description" role="tab">Description</a>
+			</li>
+
+			<li class="nav-item p-b-10">
+				<a class="nav-link" data-toggle="tab" href="#information" role="tab">Additional information</a>
+			</li>
+
+			<li class="nav-item p-b-10">
+				<a class="nav-link" data-toggle="tab" href="#reviews" role="tab">Reviews (1)</a>
+			</li>
 		</ul>
-	</div>
-							
 
-	<div class="flex-w flex-r-m p-b-10">
-		<div class="size-204 flex-w flex-m respon6-next">
-		  <button 
-			style="margin-top: 15px;" 
-			class="flex-c-m stext-101 cl0 size-101 bg1 bor1 hov-btn1 p-lr-15 trans-04" 
-			id="cartButton"
-			onclick="handleCartAction(event,'<%= productDetails.id%>')">
-			Add to cart
-		  </button>
-		</div>
-	  </div>
-						</div>
+		<!-- Tab panes -->
+		<div class="tab-content p-t-43">
+			<!-- - -->
+			<div class="tab-pane fade show active" id="description" role="tabpanel">
+				<div class="how-pos2 p-lr-15-md">
+					<p class="stext-102 cl6">
+						<%= productDetails.description %>
+					</p>
+				</div>
+			</div>
 
-						<div class="flex-w flex-m p-l-100 p-t-40 respon7">
-							<div class="flex-m bor9 p-r-10 m-r-11">
-								
-								<button class="fs-14 cl3 hov-cl1 trans-04 lh-10 p-lr-5 p-tb-2 js- tooltip100" data-tooltip="Add to Wishlist" onclick="wishlist(event,'<%= productDetails.id%>')" class="btn-addwish-b2 dis-block pos-relative ">
-									<i class="zmdi zmdi-favorite"></i>
-									</button>
-							</div>
-
-							<a href="#" class="fs-14 cl3 hov-cl1 trans-04 lh-10 p-lr-5 p-tb-2 m-r-8 tooltip100" data-tooltip="Facebook">
-								<i class="fa fa-facebook"></i>
-							</a>
-
-							<a href="#" class="fs-14 cl3 hov-cl1 trans-04 lh-10 p-lr-5 p-tb-2 m-r-8 tooltip100" data-tooltip="Twitter">
-								<i class="fa fa-twitter"></i>
-							</a>
-
-							<a href="#" class="fs-14 cl3 hov-cl1 trans-04 lh-10 p-lr-5 p-tb-2 m-r-8 tooltip100" data-tooltip="Google Plus">
-								<i class="fa fa-google-plus"></i>
-							</a>
-						</div>
+			<!-- - -->
+			<div class="tab-pane fade" id="information" role="tabpanel">
+				<div class="row">
+					<div class="col-sm-10 col-md-8 col-lg-6 m-lr-auto">
+						<ul class="p-lr-28 p-lr-15-sm">
+							<li class="flex-w flex-t p-b-7">
+								<span class="stext-102 cl3 size-205">
+									<%= productDetails.additionalInfo %>
+								</span>
+							</li>
+						</ul>
 					</div>
 				</div>
 			</div>
 
-			<div class="bor10 m-t-50 p-t-43 p-b-40">
-				<!-- Tab01 -->
-				<div class="tab01">
-					<!-- Nav tabs -->
-					<ul class="nav nav-tabs" role="tablist">
-						<li class="nav-item p-b-10">
-							<a class="nav-link active" data-toggle="tab" href="#description" role="tab">Description</a>
-						</li>
-
-						<li class="nav-item p-b-10">
-							<a class="nav-link" data-toggle="tab" href="#information" role="tab">Additional information</a>
-						</li>
-
-						<li class="nav-item p-b-10">
-							<a class="nav-link" data-toggle="tab" href="#reviews" role="tab">Reviews (1)</a>
-						</li>
-					</ul>
-
-					<!-- Tab panes -->
-					<div class="tab-content p-t-43">
-						<!-- - -->
-						<div class="tab-pane fade show active" id="description" role="tabpanel">
-							<div class="how-pos2 p-lr-15-md">
-								<p class="stext-102 cl6">
-									<%= productDetails.description %>
-								</p>
-							</div>
-						</div>
-
-						<!-- - -->
-						<div class="tab-pane fade" id="information" role="tabpanel">
-							<div class="row">
-								<div class="col-sm-10 col-md-8 col-lg-6 m-lr-auto">
-									<ul class="p-lr-28 p-lr-15-sm">
-										<li class="flex-w flex-t p-b-7">
-											<span class="stext-102 cl3 size-205">
-												<%= productDetails.additionalInfo %>
-											</span>
-										</li>
-									</ul>
+			<!-- - -->
+			<div class="tab-pane fade" id="reviews" role="tabpanel">
+				<div class="row">
+					<div class="col-sm-10 col-md-8 col-lg-6 m-lr-auto">
+						<div class="p-b-30 m-lr-15-sm">
+							<!-- Review -->
+							<div class="flex-w flex-t p-b-68">
+								<div class="wrap-pic-s size-109 bor0 of-hidden m-r-18 m-t-6">
+									<img src="/frontend/images/avatar-01.jpg" alt="AVATAR">
 								</div>
-							</div>
-						</div>
 
-						<!-- - -->
-						<div class="tab-pane fade" id="reviews" role="tabpanel">
-							<div class="row">
-								<div class="col-sm-10 col-md-8 col-lg-6 m-lr-auto">
-									<div class="p-b-30 m-lr-15-sm">
-										<!-- Review -->
-										<div class="flex-w flex-t p-b-68">
-											<div class="wrap-pic-s size-109 bor0 of-hidden m-r-18 m-t-6">
-												<img src="/frontend/images/avatar-01.jpg" alt="AVATAR">
-											</div>
+								<div class="size-207">
+									<div class="flex-w flex-sb-m p-b-17">
+										<span class="mtext-107 cl2 p-r-20">
+											Ariana Grande
+										</span>
 
-											<div class="size-207">
-												<div class="flex-w flex-sb-m p-b-17">
-													<span class="mtext-107 cl2 p-r-20">
-														Ariana Grande
-													</span>
-
-													<span class="fs-18 cl11">
-														<i class="zmdi zmdi-star"></i>
-														<i class="zmdi zmdi-star"></i>
-														<i class="zmdi zmdi-star"></i>
-														<i class="zmdi zmdi-star"></i>
-														<i class="zmdi zmdi-star-half"></i>
-													</span>
-												</div>
-
-												<p class="stext-102 cl6">
-													Quod autem in homine praestantissimum atque optimum est, id deseruit. Apud ceteros autem philosophos
-												</p>
-											</div>
-										</div>
-										
-										<!-- Add review -->
-										<form class="w-full">
-											<h5 class="mtext-108 cl2 p-b-7">
-												Add a review
-											</h5>
-
-											<p class="stext-102 cl6">
-												Your email address will not be published. Required fields are marked *
-											</p>
-
-											<div class="flex-w flex-m p-t-50 p-b-23">
-												<span class="stext-102 cl3 m-r-16">
-													Your Rating
-												</span>
-
-												<span class="wrap-rating fs-18 cl11 pointer">
-													<i class="item-rating pointer zmdi zmdi-star-outline"></i>
-													<i class="item-rating pointer zmdi zmdi-star-outline"></i>
-													<i class="item-rating pointer zmdi zmdi-star-outline"></i>
-													<i class="item-rating pointer zmdi zmdi-star-outline"></i>
-													<i class="item-rating pointer zmdi zmdi-star-outline"></i>
-													<input class="dis-none" type="number" name="rating">
-												</span>
-											</div>
-
-											<div class="row p-b-25">
-												<div class="col-12 p-b-5">
-													<p class="stext-10 cl3" for="review">Your review</p>
-													<textarea class="size-110 bor8 stext-102 cl2 p-lr-20 p-tb-10" id="review" name="review"></textarea>
-												</div>
-
-												<div class="col-sm-6 p-b-5">
-													<p class="stext-102 cl3" for="name">Name</p>
-													<input class="size-111 bor8 stext-102 cl2 p-lr-20" id="name" type="text" name="name">
-												</div>
-
-												<div class="col-sm-6 p-b-5">
-													<p class="stext-102 cl3" for="email">Email</p>
-													<input class="size-111 bor8 stext-102 cl2 p-lr-20" id="email" type="text" name="email">
-												</div>
-											</div>
-
-											<button class="flex-c-m stext-101 cl0 size-112 bg7 bor11 hov-btn3 p-lr-15 trans-04 m-b-10">
-												Submit
-											</button>
-										</form>
+										<span class="fs-18 cl11">
+											<i class="zmdi zmdi-star"></i>
+											<i class="zmdi zmdi-star"></i>
+											<i class="zmdi zmdi-star"></i>
+											<i class="zmdi zmdi-star"></i>
+											<i class="zmdi zmdi-star-half"></i>
+										</span>
 									</div>
+
+									<p class="stext-102 cl6">
+										Quod autem in homine praestantissimum atque optimum est, id deseruit. Apud ceteros autem philosophos
+									</p>
 								</div>
 							</div>
-						</div>
-					</div>
-				</div>
-			</div>
-		</div>
+							
+							<!-- Add review -->
+							<form class="w-full">
+								<h5 class="mtext-108 cl2 p-b-7">
+									Add a review
+								</h5>
 
-		<div class="bg6 flex-c-m flex-w size-302 m-t-73 p-tb-15">
-			<span class="stext-107 cl6 p-lr-25">
-				SKU: JAK-01
-			</span>
+								<p class="stext-102 cl6">
+									Your email address will not be published. Required fields are marked *
+								</p>
 
-			<span class="stext-107 cl6 p-lr-25">
-				Categories: Jacket, Men
-			</span>
-		</div>
-	</section>
+								<div class="flex-w flex-m p-t-50 p-b-23">
+									<span class="stext-102 cl3 m-r-16">
+										Your Rating
+									</span>
 
-
-	<!-- Related Products -->
-	<section class="sec-relate-product bg0 p-t-45 p-b-105">
-		<div class="container">
-			<div class="p-b-45">
-				<h3 class="ltext-106 cl5 txt-center">
-					Related Products
-				</h3>
-			</div>
-
-			<!-- Slide2 -->
-			 
-			<div class="wrap-slick2">
-				
-				<div class="slick2">
-					<% for(let i=0;i<product.length;i++){  if(productDetails.category.name == product[i].category.name)  {	%>
-					
-					<div class="item-slick2 p-l-15 p-r-15 p-t-15 p-b-15">
-						<!-- Block2 -->
-						
-						<div class="block2">
-							<div class="block2-txt-child2 flex-r p-t-3">
-								
-								<button onclick="ajaxWishlist('<%= product[i]._id %>')" class="btn-addwish-b2 dis-block pos-relative ">
-									<% 
-			let isInWishlist = false;
-			// Check if wishlist exists and has a wishlist property
-			if (wishlist && wishlist.wishlist) {
-				isInWishlist = wishlist.wishlist.some(item => product[i]._id.toString() === item.productId.toString());
-			}
-			%>
-			<% if (isInWishlist) { %>
-				<img src="/frontend/images/icons/icon-heart-02.png" alt="ICON">
-			<% } else { %>
-				<img class="icon-heart1 dis-block trans-04" src="/frontend/images/icons/icon-heart-01.png" alt="ICON">
-				<img class="icon-heart2 dis-block trans-04 ab-t-l" src="/frontend/images/icons/icon-heart-02.png" alt="ICON">
-			<% } %>
-								</button>
-							</div>
-						
-							<div class="block2-pic hov-img0" >
-								<img src="/uploads/re-image/<%= product[i].productImage[0] %>" alt="<%= product[i].productName %>">
-
-								<a href="/productDetails/<%= product[i]._id %>" class="block2-btn flex-c-m stext-103 cl2 size-102 bg0 bor2 hov-btn1 p-lr-15 trans-04">
-									Product View
-								</a>
-							</div>
-
-							<div class="block2-txt flex-w flex-t p-t-14">
-								<div class="block2-txt-child1 flex-col-l ">
-									<a href="product-detail.html" class="stext-104 cl4 hov-cl1 trans-04 js-name-b2 p-b-6">
-										<%= product[i].productName %>
-									</a>
-
-									<span class="stext-105 cl3">
-										<%= product[i].salePrice %>
+									<span class="wrap-rating fs-18 cl11 pointer">
+										<i class="item-rating pointer zmdi zmdi-star-outline"></i>
+										<i class="item-rating pointer zmdi zmdi-star-outline"></i>
+										<i class="item-rating pointer zmdi zmdi-star-outline"></i>
+										<i class="item-rating pointer zmdi zmdi-star-outline"></i>
+										<i class="item-rating pointer zmdi zmdi-star-outline"></i>
+										<input class="dis-none" type="number" name="rating">
 									</span>
 								</div>
 
-								
-							</div>
-					
+								<div class="row p-b-25">
+									<div class="col-12 p-b-5">
+										<p class="stext-10 cl3" for="review">Your review</p>
+										<textarea class="size-110 bor8 stext-102 cl2 p-lr-20 p-tb-10" id="review" name="review"></textarea>
+									</div>
+
+									<div class="col-sm-6 p-b-5">
+										<p class="stext-102 cl3" for="name">Name</p>
+										<input class="size-111 bor8 stext-102 cl2 p-lr-20" id="name" type="text" name="name">
+									</div>
+
+									<div class="col-sm-6 p-b-5">
+										<p class="stext-102 cl3" for="email">Email</p>
+										<input class="size-111 bor8 stext-102 cl2 p-lr-20" id="email" type="text" name="email">
+									</div>
+								</div>
+
+								<button class="flex-c-m stext-101 cl0 size-112 bg7 bor11 hov-btn3 p-lr-15 trans-04 m-b-10">
+									Submit
+								</button>
+							</form>
 						</div>
-					
-						
 					</div>
-					<%} } %>
 				</div>
-				
 			</div>
-		
 		</div>
 	</div>
-	</section>
-	
-	<script src="/frontend/vendor/jquery/jquery-3.2.1.min.js"></script>
-	<script src='/hover-extended-magnify/extm.min.js'></script>
-	<script>
+</div>
+</div>
 
 
+</section>
 
-	</script>
-
-	
-
-	
-	<%-include('../../views/partials/user/footer')  %>
-	
-
-
-	<script>
-
-		// radio button finout
+<script>
 let selectedColor;
 const cartColorsForProduct = JSON.parse('<%- JSON.stringify(cartColorsForProduct) %>');
+const productVariants = JSON.parse('<%- JSON.stringify(productDetails.variants) %>');
 
-// Update button text based on color selection
+function initImageZoom() {
+  const mainImage = $('#mainImage');
+  
+  // Destroy existing zoom if any
+  if (mainImage.data('elevateZoom')) {
+    mainImage.data('elevateZoom').remove();
+  }
+  
+  // Reinitialize zoom with options
+  mainImage.elevateZoom({
+    zoomType: "inner", // Inner zoom type
+    cursor: "crosshair", // Crosshair cursor for zoom
+    responsive: true // Make zoom responsive
+  });
+}
+
+
+function changeMainImage(src, thumbnail) {
+  const mainImage = document.getElementById('mainImage');
+  const zoomLink = mainImage.nextElementSibling;
+  
+  mainImage.src = src;
+  zoomLink.href = src;
+  
+  document.querySelectorAll('.thumbnail').forEach(thumb => thumb.classList.remove('active'));
+  thumbnail.classList.add('active');
+}
+
+function selectColor(element, color) {
+  document.querySelectorAll('.color-option').forEach(option => option.classList.remove('active'));
+  element.classList.add('active');
+  selectedColor = color;
+  updateButtonText(color);
+  updateProductImages(color);
+  initImageZoom();
+}
+
 function updateButtonText(color) {
   const button = document.getElementById('cartButton');
-  if (!color) return;
   if (cartColorsForProduct.includes(color)) {
     button.textContent = 'Go to Cart';
     button.classList.add('in-cart');
@@ -553,155 +481,170 @@ function updateButtonText(color) {
 }
 
 
-		document.querySelectorAll('input[name="productColor"]').forEach(radio =>{
-		radio.addEventListener('change', async(event)=>{
-			 selectedColor = event.target.value;
-			 updateButtonText(selectedColor);
-			
-		})
-	})
+function updateProductImages(selectedColor) {
+  const selectedVariant = productVariants.find(variant => 
+    variant.color.toLowerCase() === selectedColor.toLowerCase()
+  );
 
+  if (selectedVariant && Array.isArray(selectedVariant.productImage)) {
+    const mainImage = document.getElementById('mainImage');
+    const zoomLink = mainImage.nextElementSibling;
+    const thumbnailContainer = document.querySelector('.thumbnail-container');
 
+    // Update main image and zoom link
+    const firstImage = `/uploads/product-variants/${selectedVariant.productImage[0]}`;
+    mainImage.src = firstImage;
+    zoomLink.href = firstImage;
 
+    thumbnailContainer.innerHTML = '';
 
-		function handleCartAction(event,productId){
-			
-			event.preventDefault();
+    selectedVariant.productImage.forEach((image, index) => {
+      const thumbnail = document.createElement('img');
+      thumbnail.className = `thumbnail ${index === 0 ? 'active' : ''}`;
+      thumbnail.src = `/uploads/product-variants/${image}`;
+      thumbnail.alt = `Thumbnail ${index + 1}`;
+      thumbnail.onclick = function() { 
+        changeMainImage(this.src, this);
+        // Update zoom link when thumbnail is clicked
+        zoomLink.href = this.src;
+      };
+      thumbnailContainer.appendChild(thumbnail);
+    });
+	initImageZoom();
+  }
+}
 
-			if(!selectedColor){
-				Swal.fire({
-					toast:true,
-					position:'center',
-					icon:'warning',
-					title:"Warning",
-					text:'Please select a color first',
-					showConfirmButton:false,
-					timer:1500,
-					customClass:'center-toast',
-				})
-				return;
-			}
-			if (cartColorsForProduct.includes(selectedColor)) {
+function handleCartAction(event, productId) {
+  event.preventDefault();
+  
+  if (!selectedColor) {
+    Swal.fire({
+      toast: true,
+      position: 'center',
+      icon: 'warning',
+      title: 'Warning',
+      text: 'Please select a color first',
+      showConfirmButton: false,
+      timer: 1500,
+      customClass: 'center-toast',
+    });
+    return;
+  }
+
+  if (cartColorsForProduct.includes(selectedColor)) {
     window.location.href = '/cart';
     return;
   }
 
-			
-			addToCartAjax(productId,selectedColor)
-		}
+  addToCartAjax(productId, selectedColor);
+}
 
+function addToCartAjax(productId, color) {
+  $.ajax({
+    type: 'POST',
+    url: `/cart/${productId}`,
+    dataType: 'json',
+    contentType: 'application/json',
+    data: JSON.stringify({ color }),
+    success: function(response) {
+      if (response.success) {
+        Swal.fire({
+          toast: true,
+          position: 'center',
+          icon: 'success',
+          title: 'Success',
+          text: response.message,
+          showConfirmButton: false,
+          timer: 1500,
+          customClass: 'center-toast',
+        }).then(() => {
+          window.location.href = `/productDetails/${productId}`;
+        });
+      }
+    },
+    error: function(xhr) {
+      const response = xhr.responseJSON;
+      Swal.fire({
+        toast: true,
+        position: 'center',
+        icon: 'error',
+        title: 'Error',
+        text: response.message,
+        showConfirmButton: false,
+        timer: 1500,
+        customClass: 'center-toast',
+      });
+    }
+  });
+}
 
-	function addToCartAjax(productId,color){
-		
-			$.ajax({
-				type:'POST',
-				url:`/cart/${productId}`,
-				dataType:'json',
-				contentType:'application/json',
-				data:JSON.stringify({color}),
-				success:function(response){
-					if(response.success){
-						Swal.fire({
-							toast:true,
-							position:'center',
-							icon:'success',
-							title:'Success',
-							text:response.message,
-							showConfirmButton:false,
-							timer:1500,
-							customClass:'center-toast',
-						}).then(() =>{
-							window.location.href = `/productDetails/${productId}`;
-						});
-					}
-				},
-				error:function(xhr){
-					const response = xhr.responseJSON;
-					Swal.fire({
-						toast:true,
-						position:'center',
-						icon:'error',
-						title:'Error',
-						text:response.message,
-						showConfirmButton:false,
-						timer:1500,
-						customClass:'center-toast',
-					});
-				}
-				
-			})
-		}
-	</script>
+function wishlist(event, productId) {
+  event.preventDefault();
+  
+  if (!selectedColor) {
+    Swal.fire({
+      toast: true,
+      position: 'center',
+      icon: 'warning',
+      title: 'Warning',
+      text: 'Please select a color first',
+      showConfirmButton: false,
+      timer: 1500,
+      customClass: 'center-toast',
+    });
+    return;
+  }
+  
+  ajaxWishlist(productId);
+}
 
+function ajaxWishlist(productId) {
+  $.ajax({
+    url: `/wishlist/${productId}`,
+    type: 'POST',
+    dataType: 'json',
+    contentType: 'application/json',
+    data: JSON.stringify({ color: selectedColor }),
+    success: function(response) {
+      if (response.success) {
+        Swal.fire({
+          toast: true,
+          position: 'center',
+          icon: 'success',
+          title: response.message,
+          showConfirmButton: false,
+          timer: 1500,
+          customClass: 'center-toast',
+        });
+      }
+    },
+    error: function(xhr) {
+      const errorMessage = xhr.responseJSON?.message || 'An error occurred';
+      Swal.fire({
+        toast: true,
+        position: 'center',
+        icon: 'error',
+        title: 'Error',
+        text: errorMessage,
+        showConfirmButton: false,
+        timer: 1500,
+        customClass: 'center-toast',
+      });
+    }
+  });
+}
 
-
-<script>
-
-	function wishlist(event,productId){
-		
-		event.preventDefault();
-
-		if(!selectedColor){
-				Swal.fire({
-					toast:true,
-					position:'center',
-					icon:'warning',
-					title:"Warning",
-					text:'Please select a color first',
-					showConfirmButton:false,
-					timer:1500,
-					customClass:'center-toast',
-				})
-				return;
-			}
-			ajaxWishlist(productId);
-
-		
-	}
-
-
-	function ajaxWishlist(productId){
-		console.log(productId)
-		$.ajax({
-	url:`/wishlist/${productId}`,
-	type:'POST',
-	dataType:'json',
-	contentType:'application/json',
-	data:JSON.stringify({color:selectedColor}),
-
-	success:function(response){
-		if(response.success){
-			Swal.fire({
-				toast:true,
-				position:'center',
-				icon:'success',
-				title:response.message,
-				showConfirmButton:false,
-				timer:1500,
-				customClass:'center-toast',
-
-			})
-
-			
-		   
-		}
-	},
-	error:function(xhr,status,error){
-		let errorMessage = 'An error occurred';
-            if (xhr.responseJSON && xhr.responseJSON.message) {
-                errorMessage = xhr.responseJSON.message;
-            }
-		Swal.fire({
-			toast: true,
-			position: 'center',
-			icon: 'error',
-			title: 'Error',
-			text:errorMessage,
-			showConfirmButton: false,
-			timer: 1500,
-			customClass: 'center-toast',
-		});
-	}
-})
-	}
+// Initialize with first color
+window.onload = function() {
+  const firstColorOption = document.querySelector('.color-option');
+  if (firstColorOption) {
+    const firstColor = firstColorOption.style.backgroundColor;
+    selectColor(firstColorOption, firstColor);
+    
+    // NEW: Initialize zoom after color selection
+    initImageZoom();
+  }
+};
 </script>
+
+<%-include('../../views/partials/user/footer')  %>

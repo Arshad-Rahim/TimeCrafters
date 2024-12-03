@@ -54,7 +54,7 @@ const brands = await Brand.find({isBlocked:false});
         .sort({ createdOn: -1 })
         .limit(8),
     ])
-   
+
 
     if (userData) {
       if (userData.isBlocked) {

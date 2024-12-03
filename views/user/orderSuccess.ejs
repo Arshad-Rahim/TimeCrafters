@@ -97,7 +97,18 @@
                             <% for(let i=0;i<order.items.length;i++) {%>
                             <tr>
                                 <td class="px-4 py-2">
-                                    <img src="uploads/re-image/<%= order.items[i].productImage %>" alt="Img" class="w-16 h-16 object-cover">
+                                    <% 
+                                    // Find the variant that matches the order item's color
+                                    const matchedVariant = order.items[i].productId.variants.find(variant => 
+                                        variant.color.toLowerCase() === order.items[i].color.toLowerCase()
+                                    );
+                                    
+                                    // Use the first image of the matched variant, or fallback to the first variant's image
+                                    const displayImage = matchedVariant 
+                                        ? matchedVariant.productImage[0] 
+                                        : order.items[i].productId.variants[0].productImage[0];
+                                    %>
+                                    <img src="uploads/product-variants/<%= displayImage %>" alt="Product Image" class="w-16 h-16 object-cover">
                                 </td>
                                 <td class="px-4 py-2"><%= order.items[i].ProductName %></td>
                                 <td class="px-4 py-2"><%= order.items[i].color%></td>
