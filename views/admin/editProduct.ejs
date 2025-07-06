@@ -1,6 +1,6 @@
 <%- include("../../views/partials/admin/header") %>
 <head>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cropperjs/dist/cropper.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cropperjs@1.6.1/dist/cropper.min.css">
 </head>
 <style>
     .error-message { color: red; }
@@ -66,61 +66,42 @@
                         <div class="col-lg-4 mb-4">
                             <label class="form-label">Brand</label>
                             <select class="form-select border" name="brand">
-                                
-                               
-
                                 <% for(let i = 0; i < brand.length; i++) { %>
                                     <option value="<%= brand[i].brandName %>" 
                                         <%= product.brand === brand[i].brandName ? 'selected' : '' %>>
                                         <%= brand[i].brandName %>
                                     </option>
                                 <% } %>
-                                
                             </select>
                             <div id="brand-error" class="error-message"></div>
                         </div>
-
                         <div class="mb-4">
-
-                                
-                                
-                            
                             <label class="form-label">Full description</label>
-                            
-                            <textarea  placeholder="Type here" id="descriptionid" name="description" class="form-control border"
-                                rows="4">  <%= product.description %> </textarea>
-                                
+                            <textarea placeholder="Type here" id="descriptionid" name="description" class="form-control border"
+                                rows="4"><%= product.description %></textarea>
                             <div id="description-error" class="error-message"></div>
-                        
                         </div>
-
                         <div class="mb-4">
                             <label for="additionalInfo" class="form-label">Additional Information</label>
                             <textarea placeholder="Type here" id="additionalInfo" name="additionalInfo" class="form-control border" rows="4"><%= product.additionalInfo %></textarea>
                             <div id="additionalInfo-error" class="error-message"></div>
                         </div>
-
                         <div class="row">
                             <div class="col-lg-4">
                                 <div class="mb-4">
                                     <label class="form-label">Regular price</label>
                                     <input placeholder="$" name="regularPrice" type="text"
-                                        class="form-control border" value="<%= product.regularPrice%>">
+                                        class="form-control border" value="<%= product.regularPrice %>">
                                         <div id="regularPrice-error" class="error-message"></div>
                                 </div>
                             </div>
                             <div class="col-lg-4">
                                 <div class="mb-4">
                                     <label class="form-label">Sale price</label>
-                                    <input placeholder="$" name="salePrice" type="text" class="form-control border" value="<%= product.salePrice%>">
+                                    <input placeholder="$" name="salePrice" type="text" class="form-control border" value="<%= product.salePrice %>">
                                     <div id="salePrice-error" class="error-message"></div>
                                 </div>
-                                
                             </div>
-                            
-                        </div>
-                    
-                            
                         </div>
                         <div class="card mb-4">
                             <div class="card-body">
@@ -128,28 +109,18 @@
                                     <div class="col-sm-6 mb-3">
                                         <label class="form-label">Category</label>
                                         <select class="form-select border" style="width: 150px;" name="category">
-                                       
-                                       
-
-                                            <% for(let i=0;i<cat.length;i++){%>
-                                            
-                                                <option value="<%=cat[i].name%>"
+                                            <% for(let i=0; i<cat.length; i++){ %>
+                                                <option value="<%= cat[i].name %>"
                                                       <%= product.category.name === cat[i].name ? 'selected' : '' %>>
-                                                     
-                                                    <%=cat[i].name%>
+                                                    <%= cat[i].name %>
                                                 </option>
-                                                
-                                                <%}%>  
-                                                
+                                            <% } %>  
                                         </select>
                                         <div id="category-error" class="error-message"></div>
                                     </div>
                                 </div>
                             </div>
                         </div>
-
-                        <!-- ... -->
-
                         <div class="card mb-4">
                             <div class="card-header">
                                 <h4>Product Variants</h4>
@@ -174,56 +145,54 @@
                                                            value="<%= product.variants[i].quantity %>"
                                                            required>
                                                 </div>
-    <div class="card mb-2">
-    <div class="card-header">
-        <h4>Variant Images</h4>
-    </div>
-    <div class="card-body">
-        <div class="row">
-            <% for(let j = 0; j < 4; j++) { %>
-                <div class="card-body align-items-center" style="margin-bottom: 20px;">
-                    <div class="image-preview-container">
-                        <!-- Show existing image if available -->
-                        <% if (product.variants[i].productImage && product.variants[i].productImage[j]) { %>
-                            <img src="/uploads/product-variants/<%= product.variants[i].productImage[j] %>" 
-                                 alt="" 
-                                 id="imgView<%= i %>_<%= j %>"
-                                 style="max-width: 200px; max-height: 200px; object-fit: contain;">
-                        <% } else { %>
-                            <img src="" 
-                                 alt="" 
-                                 id="imgView<%= i %>_<%= j %>"
-                                 style="max-width: 200px; max-height: 200px; object-fit: contain; display: none;">
-                        <% } %>
-                    </div>
-                    <input class="form-control mt-2" 
-                           type="file" 
-                           name="variants[<%= i %>][images][<%= j %>]" 
-                           id="input<%= i %>_<%= j %>"
-                           accept="image/png, image/jpeg, image/jpg"
-                           onchange="viewImage(event, '<%= i %>_<%= j %>')">
-                           
-                </div>
-                <div id="cropperContainer<%= i %>_<%= j %>" 
-                     class="image-cropper"
-                     style="display:none; margin: 20px 0;">
-                    <div class="cropper-wrapper" style="max-width: 500px; margin: 0 auto;">
-                        <img src="" id="croppedImg<%= i %>_<%= j %>" alt="">
-                    </div>
-                    <div class="text-center mt-2">
-                        <button type="button" 
-                                id="saveButton<%= i %>_<%= j %>" 
-                                class="btn btn-primary">Save</button>
-                        <button type="button" 
-                                class="btn btn-secondary ms-2"
-                                onclick="cancelCrop('<%= i %>_<%= j %>')">Cancel</button>
-                    </div>
-                </div>
-            <% } %>
-        </div>
-    </div>
-</div>
-
+                                                <div class="card mb-2">
+                                                    <div class="card-header">
+                                                        <h4>Variant Images</h4>
+                                                    </div>
+                                                    <div class="card-body">
+                                                        <div class="row">
+                                                            <div id="addedImagesContainer<%= i %>" class="thumbnails-container mb-2"></div>
+                                                            <% for(let j = 0; j < 4; j++) { %>
+                                                                <div class="card-body align-items-center" style="margin-bottom: 20px;">
+                                                                    <div class="image-preview-container">
+                                                                        <% if (product.variants[i].productImage && product.variants[i].productImage[j]) { %>
+                                                                            <img src="/Uploads/product-variants/<%= product.variants[i].productImage[j] %>" 
+                                                                                 alt="" 
+                                                                                 id="imgView<%= i %>_<%= j %>"
+                                                                                 style="max-width: 200px; max-height: 200px; object-fit: contain;">
+                                                                        <% } else { %>
+                                                                            <img src="" 
+                                                                                 alt="" 
+                                                                                 id="imgView<%= i %>_<%= j %>"
+                                                                                 style="max-width: 200px; max-height: 200px; object-fit: contain; display: none;">
+                                                                        <% } %>
+                                                                    </div>
+                                                                    <input class="form-control mt-2" 
+                                                                           type="file" 
+                                                                           name="variants[<%= i %>][images][<%= j %>]" 
+                                                                           id="input<%= i %>_<%= j %>"
+                                                                           accept="image/png, image/jpeg, image/jpg"
+                                                                           onchange="viewImage(event, '<%= i %>_<%= j %>')">
+                                                                </div>
+                                                                <div id="cropperContainer<%= i %>_<%= j %>" 
+                                                                     class="image-cropper"
+                                                                     style="display:none; margin: 20px 0;">
+                                                                    <div class="cropper-wrapper" style="max-width: 500px; margin: 0 auto;">
+                                                                        <img src="" id="croppedImg<%= i %>_<%= j %>" alt="">
+                                                                    </div>
+                                                                    <div class="text-center mt-2">
+                                                                        <button type="button" 
+                                                                                id="saveButton<%= i %>_<%= j %>" 
+                                                                                class="btn btn-primary">Save</button>
+                                                                        <button type="button" 
+                                                                                class="btn btn-secondary ms-2"
+                                                                                onclick="cancelCrop('<%= i %>_<%= j %>')">Cancel</button>
+                                                                    </div>
+                                                                </div>
+                                                            <% } %>
+                                                        </div>
+                                                    </div>
+                                                </div>
                                                 <div class="col-12">
                                                     <button type="button" class="btn btn-danger" onclick="removeVariant(<%= i %>)">
                                                         Remove Variant
@@ -247,12 +216,13 @@
         </div>
     </div>
 </section>
-<script src="https://cdn.jsdelivr.net/npm/cropperjs/dist/cropper.min.js"></script>
-<%- include("../../views/partials/admin/footer") %>
 
+<!-- Load Cropper.js script after the DOM is fully loaded -->
+<script src="https://cdn.jsdelivr.net/npm/cropperjs@1.6.1/dist/cropper.min.js"></script>
 <script>
 let variantCount = <%= product.variants.length %>;
 let cropperInstances = {};
+
 function validateAndSubmit(event, productId) {
     event.preventDefault();
     if (validateForm()) {
@@ -277,14 +247,13 @@ function validateAndSubmit(event, productId) {
                     formData.append(`variants[${index}][newImages][${i}]`, imageInput.files[0]);
                 } 
                 // If no new image is selected, check for existing image
-                else if (existingImage && existingImage.src.includes('/uploads/product-variants/')) {
+                else if (existingImage && existingImage.src.includes('/Uploads/product-variants/')) {
                     const existingImageName = existingImage.src.split('/').pop();
                     formData.append(`variants[${index}][existingImages][${i}]`, existingImageName);
                 }
             }
         });
 
-        // Rest of the submit logic remains the same
         fetch(`/admin/editProduct/${productId}`, {
             method: 'POST',
             body: formData
@@ -333,65 +302,84 @@ function validateAndSubmit(event, productId) {
 function viewImage(event, index) {
     let input = event.target;
     let reader = new FileReader();
+    
     reader.onload = function() {
-        let dataURL = reader.result;
-        let image = document.getElementById('imgView' + index);
-        let cropperContainer = document.getElementById('cropperContainer' + index);
-        let croppedImage = document.getElementById('croppedImg' + index);
-        let saveButton = document.getElementById('saveButton' + index);
-        
-        image.src = dataURL;
-        image.style.display = 'block';
-        
-        // Destroy existing cropper if it exists
-        if (cropperInstances[index]) {
-            cropperInstances[index].destroy();
-        }
-        
-        let cropper = new Cropper(image, {
-            aspectRatio: 1,
-            viewMode: 1,
-            guides: true,
-            background: false,
-            autoCropArea: 1,
-            zoomable: true
-        });
-        
-        cropperInstances[index] = cropper;
-        cropperContainer.style.display = 'block';
-        
-        saveButton.onclick = async function() {
-            let croppedCanvas = cropper.getCroppedCanvas();
-            croppedImage.src = croppedCanvas.toDataURL('image/jpeg', 1.0);
+        try {
+            let dataURL = reader.result;
+            let image = document.getElementById('imgView' + index);
+            let cropperContainer = document.getElementById('cropperContainer' + index);
+            let croppedImage = document.getElementById('croppedImg' + index);
+            let saveButton = document.getElementById('saveButton' + index);
             
-            let timestamp = new Date().getTime();
-            let fileName = `cropped-img-${timestamp}-${index}.png`;
+            image.src = dataURL;
+            image.style.display = 'block';
             
-            await croppedCanvas.toBlob(blob => {
-                let inputFile = document.getElementById('input' + index);
-                let imgFile = new File([blob], fileName, { type: 'image/png' });
-                const fileList = new DataTransfer();
-                fileList.items.add(imgFile);
-                inputFile.files = fileList.files;
+            // Destroy existing cropper if it exists
+            if (cropperInstances[index]) {
+                cropperInstances[index].destroy();
+            }
+            
+            // Initialize Cropper.js
+            if (typeof Cropper === 'undefined') {
+                throw new Error('Cropper.js is not loaded');
+            }
+            
+            let cropper = new Cropper(image, {
+                aspectRatio: 1,
+                viewMode: 1,
+                guides: true,
+                background: false,
+                autoCropArea: 1,
+                zoomable: true
             });
             
-            const [variantIndex, imageIndex] = index.split('_');
-            const thumbnailsContainer = document.getElementById(`addedImagesContainer${variantIndex}`);
+            cropperInstances[index] = cropper;
+            cropperContainer.style.display = 'block';
             
-            const newThumbnail = document.createElement('div');
-            newThumbnail.className = 'thumbnail';
-            newThumbnail.id = `thumbnail-${variantIndex}-${imageIndex}`;
-            newThumbnail.innerHTML = `
-                <img src="${croppedImage.src}" alt="Variant Image">
-                <span class="remove-image" onclick="removeImage(${variantIndex}, ${imageIndex})">&times;</span>
-            `;
-            
-            thumbnailsContainer.appendChild(newThumbnail);
-            
-            cropperContainer.style.display = 'none';
-            cropper.destroy();
-            delete cropperInstances[index];
-        };
+            saveButton.onclick = async function() {
+                let croppedCanvas = cropper.getCroppedCanvas();
+                croppedImage.src = croppedCanvas.toDataURL('image/jpeg', 1.0);
+                
+                let timestamp = new Date().getTime();
+                let fileName = `cropped-img-${timestamp}-${index}.png`;
+                
+                await croppedCanvas.toBlob(blob => {
+                    let inputFile = document.getElementById('input' + index);
+                    let imgFile = new File([blob], fileName, { type: 'image/png' });
+                    const fileList = new DataTransfer();
+                    fileList.items.add(imgFile);
+                    inputFile.files = fileList.files;
+                });
+                
+                const [variantIndex, imageIndex] = index.split('_');
+                const thumbnailsContainer = document.getElementById(`addedImagesContainer${variantIndex}`);
+                
+                const newThumbnail = document.createElement('div');
+                newThumbnail.className = 'thumbnail';
+                newThumbnail.id = `thumbnail-${variantIndex}-${imageIndex}`;
+                newThumbnail.innerHTML = `
+                    <img src="${croppedImage.src}" alt="Variant Image">
+                    <span class="remove-image" onclick="removeImage(${variantIndex}, ${imageIndex})">×</span>
+                `;
+                
+                thumbnailsContainer.appendChild(newThumbnail);
+                
+                cropperContainer.style.display = 'none';
+                cropper.destroy();
+                delete cropperInstances[index];
+            };
+        } catch (error) {
+            console.error('Error initializing Cropper:', error);
+            Swal.fire({
+                toast: true,
+                position: "top",
+                icon: 'error',
+                title: 'Image Processing Error',
+                text: 'Failed to initialize image cropper. Please try again or ensure Cropper.js is loaded.',
+                showConfirmButton: false,
+                timer: 3000
+            });
+        }
     };
     
     reader.readAsDataURL(input.files[0]);
@@ -411,7 +399,7 @@ function removeImage(variantIndex, imageIndex) {
 
 function cancelCrop(index) {
     const cropperContainer = document.getElementById(`cropperContainer${index}`);
-    const fileInput = document.getElementById(`input${index}`);
+    const file287Input = document.getElementById(`input${index}`);
     
     cropperContainer.style.display = 'none';
     fileInput.value = '';
@@ -422,7 +410,6 @@ function cancelCrop(index) {
     }
 }
 
-
 function addVariant() {
     const container = document.getElementById('variants-container');
     const variantDiv = document.createElement('div');
@@ -431,27 +418,24 @@ function addVariant() {
     
     variantDiv.innerHTML = `
         <div class="row">
-            <!-- Existing variant HTML -->
-             <div class="col-md-6 mb-3">
+            <div class="col-md-6 mb-3">
                 <label class="form-label">Color (lowercase letters only)</label>
                 <input type="text" name="variants[${variantCount}][color]" 
                        class="form-control" 
                        placeholder="e.g. red, blue, green" 
                        required>
             </div>
-            
             <div class="col-md-6 mb-3">
                 <label class="form-label">Quantity</label>
                 <input type="number" name="variants[${variantCount}][quantity]" class="form-control" required>
             </div>
-
             <div class="card mb-2">
                 <div class="card-header">
                     <h4>Variant Images</h4>
                 </div>
                 <div class="card-body">
                     <div id="addedImagesContainer${variantCount}" class="thumbnails-container mb-2"></div>
-                    ${[1, 2, 3, 4].map(imgIndex => `
+                    ${[0, 1, 2, 3].map(imgIndex => `
                         <div class="mb-2">
                             <input class="form-control" type="file" 
                                    name="variants[${variantCount}][images][${imgIndex}]" 
@@ -488,7 +472,6 @@ function addVariant() {
     container.appendChild(variantDiv);
     variantCount++;
 }
-
 
 function removeVariant(id) {
     const variantDiv = document.getElementById(`variant-${id}`);
@@ -631,3 +614,4 @@ function clearErrorMessages() {
     });
 }
 </script>
+<%- include("../../views/partials/admin/footer") %>

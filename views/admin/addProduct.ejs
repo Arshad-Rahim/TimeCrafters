@@ -1,197 +1,171 @@
 <%- include("../../views/partials/admin/header") %>
 <head>
-   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cropperjs/dist/cropper.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cropperjs@1.6.1/dist/cropper.min.css">
 </head>
 <style>
-    
-
-.is-invalid {
-    border-color: red !important;
-}
-
-.variant-error {
-    color: red;
-    font-size: 0.85rem;
-    margin-top: 5px;
-}
-
-.variant-item {
-    position: relative;
-    background: #f8f9fa;
-    transition: all 0.3s ease;
-}
-
-.variant-item:hover {
-    background: #fff;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
-   .error-message{
-       color: red;
-   }
-
-
-       .thumbnails-container {
-           display: flex;
-           overflow-x: auto;
-       }
-
-
-       .thumbnail {
-           margin-right: 10px;
-
-
-       }
+    .error-message {
+        color: red;
+    }
+    .is-invalid {
+        border-color: red !important;
+    }
+    .variant-error {
+        color: red;
+        font-size: 0.85rem;
+        margin-top: 5px;
+    }
+    .variant-item {
+        position: relative;
+        background: #f8f9fa;
+        transition: all 0.3s ease;
+    }
+    .variant-item:hover {
+        background: #fff;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .thumbnails-container {
+        display: flex;
+        overflow-x: auto;
+    }
+    .thumbnail {
+        margin-right: 10px;
+        position: relative;
+    }
+    .thumbnail img {
+        width: 50px;
+        height: 50px;
+        object-fit: cover;
+    }
+    .remove-image {
+        position: absolute;
+        top: -5px;
+        right: -5px;
+        background: red;
+        color: white;
+        border-radius: 50%;
+        padding: 2px 5px;
+        font-size: 12px;
+        cursor: pointer;
+    }
 </style>
-   <section class="content-main">
-       <div class="row">
-           <div class="col-9">
-               <div class="content-header">
-                   <h2 class="content-title">Add New Product</h2>
-               </div>
-           </div>
-           <div class="col-lg-6">
-               <div class="card mb-4">
-                   <div class="card-body">
+<section class="content-main">
+    <div class="row">
+        <div class="col-9">
+            <div class="content-header">
+                <h2 class="content-title">Add New Product</h2>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="card mb-4">
+                <div class="card-body">
                     <form id="productForm" enctype="multipart/form-data" onsubmit="validateAndSubmit(event)">
-                           <div class="mb-4">
-                               <label for="product_name" class="form-label">Product Name</label>
-                               <input type="text" placeholder="Type here" name="productName"
-                                   class="form-control border" id="product_name">
-                               <div id="productName-error" class="error-message"></div>
-                           </div>
-                           <div class="col-lg-4 mb-4">
-                               <label class="form-label">Brand</label>
-                               <select class="form-select border" name="brand">
-                                   
-                                <% for(let i=0;i<brand.length;i++){ %>
-                                       <option value="<%=brand[i].brandName%>">
-                                           
-                                        <%=brand[i].brandName%> 
-
-                                         
-                                       </option>
-                                       
-                                    <% } %> 
-                               </select>
-                               <div id="brand-error" class="error-message"></div>
-                           </div>
-                           <div class="mb-4">
-                               <label class="form-label">Full description</label>
-                               <textarea placeholder="Type here" id="descriptionid" name="description" class="form-control border"
-                                   rows="4"></textarea>
-                               <div id="description-error" class="error-message"></div>
-                           </div>
-
-                           <div class="mb-4">
+                        <div class="mb-4">
+                            <label for="product_name" class="form-label">Product Name</label>
+                            <input type="text" placeholder="Type here" name="productName"
+                                class="form-control border" id="product_name">
+                            <div id="productName-error" class="error-message"></div>
+                        </div>
+                        <div class="col-lg-4 mb-4">
+                            <label class="form-label">Brand</label>
+                            <select class="form-select border" name="brand">
+                                <% for(let i=0; i<brand.length; i++){ %>
+                                    <option value="<%=brand[i].brandName%>">
+                                        <%=brand[i].brandName%>
+                                    </option>
+                                <% } %>
+                            </select>
+                            <div id="brand-error" class="error-message"></div>
+                        </div>
+                        <div class="mb-4">
+                            <label class="form-label">Full description</label>
+                            <textarea placeholder="Type here" id="descriptionid" name="description" class="form-control border"
+                                rows="4"></textarea>
+                            <div id="description-error" class="error-message"></div>
+                        </div>
+                        <div class="mb-4">
                             <label for="additionalInfo" class="form-label">Additional Information</label>
                             <textarea placeholder="Type here" id="additionalInfo" name="additionalInfo" class="form-control border" rows="4"></textarea>
                             <div id="additionalInfo-error" class="error-message"></div>
                         </div>
-                        
-                           <div class="row">
-                               <div class="col-lg-4">
-                                   <div class="mb-4">
-                                       <label class="form-label">Regular price</label>
-                                       <input placeholder="$" name="regularPrice" type="text"
-                                           class="form-control border">
-                                           <div id="regularPrice-error" class="error-message"></div>
-                                   </div>
-                               </div>
-                               <div class="col-lg-4">
-                                   <div class="mb-4">
-                                       <label class="form-label">Sale price</label>
-                                       <input placeholder="$" name="salePrice" type="text" class="form-control border">
-                                       <div id="salePrice-error" class="error-message"></div>
-                                      
-                                   </div>
-                                  
-                               </div>
-                               
-                           </div>
-                           
-                           <div class="card mb-4">
-                               <div class="card-body">
-                                   <div class="row gx-2">
-                                       <div class="col-sm-6 mb-3">
-                                           <label class="form-label">Category</label>
-                                           <select class="form-select border" style="width: 150px;" name="category">
-                                               
-
-                                            <% for(let i=0;i<cat.length;i++){%>
-                                              
-                                                   <option value="<%=cat[i].name%>">
-                                                       <%=cat[i].name%>
-                                                   </option>
-                                                  
-                                                 <%}%>
-                                                   
-                                           </select>
-                                           <div id="category-error" class="error-message"></div>
-                                       </div>
-                                   </div>
-                               </div>
-                           </div>
-                          
-                           </div>
-                           <div class="card mb-4">
-    <div class="card-header">
-        <h4>Product Variants</h4>
-    </div>
-    <div class="card-body">
-        <div id="variants-container">
-
-           
+                        <div class="row">
+                            <div class="col-lg-4">
+                                <div class="mb-4">
+                                    <label class="form-label">Regular price</label>
+                                    <input placeholder="$" name="regularPrice" type="text"
+                                        class="form-control border">
+                                    <div id="regularPrice-error" class="error-message"></div>
+                                </div>
+                            </div>
+                            <div class="col-lg-4">
+                                <div class="mb-4">
+                                    <label class="form-label">Sale price</label>
+                                    <input placeholder="$" name="salePrice" type="text" class="form-control border">
+                                    <div id="salePrice-error" class="error-message"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card mb-4">
+                            <div class="card-body">
+                                <div class="row gx-2">
+                                    <div class="col-sm-6 mb-3">
+                                        <label class="form-label">Category</label>
+                                        <select class="form-select border" style="width: 150px;" name="category">
+                                            <% for(let i=0; i<cat.length; i++){ %>
+                                                <option value="<%=cat[i].name%>">
+                                                    <%=cat[i].name%>
+                                                </option>
+                                            <% } %>
+                                        </select>
+                                        <div id="category-error" class="error-message"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <h4>Product Variants</h4>
+                            </div>
+                            <div class="card-body">
+                                <div id="variants-container">
+                                </div>
+                                <button type="button" class="btn btn-primary mt-3" onclick="addVariant()">
+                                    Add Variant
+                                </button>
+                            </div>
+                        </div>
+                        <div>
+                            <button class="btn btn-md rounded font-sm hover-up" type="submit">Publish</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
         </div>
-
-        <button type="button" class="btn btn-primary mt-3" onclick="addVariant()">
-            Add Variant
-        </button>
     </div>
-</div>
-                           <div>
-                               <button class="btn btn-md rounded font-sm hover-up"  type="submit">Publish</button>
-                           </div>
-                       </form>
-                   </div>
-               </div>
-           </div>
-       </div>
-   </section>
-<script src="https://cdn.jsdelivr.net/npm/cropperjs/dist/cropper.min.js"></script>
-     
-<%- include("../../views/partials/admin/footer") %>
-
-
+</section>
+<script src="https://cdn.jsdelivr.net/npm/cropperjs@1.6.1/dist/cropper.min.js"></script>
 <script>
-
-   
+let variantCount = 0;
+let cropperInstances = {};
 
 function isValidValue(value) {
     return value !== null && value !== undefined && value.toString().trim() !== '';
 }
 
-
-
-
 function validateAndSubmit(event) {
     event.preventDefault();
     
-    // Perform overall form validation first
     if(validateForm()) {
         const form = document.getElementById('productForm');
         const formData = new FormData(form);
         
-        // Collect variants data
         const variants = [];
         const variantContainers = document.querySelectorAll('.variant-item');
         
         variantContainers.forEach((variantContainer, variantIndex) => {
-            // Get color and quantity inputs for each variant
             const color = variantContainer.querySelector(`input[name="variants[${variantIndex}][color]"]`)?.value;
             const quantity = variantContainer.querySelector(`input[name="variants[${variantIndex}][quantity]"]`)?.value;
             
             const variantImages = [];
-            // Collect images for this variant (up to 4 images)
             for (let i = 1; i <= 4; i++) {
                 const imageInput = variantContainer.querySelector(`#input${variantIndex}_${i}`);
                 if (imageInput && imageInput.files.length > 0) {
@@ -199,7 +173,6 @@ function validateAndSubmit(event) {
                 }
             }
             
-            // Only add variant if color and quantity are valid
             if (color && quantity) {
                 variants.push({
                     color: color.trim(),
@@ -209,10 +182,7 @@ function validateAndSubmit(event) {
             }
         });
 
-        // Create a new FormData to send all data
         const finalFormData = new FormData();
-
-        // Add basic product information
         const basicFields = [
             'productName', 'brand', 'description', 'additionalInfo', 
             'regularPrice', 'salePrice', 'category'
@@ -222,7 +192,6 @@ function validateAndSubmit(event) {
             finalFormData.append(field, formData.get(field));
         });
 
-
         const allImageInputs = document.querySelectorAll('input[type="file"][id^="input"]');
         allImageInputs.forEach((input, index) => {
             if (input.files.length > 0) {
@@ -230,19 +199,15 @@ function validateAndSubmit(event) {
             }
         });
 
-        // Add variant data
         variants.forEach((variant, index) => {
-            // Add variant color and quantity
             finalFormData.append(`variants[${index}][color]`, variant.color);
             finalFormData.append(`variants[${index}][quantity]`, variant.quantity);
             
-            // Add variant images
             variant.images.forEach((image, imageIndex) => {
                 finalFormData.append(`variants[${index}][images][${imageIndex}]`, image);
             });
         });
 
-        // Send to server
         fetch('/admin/addProduct', {
             method: 'POST',
             body: finalFormData
@@ -258,7 +223,6 @@ function validateAndSubmit(event) {
                     showConfirmButton: false, 
                     timer: 3000 
                 });
-
                 setTimeout(() => {
                     window.location.href = '/admin/product';
                 }, 1500);
@@ -276,132 +240,129 @@ function validateAndSubmit(event) {
         })
         .catch(error => {
             console.error('Error:', error);
-            alert(error.message);
+            Swal.fire({
+                toast: true,
+                position: "top",
+                icon: 'error',
+                title: 'Network Error',
+                text: error.message,
+                showConfirmButton: false,
+                timer: 3000
+            });
         });
     }
 }
 
-
-    function viewImage(event, variantIndex) {
+function viewImage(event, index) {
     let input = event.target;
     let reader = new FileReader();
+    
     reader.onload = function() {
-        let dataURL = reader.result;
-        
-        // Dynamically select the image view and cropper containers based on variant index
-        let image = document.querySelector(`#imgView${variantIndex}`);
-        let cropperContainer = document.querySelector(`#cropperContainer${variantIndex}`);
-        let croppedImage = document.querySelector(`#croppedImg${variantIndex}`);
-        let saveButton = document.querySelector(`#saveButton${variantIndex}`);
-        
-        // Ensure the image exists
-        if (!image) {
-            console.error(`Image view for variant ${variantIndex} not found`);
-            return;
-        }
-        
-        // Set the source of the image to be cropped
-        image.src = dataURL;
-        
-        // Initialize Cropper
-        let cropper = new Cropper(image, {
-            aspectRatio: 1,
-            viewMode: 1,
-            guides: true,
-            background: false,
-            autoCropArea: 1,
-            zoomable: true
-        });
-        
-        // Show the cropper container
-        if (cropperContainer) {
+        try {
+            let dataURL = reader.result;
+            let image = document.getElementById('imgView' + index);
+            let cropperContainer = document.getElementById('cropperContainer' + index);
+            let croppedImage = document.getElementById('croppedImg' + index);
+            let saveButton = document.getElementById('saveButton' + index);
+            
+            if (!image) {
+                throw new Error(`Image view for index ${index} not found`);
+            }
+            
+            image.src = dataURL;
+            image.style.display = 'block';
+            
+            if (cropperInstances[index]) {
+                cropperInstances[index].destroy();
+            }
+            
+            if (typeof Cropper === 'undefined') {
+                throw new Error('Cropper.js is not loaded');
+            }
+            
+            let cropper = new Cropper(image, {
+                aspectRatio: 1,
+                viewMode: 1,
+                guides: true,
+                background: false,
+                autoCropArea: 1,
+                zoomable: true
+            });
+            
+            cropperInstances[index] = cropper;
             cropperContainer.style.display = 'block';
-        }
-        
-        // Save button event listener
-        if (saveButton) {
+            
             saveButton.onclick = async function() {
                 let croppedCanvas = cropper.getCroppedCanvas();
+                croppedImage.src = croppedCanvas.toDataURL('image/jpeg', 1.0);
                 
-                // Update the cropped image preview
-                if (croppedImage) {
-                    croppedImage.src = croppedCanvas.toDataURL('image/jpeg', 1.0);
-                }
-                
-                // Generate a unique filename
                 let timestamp = new Date().getTime();
-                let fileName = `cropped-img-${timestamp}-${variantIndex}.png`;
+                let fileName = `cropped-img-${timestamp}-${index}.png`;
                 
-                // Convert cropped canvas to blob and create a file
                 await croppedCanvas.toBlob(blob => {
-                    let inputFile = document.querySelector(`#input${variantIndex}`);
-                    if (inputFile) {
-                        let imgFile = new File([blob], fileName, { type: 'image/png' });
-                        const fileList = new DataTransfer();
-                        fileList.items.add(imgFile);
-                        inputFile.files = fileList.files;
-                    }
+                    let inputFile = document.getElementById('input' + index);
+                    let imgFile = new File([blob], fileName, { type: 'image/png' });
+                    const fileList = new DataTransfer();
+                    fileList.items.add(imgFile);
+                    inputFile.files = fileList.files;
                 });
                 
-                // Hide the cropper container and destroy the cropper
-                if (cropperContainer) {
-                    cropperContainer.style.display = 'none';
-                }
+                const [variantIndex, imageIndex] = index.split('_');
+                const thumbnailsContainer = document.getElementById(`addedImagesContainer${variantIndex}_${imageIndex}`);
+                
+                // Clear existing thumbnails for this input
+                thumbnailsContainer.innerHTML = '';
+                
+                const newThumbnail = document.createElement('div');
+                newThumbnail.className = 'thumbnail';
+                newThumbnail.id = `thumbnail-${variantIndex}-${imageIndex}`;
+                newThumbnail.innerHTML = `
+                    <img src="${croppedImage.src}" alt="Variant Image">
+                    <span class="remove-image" onclick="removeImage(${variantIndex}, ${imageIndex})">×</span>
+                `;
+                
+                thumbnailsContainer.appendChild(newThumbnail);
+                
+                cropperContainer.style.display = 'none';
                 cropper.destroy();
+                delete cropperInstances[index];
             };
+        } catch (error) {
+            console.error('Error initializing Cropper:', error);
+            Swal.fire({
+                toast: true,
+                position: "top",
+                icon: 'error',
+                title: 'Image Processing Error',
+                text: 'Failed to initialize image cropper. Please try again or ensure Cropper.js is loaded.',
+                showConfirmButton: false,
+                timer: 3000
+            });
         }
     };
     
     reader.readAsDataURL(input.files[0]);
 }
 
-
-
-    const selectedImages = [];
-    document.getElementById('input1').addEventListener('change',handleFileSelect);
-
-    function handleFileSelect(event){
-
-        const addedImagesContainer = document.getElementById('addedImageContainer');
-        addedImagesContainer.innerHTML='';
-        const files = event.target.files;
-
-        for(let i=0;i<files.length;i++){
-            const file = files[i];
-            selectedImages.push(file);
-            const thumbnail = document.createElement('div');
-            thumbnail.classList.add('thumbnail');
-
-
-            const img = documetn.getElementById('img');
-            img.src = URL.createObjectURL(file);
-            img.alt='thumbnail';
-            img.style.width='50px';
-            img.style.height='auto';
-            const removeIcon = document.createElement('span');
-
-            removeIcon.classList.add('remove-icon');
-            removeIcon.innerHTML="&times;";
-            removeIcon.addEventListener('click',function(){
-                const index = selectedImages.indexOf(file);
-                if(index==-1){
-                    selectedImages.splice(index,1);
-                }
-                thumbnail.remove();
-            });
-            thumbnail.appendChild(img);
-            thumbnail.appendChild(removeIcon);
-            addedImagesContainer.appendChild(thumbnail);
-        }
+function removeImage(variantIndex, imageIndex) {
+    const thumbnailContainer = document.getElementById(`addedImagesContainer${variantIndex}_${imageIndex}`);
+    const thumbnail = document.getElementById(`thumbnail-${variantIndex}-${imageIndex}`);
+    if (thumbnail) {
+        thumbnailContainer.removeChild(thumbnail);
+        
+        const fileInput = document.getElementById(`input${variantIndex}_${imageIndex}`);
+        fileInput.value = '';
     }
+}
 
+function handleFileSelect(event, variantIndex, imgIndex) {
+    // Do nothing here to prevent immediate thumbnail creation
+    // The thumbnail will be added only after cropping in the viewImage function
+}
 
-
-    function validateForm() {
-    // Clear previous error messages
+function validateForm() {
     clearErrorMessages();
 
-    // Get form fields
     const name = document.getElementsByName('productName')[0]?.value;
     const description = document.getElementById('descriptionid')?.value;
     const additionalInfo = document.getElementById('additionalInfo')?.value;
@@ -410,7 +371,6 @@ function validateAndSubmit(event) {
     
     let isValid = true;
 
-    // Validate product name
     if (name.trim() === "") {
         displayErrorMessage('productName-error', 'Please enter a product name.');
         isValid = false;
@@ -419,7 +379,6 @@ function validateAndSubmit(event) {
         isValid = false;
     }
 
-    // Validate description
     if (description.trim() === "") {
         displayErrorMessage('description-error', 'Please enter a product description.');
         isValid = false;
@@ -431,7 +390,6 @@ function validateAndSubmit(event) {
         isValid = false;
     }
 
-    // Validate additional info
     if (additionalInfo.trim() === "") {
         displayErrorMessage('additionalInfo-error', 'Please enter additional information.');
         isValid = false;
@@ -443,7 +401,6 @@ function validateAndSubmit(event) {
         isValid = false;
     }
 
-    // Validate prices
     if (!/^\d+(\.\d{1,2})?$/.test(price) || parseFloat(price) < 0) {
         displayErrorMessage('regularPrice-error', 'Please enter a valid non-negative price.');
         isValid = false;
@@ -459,8 +416,6 @@ function validateAndSubmit(event) {
         isValid = false;
     }
 
-
-
     const variantImageInputs = document.querySelectorAll('input[type="file"][id^="input"]');
     const hasImages = Array.from(variantImageInputs).some(input => input.files.length > 0);
     
@@ -469,11 +424,9 @@ function validateAndSubmit(event) {
         isValid = false;
     }
 
-    // Validate variants
     const variants = document.querySelectorAll('.variant-item');
     const variantsData = [];
 
-    // Check if at least one variant exists
     if (variants.length === 0) {
         const variantsContainer = document.getElementById('variants-container');
         const noVariantError = document.createElement('div');
@@ -484,7 +437,6 @@ function validateAndSubmit(event) {
         isValid = false;
     }
 
-    // Validate each variant
     variants.forEach((variant, index) => {
         const colorInput = variant.querySelector(`input[name="variants[${index}][color]"]`);
         const quantityInput = variant.querySelector(`input[name="variants[${index}][quantity]"]`);
@@ -498,7 +450,6 @@ function validateAndSubmit(event) {
             variant.appendChild(errorDiv);
         }
 
-        // Validate color
         if (!color) {
             errorDiv.textContent = 'Color is required';
             errorDiv.style.color = 'red'; 
@@ -514,7 +465,6 @@ function validateAndSubmit(event) {
             colorInput.classList.remove('is-invalid');
         }
 
-        // Validate quantity
         if (!quantity || parseInt(quantity) < 0) {
             errorDiv.textContent = 'Valid quantity is required';
             quantityInput.classList.add('is-invalid');
@@ -524,13 +474,11 @@ function validateAndSubmit(event) {
             quantityInput.classList.remove('is-invalid');
         }
 
-        // Only push valid variants
         if (color && quantity && parseInt(quantity) >= 0) {
             variantsData.push({ color, quantity });
         }
     });
 
-    // Add variants to form as a hidden input for backend processing
     const variantsInput = document.createElement('input');
     variantsInput.type = 'hidden';
     variantsInput.name = 'variants';
@@ -540,47 +488,28 @@ function validateAndSubmit(event) {
     return isValid;
 }
 
+function displayErrorMessage(elementId, message) {
+    var errorElement = document.getElementById(elementId);
+    errorElement.innerText = message;
+    errorElement.style.display = "block";
+}
 
-
-
-
-          function displayErrorMessage(elementId, message) {
-              var errorElement = document.getElementById(elementId);
-              errorElement.innerText = message;
-              errorElement.style.display = "block";
-          }
-  
-  
-          function clearErrorMessages() {
+function clearErrorMessages() {
     const errorElements = document.getElementsByClassName('error-message');
     Array.from(errorElements).forEach(element => {
         element.innerText = '';
     });
 
-    // CLEAR VARIANT ERRORS
     const variantErrors = document.querySelectorAll('.variant-error');
     variantErrors.forEach(error => {
         error.textContent = '';
     });
 
-    // Remove invalid classes from inputs
     const invalidInputs = document.querySelectorAll('.is-invalid');
     invalidInputs.forEach(input => {
         input.classList.remove('is-invalid');
     });
 }
-
-
-</script>           
-
-
-
-
-
-
-<script>
-    let variantCount = 0;
- 
 
 function addVariant() {
     const container = document.getElementById('variants-container');
@@ -597,47 +526,47 @@ function addVariant() {
                        placeholder="e.g. red, blue, green" 
                        required>
             </div>
-            
             <div class="col-md-6 mb-3">
                 <label class="form-label">Quantity</label>
                 <input type="number" name="variants[${variantCount}][quantity]" class="form-control" required>
             </div>
-            
             <div class="card mb-2">
                 <div class="card-header">
                     <h4>Choose images</h4>
                 </div>
-                <div class="border row">
-                    <div id="addedImagesContainer${variantCount}" class="thumbnails-container"></div>
-                </div>
-                
-                <!-- Dynamic image upload sections (4 images) -->
-                ${[1, 2, 3, 4].map(imgIndex => `
-                    <div class="row">
-                        <div class="card-body align-items-center" style="margin-bottom: 20px;">
-                            <img src="" alt="" id="imgView${variantCount}_${imgIndex}">
-                            <input class="form-control" type="file" 
-                                   name="images[${variantCount}][${imgIndex}]" 
-                                   id="input${variantCount}_${imgIndex}"
-                                   accept="image/png, image/jpeg, image/jpg"
-                                   onchange="viewImage(event, '${variantCount}_${imgIndex}')">
-                           
+                <div class="card-body">
+                    ${[1, 2, 3, 4].map(imgIndex => `
+                        <div class="row">
+                            <div class="card-body align-items-center" style="margin-bottom: 20px;">
+                                <div id="addedImagesContainer${variantCount}_${imgIndex}" class="thumbnails-container mb-2"></div>
+                                <img src="" alt="" id="imgView${variantCount}_${imgIndex}" style="max-width: 200px; max-height: 200px; object-fit: contain; display: none;">
+                                <input class="form-control mt-2" type="file" 
+                                       name="variants[${variantCount}][images][${imgIndex}]" 
+                                       id="input${variantCount}_${imgIndex}"
+                                       accept="image/png, image/jpeg, image/jpg"
+                                       onchange="viewImage(event, '${variantCount}_${imgIndex}')">
+                            </div>
+                            <div id="cropperContainer${variantCount}_${imgIndex}" 
+                                 class="image-cropper"
+                                 style="display:none; margin: 20px 0;">
+                                <div class="cropper-wrapper" style="max-width: 500px; margin: 0 auto;">
+                                    <img src="" id="croppedImg${variantCount}_${imgIndex}" alt="">
+                                </div>
+                                <div class="text-center mt-2">
+                                    <button type="button" id="saveButton${variantCount}_${imgIndex}" 
+                                            class="btn btn-primary btn-sm">Save</button>
+                                    <button type="button" class="btn btn-secondary btn-sm ms-2"
+                                            onclick="cancelCrop('${variantCount}_${imgIndex}')">Cancel</button>
+                                </div>
+                            </div>
                         </div>
-                        <div id="cropperContainer${variantCount}_${imgIndex}" 
-                             class="image-cropper d-flex align-items-center"
-                             style="display:none; width: 300px; height: 200px; margin-bottom: 20px;">
-                            <img src="" id="croppedImg${variantCount}_${imgIndex}" alt="">
-                            <button type="button" id="saveButton${variantCount}_${imgIndex}" 
-                                    class="btn-sm btn-primary">Save</button>
-                        </div>
-                    </div>
-                `).join('')}
-                
-                <div class="col-12">
-                    <button type="button" class="btn btn-danger" onclick="removeVariant(${variantCount})">
-                        Remove Variant
-                    </button>
+                    `).join('')}
                 </div>
+            </div>
+            <div class="col-12">
+                <button type="button" class="btn btn-danger" onclick="removeVariant(${variantCount})">
+                    Remove Variant
+                </button>
             </div>
         </div>
     `;
@@ -645,13 +574,25 @@ function addVariant() {
     container.appendChild(variantDiv);
     variantCount++;
 }
+
+function cancelCrop(index) {
+    const cropperContainer = document.getElementById(`cropperContainer${index}`);
+    const fileInput = document.getElementById(`input${index}`);
     
-    function removeVariant(id) {
-        const variantDiv = document.getElementById(`variant-${id}`);
-        if (variantDiv) {
-            variantDiv.remove();
-        }
+    cropperContainer.style.display = 'none';
+    fileInput.value = '';
+    
+    if (cropperInstances[index]) {
+        cropperInstances[index].destroy();
+        delete cropperInstances[index];
     }
-    
-    
-    </script>
+}
+
+function removeVariant(id) {
+    const variantDiv = document.getElementById(`variant-${id}`);
+    if (variantDiv) {
+        variantDiv.remove();
+    }
+}
+</script>
+<%- include("../../views/partials/admin/footer") %>
