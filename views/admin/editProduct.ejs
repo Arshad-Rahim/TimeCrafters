@@ -222,6 +222,27 @@
 <script>
 let variantCount = <%= product.variants.length %>;
 let cropperInstances = {};
+let removedImages = []; // Track removed existing images
+
+function initializeThumbnails() {
+    <% for (let i = 0; i < product.variants.length; i++) { %>
+        <% if (product.variants[i].productImage && product.variants[i].productImage.length > 0) { %>
+            <% for (let j = 0; j < product.variants[i].productImage.length; j++) { %>
+                <% if (product.variants[i].productImage[j]) { %>
+                    const thumbnailsContainer<%= i %> = document.getElementById('addedImagesContainer<%= i %>');
+                    const thumbnail<%= i %>_<%= j %> = document.createElement('div');
+                    thumbnail<%= i %>_<%= j %>.className = 'thumbnail';
+                    thumbnail<%= i %>_<%= j %>.id = `thumbnail-<%= i %>-<%= j %>`;
+                    thumbnail<%= i %>_<%= j %>.innerHTML = `
+                        <img src="/Uploads/product-variants/<%= product.variants[i].productImage[j] %>" alt="Variant Image">
+                        <span class="remove-image" onclick="removeImage(<%= i %>, <%= j %>)">×</span>
+                    `;
+                    thumbnailsContainer<%= i %>.appendChild(thumbnail<%= i %>_<%= j %>);
+                <% } %>
+            <% } %>
+        <% } %>
+    <% } %>
+}
 
 function validateAndSubmit(event, productId) {
     event.preventDefault();
@@ -253,6 +274,9 @@ function validateAndSubmit(event, productId) {
                 }
             }
         });
+
+        // Append removed images to formData
+        formData.append('removedImages', JSON.stringify(removedImages));
 
         fetch(`/admin/editProduct/${productId}`, {
             method: 'POST',
@@ -354,6 +378,12 @@ function viewImage(event, index) {
                 const [variantIndex, imageIndex] = index.split('_');
                 const thumbnailsContainer = document.getElementById(`addedImagesContainer${variantIndex}`);
                 
+                // Remove existing thumbnail for this image index if it exists
+                const existingThumbnail = document.getElementById(`thumbnail-${variantIndex}-${imageIndex}`);
+                if (existingThumbnail) {
+                    thumbnailsContainer.removeChild(existingThumbnail);
+                }
+                
                 const newThumbnail = document.createElement('div');
                 newThumbnail.className = 'thumbnail';
                 newThumbnail.id = `thumbnail-${variantIndex}-${imageIndex}`;
@@ -394,12 +424,19 @@ function removeImage(variantIndex, imageIndex) {
         // Clear the corresponding file input
         const fileInput = document.getElementById(`input${variantIndex}_${imageIndex}`);
         fileInput.value = '';
+        
+        // If this is an existing image, add it to removedImages
+        const existingImage = document.getElementById(`imgView${variantIndex}_${imageIndex}`);
+        if (existingImage && existingImage.src.includes('/Uploads/product-variants/')) {
+            const imageName = existingImage.src.split('/').pop();
+            removedImages.push({ variantIndex, imageIndex, imageName });
+        }
     }
 }
 
 function cancelCrop(index) {
     const cropperContainer = document.getElementById(`cropperContainer${index}`);
-    const file287Input = document.getElementById(`input${index}`);
+    const fileInput = document.getElementById(`input${index}`);
     
     cropperContainer.style.display = 'none';
     fileInput.value = '';
@@ -613,5 +650,8 @@ function clearErrorMessages() {
         input.classList.remove('is-invalid');
     });
 }
+
+// Call initializeThumbnails when the page loads
+document.addEventListener('DOMContentLoaded', initializeThumbnails);
 </script>
 <%- include("../../views/partials/admin/footer") %>
